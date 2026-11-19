@@ -51,6 +51,16 @@
         }
       }
     },
+    "%@ has the latest version, %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ a la dernière version, %2$@."
+          }
+        }
+      }
+    },
     "%@ holds more than one file this could be. Choose a .zip or .7z with only one.": {
       "localizations": {
         "fr": {
@@ -1231,6 +1241,16 @@
         }
       }
     },
+    "Latest version %@, checked %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernière version : %1$@, vérifiée %2$@."
+          }
+        }
+      }
+    },
     "Left": {
       "localizations": {
         "fr": {
@@ -1511,6 +1531,16 @@
         }
       }
     },
+    "Not checked yet.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas encore vérifiée."
+          }
+        }
+      }
+    },
     "Not enough space: the data needs %@, the disk has %@ free.": {
       "localizations": {
         "fr": {
@@ -1737,6 +1767,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Quittez le jeu pour déplacer le dossier de données."
+          }
+        }
+      }
+    },
+    "Read what changed since %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lire ce qui a changé depuis la %@"
           }
         }
       }
@@ -2021,6 +2061,16 @@
         }
       }
     },
+    "SM Launcher Plus looks for a new version of the game on GitHub once a day and says so on the Play page.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SM Launcher Plus cherche une nouvelle version du jeu sur GitHub une fois par jour et l’indique dans la page Jouer."
+          }
+        }
+      }
+    },
     "SM Launcher Plus ships no game files. It downloads SuperMetroidRecomp from its own releases, and your ROM stays where it is. Unofficial: not affiliated with Nintendo or the game's authors.": {
       "localizations": {
         "fr": {
@@ -2297,6 +2347,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "SuperMetroidRecomp %@"
+          }
+        }
+      }
+    },
+    "SuperMetroidRecomp %@ is available": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SuperMetroidRecomp %@ est disponible"
           }
         }
       }
@@ -2651,6 +2711,16 @@
         }
       }
     },
+    "This release has no notes.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette version n’a pas de notes."
+          }
+        }
+      }
+    },
     "This version of the game has no mods.": {
       "localizations": {
         "fr": {
@@ -2931,6 +3001,16 @@
         }
       }
     },
+    "View on GitHub": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voir sur GitHub"
+          }
+        }
+      }
+    },
     "Volume": {
       "localizations": {
         "fr": {
@@ -2981,6 +3061,26 @@
         }
       }
     },
+    "What's New": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nouveautés"
+          }
+        }
+      }
+    },
+    "What's New in SuperMetroidRecomp %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nouveautés de SuperMetroidRecomp %@"
+          }
+        }
+      }
+    },
     "Widescreen": {
       "localizations": {
         "fr": {
@@ -2997,6 +3097,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fenêtre"
+          }
+        }
+      }
+    },
+    "You have %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous avez la %@."
           }
         }
       }

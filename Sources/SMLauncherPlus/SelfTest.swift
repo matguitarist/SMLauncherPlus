@@ -153,6 +153,7 @@ enum SelfTest {
             check("About links to the game, its license and snesrecomp",
                   links == [Credits.project, Credits.license, Credits.framework], "\(links)")
 
+            await checkUpdateBanner(model: model)
             await checkDataFolderMove(model: model)
             await checkModInstall(model: model)
             await checkModResources()
@@ -456,6 +457,39 @@ enum SelfTest {
               && !state.contains("selftest.hud") && profile.installedMods.isEmpty && model.modMessage == .removed(name: "Self-test HUD"), state)
         model.modMessage = nil
         try? fm.removeItem(at: profile.folder)
+        model.context.delete(profile)
+        try? model.context.save()
+    }
+
+    /// S-030: the banner shows only for a newer version, with the notes of every version since the profile's.
+    private static func checkUpdateBanner(model: AppModel) async {
+        let profile = Profile(name: "Update", gameVersion: "0.4.6")
+        model.context.insert(profile)
+        try? model.context.save()
+        let saved = model.latestUpdate
+        let latest = SeedData.latestUpdate()
+        model.latestUpdate = latest
+        check("a newer release shows the banner", model.availableUpdate(for: profile)?.version == "0.4.8")
+        check("What's New lists every version since the profile's", latest.notes(since: profile.gameVersion).map(\.version) == ["0.4.8", "0.4.7"])
+        profile.gameVersion = "0.4.8"
+        check("the latest version shows no banner", model.availableUpdate(for: profile) == nil)
+        // Offline, a forced check says why and keeps the last answer.
+        let wasOffline = AppModel.simulateOffline
+        AppModel.simulateOffline = true
+        await model.checkForGameUpdate(force: true)
+        AppModel.simulateOffline = wasOffline
+        check("an offline check says why and keeps the last answer",
+              model.updateCheckMessage == GameRelease.Failure.offline.message && model.latestUpdate == latest, model.updateCheckMessage ?? "")
+        model.updateCheckMessage = nil
+        model.latestUpdate = saved
+        if ProcessInfo.processInfo.environment["APP_SELFTEST_INSTALL"] == "1" {
+            await model.checkForGameUpdate(force: true)
+            let live = model.latestUpdate
+            check("GitHub answers with the latest release and its notes",
+                  live != nil && live?.version.isEmpty == false && live?.notes.first?.version == live?.version && live?.notes.first?.body.isEmpty == false,
+                  model.updateCheckMessage ?? "\(String(describing: live?.version))")
+            check("the answer is kept for the next launch", UpdateCheck.read(from: DataFolder.latestUpdate) == live)
+        }
         model.context.delete(profile)
         try? model.context.save()
     }

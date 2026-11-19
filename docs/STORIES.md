@@ -191,7 +191,7 @@ Screens: update-banner
 Acceptance:
 - [unit] Checks GitHub at most once a day; compares semantic versions.
 - [snap] Banner "SuperMetroidRecomp 0.4.7 is available" with What's New and Update.
-Status: todo
+Status: done (Update joins the banner with S-031)
 
 ### S-031 Update a profile in one click
 As the player, Update installs the new build into the same profile and keeps my saves, settings,

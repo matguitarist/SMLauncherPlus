@@ -33,6 +33,9 @@ struct ContentView: View {
             SeedData.addIfRequested(model: model)
             SelfTest.runIfRequested(model: model)
             Snapshot.runIfRequested(model: model, openSettings: openSettings)
+            if !SelfTest.requested, ProcessInfo.processInfo.environment["APP_SNAPSHOT"] == nil {
+                await model.checkForGameUpdate()
+            }
         }
     }
 }
@@ -102,6 +105,9 @@ struct ProfileSummary: View {
                     .foregroundStyle(.secondary)
                 if let failure = model.lastGameFailure, failure.profile == profile.uuid, !model.isPlaying {
                     FailureBanner(failure: failure)
+                }
+                if let latest = model.availableUpdate(for: profile) {
+                    UpdateBanner(latest: latest, profile: profile)
                 }
                 if let failure = model.playFailure, !model.isPlaying {
                     Label(failure.message, systemImage: "exclamationmark.triangle.fill")
@@ -269,6 +275,32 @@ enum SeedData {
         log.post(.info, "Started the game", source: "Game")
         log.post(.warning, "The game took 4 seconds to open its window", source: "Game")
         log.post(.error, "The game quit with code 6", source: "Game")
+    }
+
+    /// Two made-up releases newer than the seeded 0.4.6, for the update banner and What's New.
+    static func latestUpdate() -> UpdateCheck.Latest {
+        let release = GameRelease(version: "0.4.8", tag: "v0.4.8", zipName: "supermetroid-0.4.8-macos-arm64.zip",
+                                  zipURL: URL(string: "https://github.com/mstan/SuperMetroidRecomp/releases/download/v0.4.8/supermetroid-0.4.8-macos-arm64.zip")!,
+                                  size: 16_400_000, sha256: String(repeating: "0", count: 64))
+        let page = URL(string: "https://github.com/mstan/SuperMetroidRecomp/releases/tag/v0.4.8")!
+        return UpdateCheck.Latest(release: release, notes: [
+            .init(version: "0.4.8", published: Date(timeIntervalSince1970: 1_795_600_000), body: """
+            # Super Metroid 0.4.8
+
+            The pause map remembers its zoom between visits, and the minimap no longer
+            hides the energy tanks in widescreen.
+
+            New optional mods:
+
+            - **Quick morph:** press Down twice to morph without stopping.
+            - **Item counter:** show collected items on the pause screen.
+            """, page: page),
+            .init(version: "0.4.7", published: Date(timeIntervalSince1970: 1_795_300_000), body: """
+            Super Metroid v0.4.7 fixes a crash when a controller was unplugged during
+            the Ceres escape, and keeps `config.ini` comments when settings are saved.
+            """, page: nil),
+            .init(version: "0.4.6", published: Date(timeIntervalSince1970: 1_795_100_000), body: "Already installed.", page: nil),
+        ], checkedAt: .now)
     }
 
     /// A short made-up game log in the game's own style, for the log sheet snapshot.

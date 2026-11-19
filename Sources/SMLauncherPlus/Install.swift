@@ -62,6 +62,9 @@ nonisolated enum DataFolder {
         return FolderMove.size(of: folder, excluding: keeping(for: folder))
     }
 
+    /// The last answer from GitHub about the newest release (S-030).
+    static var latestUpdate: URL { url.appending(path: "Caches/latest-update.json") }
+
     /// Downloaded game zips, one folder per version.
     static var downloads: URL { url.appending(path: "Downloads", directoryHint: .isDirectory) }
 

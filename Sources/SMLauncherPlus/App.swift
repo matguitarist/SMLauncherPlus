@@ -146,6 +146,14 @@ final class AppModel {
     /// S-021: what the last .snesmod install or removal did, shown at the top of the Mods page.
     var modMessage: ModMessage?
 
+    /// S-030: the newest release when GitHub was last asked, kept between launches.
+    var latestUpdate: UpdateCheck.Latest? = UpdateCheck.read(from: DataFolder.latestUpdate)
+    var checkingForUpdates = false
+    /// What Check Now in Settings found ("Super Metroid is up to date."), or why it couldn't check.
+    var updateCheckMessage: String?
+    /// The release notes sheet (What's New).
+    var showWhatsNew = false
+
     var isCheckingROM: Bool {
         if case .checking = welcome { return true }
         return false

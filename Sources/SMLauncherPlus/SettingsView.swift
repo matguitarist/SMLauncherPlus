@@ -242,6 +242,7 @@ struct UpdateSettings: View {
                     .disabled(!Updater.shared.isAvailable)
             }
         }
+        GameUpdateSection()
     }
 
     static var version: String { Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?" }
@@ -250,6 +251,40 @@ struct UpdateSettings: View {
         guard Updater.shared.isAvailable else { return String(localized: "Updates are off in this build.") }
         guard let last = Updater.shared.lastCheck else { return String(localized: "Looks once a day for a new version on GitHub.") }
         return String(localized: "Looks once a day for a new version on GitHub. Last checked \(last.formatted(.relative(presentation: .named))).")
+    }
+}
+
+/// Settings › Updates: SuperMetroidRecomp's releases (S-030), checked once a day.
+struct GameUpdateSection: View {
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
+        Section {
+            LabeledContent {
+                HStack(spacing: Space.sm) {
+                    if model.checkingForUpdates { ProgressView().controlSize(.small) }
+                    Button("Check Now") { Task { await model.checkForGameUpdate(force: true) } }
+                        .disabled(model.checkingForUpdates || model.currentProfile == nil)
+                }
+            } label: {
+                Text(Credits.gameName)
+                Text(status)
+            }
+            if let message = model.updateCheckMessage {
+                Text(message)
+                    .foregroundStyle(.secondary)
+            }
+        } header: {
+            Text("Game")
+        } footer: {
+            Text("SM Launcher Plus looks for a new version of the game on GitHub once a day and says so on the Play page.")
+        }
+    }
+
+    private var status: String {
+        guard let latest = model.latestUpdate else { return String(localized: "Not checked yet.") }
+        let when = latest.checkedAt.formatted(.relative(presentation: .named).locale(.app))
+        return String(localized: "Latest version \(latest.version), checked \(when).")
     }
 }
 

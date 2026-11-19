@@ -61,6 +61,10 @@ public struct GameRelease: Equatable, Sendable, Codable {
         var tag_name: String
         var published_at: Date?
         var assets: [Asset]
+        var body: String?
+        var html_url: URL?
+        var draft: Bool?
+        var prerelease: Bool?
     }
 
     /// Reads the latest release and its SHA256SUMS (one API call, one download).
@@ -104,7 +108,7 @@ public struct GameRelease: Equatable, Sendable, Codable {
         return nil
     }
 
-    private static func get(_ url: URL, accept: String?, session: URLSession) async throws(Failure) -> Data {
+    static func get(_ url: URL, accept: String?, session: URLSession) async throws(Failure) -> Data {
         var request = URLRequest(url: url)
         if let accept { request.setValue(accept, forHTTPHeaderField: "Accept") }
         request.setValue("SMLauncherPlus", forHTTPHeaderField: "User-Agent")

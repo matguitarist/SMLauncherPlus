@@ -118,6 +118,28 @@ enum Snapshot {
                 }
                 model.lastGameFailure = nil
             }
+            // S-030: the update banner on the Play page, then What's New over it.
+            if only == nil || only?.contains("update-banner") == true || only?.contains("whats-new") == true {
+                let saved = model.latestUpdate
+                model.latestUpdate = SeedData.latestUpdate()
+                model.sidebar = .play
+                for mode in ["light", "dark"] where only?.contains("update-banner") ?? true {
+                    NSApp.appearance = NSAppearance(named: mode == "light" ? .aqua : .darkAqua)
+                    try? await Task.sleep(for: .seconds(0.8))
+                    capture(to: "\(dir)/update-banner-\(mode).png")
+                }
+                if only?.contains("whats-new") ?? true {
+                    model.showWhatsNew = true
+                    for mode in ["light", "dark"] {
+                        NSApp.appearance = NSAppearance(named: mode == "light" ? .aqua : .darkAqua)
+                        try? await Task.sleep(for: .seconds(1.2))
+                        capture(to: "\(dir)/whats-new-\(mode).png", window: NSApp.windows.first { $0.isSheet && $0.isVisible })
+                    }
+                    model.showWhatsNew = false
+                    try? await Task.sleep(for: .seconds(0.5))
+                }
+                model.latestUpdate = saved
+            }
             // S-021: the Mods page after an install, and after a refused one.
             for (name, message) in [("mods-install", ModMessage.installed(name: "Better HUD", version: "1.2.0")),
                                     ("mods-install-error", ModMessage.failed(ModArchive.Failure.wrongGame(name: "Yoshi Tweaks", games: ["smw-usa"]).message))]
