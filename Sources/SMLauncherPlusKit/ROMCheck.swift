@@ -41,6 +41,15 @@ public enum ROMCheck {
         case otherVersion
         /// Super Metroid (Japan, USA) that doesn't match the original bytes.
         case patched
+
+        /// True when the file is Super Metroid but not the supported copy (yellow on the welcome page);
+        /// false when it isn't recognized as Super Metroid at all (red).
+        public var isSuperMetroid: Bool {
+            switch self {
+            case .patched, .otherVersion: true
+            default: false
+            }
+        }
     }
 
     static let romExtensions: Set<String> = ["sfc", "smc"]

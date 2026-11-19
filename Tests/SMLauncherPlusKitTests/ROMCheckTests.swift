@@ -104,3 +104,13 @@ import Testing
         return folder.appending(path: name)
     }
 }
+
+extension ROMCheckTests {
+    @Test func onlyPatchedAndOtherRegionCountAsSuperMetroid() {
+        #expect(ROMCheck.Problem.patched.isSuperMetroid)
+        #expect(ROMCheck.Problem.otherVersion.isSuperMetroid)
+        for problem: ROMCheck.Problem in [.notROM, .unreadable, .zipWithoutROM, .zipWithSeveralROMs, .wrongSize, .otherGame("ZELDA")] {
+            #expect(!problem.isSuperMetroid)
+        }
+    }
+}

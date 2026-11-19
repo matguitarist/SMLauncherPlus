@@ -21,6 +21,7 @@ struct ContentView: View {
             case .log: LogPage()
             }
         }
+        .noInitialFocus()
         .task {
             model.load()
             SeedData.addIfRequested(model: model)

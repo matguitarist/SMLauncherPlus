@@ -71,7 +71,7 @@ struct WelcomePage: View {
             .gridArea("drop-zone", inset: Space.xxl)
             .overlay {
                 RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
-                    .strokeBorder(dropTargeted ? Palette.accent : Color.secondary.opacity(0.4), style: StrokeStyle(lineWidth: 2, dash: [8, 4]))
+                    .strokeBorder(dropTargeted ? Palette.accent : borderColor, style: StrokeStyle(lineWidth: 2, dash: [8, 4]))
             }
             .contentShape(.rect(cornerRadius: Radius.card, style: .continuous))
         }
@@ -116,20 +116,42 @@ struct WelcomePage: View {
 
     private var isChecking: Bool { model.isCheckingROM }
 
-    private var symbol: String {
+    /// The result in three colors, each with its own symbol and words:
+    /// green, the supported ROM; yellow, Super Metroid that fails the check; red, not Super Metroid.
+    private enum Verdict { case match, wrongCopy, notSuperMetroid }
+
+    private var verdict: Verdict? {
         switch model.welcome {
-        case .empty, .checking: "arrow.down.doc"
-        case .failed: "exclamationmark.triangle.fill"
-        case .ready: "checkmark.circle.fill"
+        case .ready: .match
+        case .failed(let problem, _): problem.isSuperMetroid ? .wrongCopy : .notSuperMetroid
+        case .empty, .checking: nil
+        }
+    }
+
+    private var symbol: String {
+        switch verdict {
+        case .match: "checkmark.circle.fill"
+        case .wrongCopy: "exclamationmark.triangle.fill"
+        case .notSuperMetroid: "xmark.octagon.fill"
+        case nil: "arrow.down.doc"
+        }
+    }
+
+    private var verdictColor: Color? {
+        switch verdict {
+        case .match: .green
+        case .wrongCopy: .yellow
+        case .notSuperMetroid: .red
+        case nil: nil
         }
     }
 
     private var symbolStyle: AnyShapeStyle {
-        switch model.welcome {
-        case .failed: AnyShapeStyle(.orange)
-        case .ready: AnyShapeStyle(Palette.accent)
-        default: AnyShapeStyle(.secondary)
-        }
+        verdictColor.map { AnyShapeStyle($0) } ?? AnyShapeStyle(.secondary)
+    }
+
+    private var borderColor: Color {
+        verdictColor?.opacity(0.7) ?? Color.secondary.opacity(0.4)
     }
 
     private var title: String {

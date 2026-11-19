@@ -8,7 +8,7 @@ import SwiftUI
 /// settings-<tab>-light.png and settings-<tab>-dark.png for every Settings tab, then quits.
 /// Each PNG gets a <page>-<mode>-layout.json with the grid probes (tools/check-layout.swift).
 /// APP_SNAPSHOT_PAGES=play,log limits the pages. Add "settings" to include Settings, and
-/// "welcome", "welcome-checking", "welcome-error", "welcome-ready" for the welcome page's states (S-001).
+/// "welcome", "welcome-checking", "welcome-error" (yellow), "welcome-wrong" (red), "welcome-ready" for the welcome page's states (S-001).
 /// Add APP_ACCENT=<id> to see the pages in another accent.
 /// Add APP_SNAPSHOT_MIN=1 to shrink the main window to its smallest size first.
 enum Snapshot {
@@ -50,6 +50,7 @@ enum Snapshot {
                 ("welcome", .empty),
                 ("welcome-checking", .checking("Super Metroid (Japan, USA) (En,Ja).zip")),
                 ("welcome-error", .failed(.patched, "Super Metroid (Japan, USA) (En,Ja).sfc")),
+                ("welcome-wrong", .failed(.otherGame("ZELDA"), "Zelda.sfc")),
                 ("welcome-ready", .ready),
             ]
             let savedWelcome = model.welcome
