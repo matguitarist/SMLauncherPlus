@@ -1,4 +1,5 @@
 import AppKit
+import SMLauncherPlusKit
 import SwiftUI
 
 /// The Settings window (Command-Comma). One tab per topic, at most about
@@ -83,6 +84,69 @@ struct GeneralSettings: View {
                 }
             }
         }
+        AboutSection()
+    }
+}
+
+/// Settings > General's About (S-006): both versions, and credit for the game with its license.
+struct AboutSection: View {
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
+        Section {
+            LabeledContent("SM Launcher Plus", value: UpdateSettings.version)
+            LabeledContent(Credits.gameName) {
+                Text(model.currentProfile?.gameVersion ?? String(localized: "Not installed"))
+            }
+            LabeledContent("Made by") {
+                Text(verbatim: Credits.gameAuthor)
+            }
+            LabeledContent("License") {
+                Link(Credits.licenseName, destination: Credits.license)
+            }
+            HStack {
+                Link("Game Project", destination: Credits.project)
+                Spacer()
+                Link("Extra Permissions", destination: Credits.permissions)
+                Spacer()
+                Link("snesrecomp Framework", destination: Credits.framework)
+            }
+        } header: {
+            Text("About")
+        } footer: {
+            Text("SM Launcher Plus ships no game files. It downloads SuperMetroidRecomp from its own releases, and your ROM stays where it is. Unofficial: not affiliated with Nintendo or the game's authors.")
+        }
+    }
+}
+
+/// The About panel's credits (S-006), with links to the game, its license and its framework.
+enum AboutCredits {
+    static func make(gameVersion: String?) -> NSAttributedString {
+        let text = NSMutableAttributedString()
+        let font = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
+        let style = NSMutableParagraphStyle()
+        style.alignment = .center
+        func add(_ string: String, link: URL? = nil) {
+            var attributes: [NSAttributedString.Key: Any] = [.font: font, .paragraphStyle: style, .foregroundColor: NSColor.labelColor]
+            if let link { attributes[.link] = link }
+            text.append(NSAttributedString(string: string, attributes: attributes))
+        }
+        let installed = gameVersion.map { String(localized: "\(Credits.gameName) \($0) installed") } ?? String(localized: "\(Credits.gameName) not installed yet")
+        add(installed + "\n")
+        add(String(localized: "The game is by \(Credits.gameAuthor), built on ") )
+        add("snesrecomp", link: Credits.framework)
+        add(".\n")
+        add(Credits.gameName, link: Credits.project)
+        add(" · ")
+        add(Credits.licenseName, link: Credits.license)
+        add("\n\n")
+        add(String(localized: "SM Launcher Plus ships no game files. Your ROM stays where it is."))
+        return text
+    }
+
+    @MainActor static func show(gameVersion: String?) {
+        NSApp.orderFrontStandardAboutPanel(options: [.credits: make(gameVersion: gameVersion)])
+        NSApp.activate()
     }
 }
 

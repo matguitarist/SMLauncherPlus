@@ -139,6 +139,15 @@ enum SelfTest {
                 model.settingsTab = tab
                 check("the \(tab.rawValue) Settings tab is selectable", model.settingsTab == tab)
             }
+            // S-006: About credits the game, its version and its license.
+            let about = AboutCredits.make(gameVersion: "0.4.6")
+            var links = Set<URL>()
+            about.enumerateAttribute(.link, in: NSRange(location: 0, length: about.length)) { value, _, _ in
+                if let url = value as? URL { links.insert(url) }
+            }
+            check("About shows the installed game version", about.string.contains("0.4.6"), about.string)
+            check("About links to the game, its license and snesrecomp",
+                  links == [Credits.project, Credits.license, Credits.framework], "\(links)")
 
             print(failures == 0 ? "SELFTEST PASS \(count) checks" : "SELFTEST FAIL \(failures) of \(count) checks")
             finish(code: failures == 0 ? 0 : 1)

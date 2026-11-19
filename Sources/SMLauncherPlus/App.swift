@@ -46,6 +46,9 @@ struct SMLauncherPlusApp: App {
                     .keyboardShortcut(".")
                     .disabled(!model.isPlaying)
             }
+            CommandGroup(replacing: .appInfo) {
+                Button("About SM Launcher Plus") { AboutCredits.show(gameVersion: model.currentProfile?.gameVersion) }
+            }
             CommandGroup(after: .appInfo) {
                 Button("Check for Updates…") { Updater.shared.checkForUpdates() }
                     .disabled(!Updater.shared.isAvailable)

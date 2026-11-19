@@ -110,7 +110,7 @@ Screens: settings-general
 Acceptance:
 - [self] About shows the installed game version and links to the project and its license.
 - [manual] README and README.fr.md say the ROM and Nintendo art are never included.
-Status: todo
+Status: done
 
 ## M2 Tune the game (0.1.0)
 

@@ -1,6 +1,16 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%@ %@ installed": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ %2$@ installé"
+          }
+        }
+      }
+    },
     "%@ Is Ready": {
       "localizations": {
         "fr": {
@@ -17,6 +27,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ trouvé"
+          }
+        }
+      }
+    },
+    "%@ not installed yet": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ pas encore installé"
           }
         }
       }
@@ -57,6 +77,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "1 restant"
+          }
+        }
+      }
+    },
+    "About": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À propos"
+          }
+        }
+      }
+    },
+    "About SM Launcher Plus": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À propos de SM Launcher Plus"
           }
         }
       }
@@ -351,6 +391,16 @@
         }
       }
     },
+    "Extra Permissions": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permissions supplémentaires"
+          }
+        }
+      }
+    },
     "Failed": {
       "localizations": {
         "fr": {
@@ -457,6 +507,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Journal du jeu"
+          }
+        }
+      }
+    },
+    "Game Project": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Projet du jeu"
           }
         }
       }
@@ -641,6 +701,16 @@
         }
       }
     },
+    "License": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Licence"
+          }
+        }
+      }
+    },
     "Light": {
       "localizations": {
         "fr": {
@@ -687,6 +757,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cherche une nouvelle version sur GitHub une fois par jour. Dernière recherche %@."
+          }
+        }
+      }
+    },
+    "Made by": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Créé par"
           }
         }
       }
@@ -747,6 +827,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aucun"
+          }
+        }
+      }
+    },
+    "Not installed": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non installé"
           }
         }
       }
@@ -907,6 +997,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "SM Launcher Plus installe SuperMetroidRecomp, un portage natif de Super Metroid, à partir de votre propre ROM et le tient à jour."
+          }
+        }
+      }
+    },
+    "SM Launcher Plus ships no game files. It downloads SuperMetroidRecomp from its own releases, and your ROM stays where it is. Unofficial: not affiliated with Nintendo or the game's authors.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SM Launcher Plus n’inclut aucun fichier du jeu. Il télécharge SuperMetroidRecomp depuis ses propres versions publiées, et votre ROM reste là où elle se trouve. Non officiel : sans lien avec Nintendo ni avec les auteurs du jeu."
+          }
+        }
+      }
+    },
+    "SM Launcher Plus ships no game files. Your ROM stays where it is.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SM Launcher Plus n’inclut aucun fichier du jeu. Votre ROM reste là où elle se trouve."
           }
         }
       }
@@ -1167,6 +1277,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Les fichiers du jeu de ce profil sont introuvables. Installez le jeu de nouveau."
+          }
+        }
+      }
+    },
+    "The game is by %@, built on ": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le jeu est de %@, bâti sur "
           }
         }
       }
@@ -1567,6 +1687,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "moins d’une minute"
+          }
+        }
+      }
+    },
+    "snesrecomp Framework": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cadriciel snesrecomp"
           }
         }
       }
