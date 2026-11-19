@@ -133,6 +133,10 @@ struct DisplaySettingsView: View {
         switch look {
         case "scanlines": String(localized: "Scanlines")
         case "crt": String(localized: "CRT")
+        case "crt-soft": String(localized: "CRT Soft")
+        case "sharp": String(localized: "Sharp")
+        case "lcd-grid": String(localized: "LCD Grid")
+        case "warm-composite": String(localized: "Warm Composite")
         default: look.replacingOccurrences(of: "-", with: " ").capitalized
         }
     }

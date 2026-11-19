@@ -111,4 +111,24 @@ import Testing
         #expect(list[4].look == "crt" && list[4].strength == "strong")
         #expect(ShaderPreset.list(game: game.appending(path: "nothing")).isEmpty)
     }
+
+    @Test func theLaunchersFiltersAreAddedWithoutTouchingTheGamesOwn() throws {
+        let root = FileManager.default.temporaryDirectory.appending(path: "SMLauncherPlus-bundled-\(UUID())", directoryHint: .isDirectory)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let source = root.appending(path: "Shaders", directoryHint: .isDirectory)
+        let game = root.appending(path: "game", directoryHint: .isDirectory)
+        try FileManager.default.createDirectory(at: source.appending(path: "_passes"), withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: game.appending(path: "assets/shaders"), withIntermediateDirectories: true)
+        try Data("shaders = 1\nshader0 = _passes/sharp-pass.glsl\n".utf8).write(to: source.appending(path: "sharp.glslp"))
+        try Data("// pass".utf8).write(to: source.appending(path: "_passes/sharp-pass.glsl"))
+        try Data("# credits".utf8).write(to: source.appending(path: "README.md"))
+        try Data("game's own".utf8).write(to: game.appending(path: "assets/shaders/crt.glslp"))
+
+        #expect(try ShaderPreset.installBundled(from: source, game: game) == ["_passes/sharp-pass.glsl", "sharp.glslp"])
+        #expect(try ShaderPreset.installBundled(from: source, game: game).isEmpty)
+        try Data("// pass v2".utf8).write(to: source.appending(path: "_passes/sharp-pass.glsl"))
+        #expect(try ShaderPreset.installBundled(from: source, game: game) == ["_passes/sharp-pass.glsl"])
+        #expect(try String(contentsOf: game.appending(path: "assets/shaders/crt.glslp"), encoding: .utf8) == "game's own")
+        #expect(ShaderPreset.list(game: game).map(\.look) == ["crt", "sharp"])
+    }
 }

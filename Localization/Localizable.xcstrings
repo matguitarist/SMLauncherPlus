@@ -141,6 +141,16 @@
         }
       }
     },
+    "CRT Soft": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CRT doux"
+          }
+        }
+      }
+    },
     "Cancel": {
       "localizations": {
         "fr": {
@@ -601,6 +611,16 @@
         }
       }
     },
+    "LCD Grid": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grille LCD"
+          }
+        }
+      }
+    },
     "Language": {
       "localizations": {
         "fr": {
@@ -927,6 +947,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Préparation du jeu"
+          }
+        }
+      }
+    },
+    "Sharp": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Net"
           }
         }
       }
@@ -1457,6 +1487,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "En attente"
+          }
+        }
+      }
+    },
+    "Warm Composite": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Composite chaud"
           }
         }
       }

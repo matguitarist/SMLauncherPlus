@@ -272,8 +272,15 @@ Status: todo
 - Windows and Linux launcher (C# Avalonia).
 - Game Mode, a CLI for agents.
 - Sparkle self-update, signing and notarization.
+- Our own build of the game with a Metal renderer (owner's idea, 2026-11-19, kept for later). Would
+  bring Metal output and Metal filters, HDR, ProMotion pacing, and our own renderer fixes; we'd merge
+  upstream fixes we haven't made. Estimated 2–3 days (build from source with `tools/regen.sh`,
+  Metal for `opengl.c` and `hd_gpu.c`, ImGui's Metal backend, our filters in MSL), then a merge per
+  release. Gains today are small: OpenGL still works and filters already do. Revisit if Apple
+  removes OpenGL or upstream stalls. Open question: shipping a build generated from the ROM.
 
 ## Dropped
-- Building the game from source in the launcher: precompiled releases cover it.
+- Building the game from source on the player's Mac in the launcher: precompiled releases cover it
+  (our own build is a separate idea under Later).
 - Netplay lobby and replay viewer: the game's own launcher and tools handle them.
 - ROM patches (IPS/BPS): the game refuses patched ROMs; changes come as mods.

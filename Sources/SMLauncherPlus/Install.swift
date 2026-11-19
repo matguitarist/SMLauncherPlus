@@ -125,6 +125,7 @@ extension AppModel {
                     try ProfileBuilder.build(zip: zip, profile: folder, info: info)
                 }.value
                 try Task.checkCancellation()
+                installFilters(in: game)
                 let profile = Profile(name: String(localized: "Super Metroid"), gameVersion: release.version)
                 profile.uuid = uuid
                 profile.installedAt = info.installedAt

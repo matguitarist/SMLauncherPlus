@@ -290,7 +290,8 @@ enum SeedData {
     private static func seedShaders(in game: URL) {
         let folder = game.appending(path: ShaderPreset.folder, directoryHint: .isDirectory)
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-        for name in ["scanlines-light", "scanlines", "scanlines-strong", "crt-light", "crt", "crt-strong"] {
+        for name in ["scanlines-light", "scanlines", "scanlines-strong", "crt-light", "crt", "crt-strong",
+                     "crt-soft", "sharp", "lcd-grid", "warm-composite"] {
             try? Data().write(to: folder.appending(path: "\(name).glslp"))
         }
         if !FileManager.default.fileExists(atPath: DisplaySettings.configFile(game: game).path) {

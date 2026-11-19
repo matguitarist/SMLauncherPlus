@@ -99,6 +99,10 @@ enum SelfTest {
                     check("profile.json records the version and the ROM",
                           info?.version == profile.gameVersion && info?.romSHA256 == SupportedROM.sha256)
                     check("the game has no quarantine flag", !ProfileBuilder.isQuarantined(profile.executable))
+                    check("the launcher's filters are added beside the game's own",
+                          Set(ShaderPreset.list(game: profile.gameFolder).map(\.look))
+                            .isSuperset(of: ["scanlines", "crt", "sharp", "crt-soft", "lcd-grid", "warm-composite"]),
+                          "\(ShaderPreset.list(game: profile.gameFolder).map(\.path))")
                     let help = Self.runHeadless(profile.executable, ["--help"])
                     check("the game runs right after unpacking (--help)", help.status == 0 && help.output.contains("usage:"),
                           "exit \(help.status): \(help.output.prefix(200))")

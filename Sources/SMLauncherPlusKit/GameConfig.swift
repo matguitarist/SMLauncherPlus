@@ -109,18 +109,43 @@ public struct ShaderPreset: Equatable, Hashable, Sendable, Identifiable {
         }
     }
 
-    /// Every .glslp preset in the profile's game folder: scanlines first, then CRT, then any others,
-    /// each from light to strong.
+    /// Every .glslp preset in the profile's game folder: scanlines first, then CRT, then the launcher's,
+    /// then any others, each from light to strong.
     public static func list(game: URL) -> [ShaderPreset] {
         let folder = game.appending(path: Self.folder, directoryHint: .isDirectory)
         let files = (try? FileManager.default.contentsOfDirectory(atPath: folder.path)) ?? []
-        func lookOrder(_ look: String) -> Int { ["scanlines": 0, "crt": 1][look] ?? 2 }
+        func lookOrder(_ look: String) -> Int {
+            ["scanlines": 0, "crt": 1, "crt-soft": 2, "sharp": 3, "lcd-grid": 4, "warm-composite": 5][look] ?? 6
+        }
         func strengthOrder(_ strength: String) -> Int { ["light": 0, "": 1, "strong": 2][strength] ?? 3 }
         return files.filter { $0.lowercased().hasSuffix(".glslp") && !$0.hasPrefix(".") }
             .map(ShaderPreset.init(file:))
             .sorted {
                 (lookOrder($0.look), $0.look, strengthOrder($0.strength)) < (lookOrder($1.look), $1.look, strengthOrder($1.strength))
             }
+    }
+}
+
+extension ShaderPreset {
+    /// Copies the launcher's presets (a folder holding .glslp files and their `_passes/`) into the
+    /// profile's `assets/shaders/`, adding missing files and refreshing changed ones. The game's own
+    /// presets and any the player added stay as they are. Returns the files it wrote.
+    @discardableResult
+    public static func installBundled(from source: URL, game: URL) throws -> [String] {
+        let target = game.appending(path: folder, directoryHint: .isDirectory)
+        let manager = FileManager.default
+        var written: [String] = []
+        for relative in (manager.subpaths(atPath: source.path) ?? []).sorted() {
+            guard relative.hasSuffix(".glslp") || relative.hasSuffix(".glsl") else { continue }
+            let from = source.appending(path: relative)
+            let to = target.appending(path: relative)
+            let data = try Data(contentsOf: from)
+            if (try? Data(contentsOf: to)) == data { continue }
+            try manager.createDirectory(at: to.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try data.write(to: to, options: .atomic)
+            written.append(relative)
+        }
+        return written
     }
 }
 

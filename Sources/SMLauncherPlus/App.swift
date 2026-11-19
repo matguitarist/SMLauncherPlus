@@ -178,6 +178,21 @@ final class AppModel {
         log.post(.info, "Opened the database (\(profiles) profiles)", source: "App")
         // A temporary ROM copy left by a crash or a forced quit.
         GameLaunch.removeLeftoverROMs(in: DataFolder.runROM)
+        // Profiles from an earlier launcher, or a filter that changed in this one.
+        for profile in (try? context.fetch(FetchDescriptor<Profile>())) ?? [] { installFilters(in: profile.gameFolder) }
+    }
+
+    /// The launcher's filter presets (Sharp, CRT Soft, LCD Grid, Warm Composite) in a profile's
+    /// assets/shaders, beside the game's own (S-010).
+    func installFilters(in game: URL) {
+        guard FileManager.default.fileExists(atPath: game.path),
+              let source = Bundle.module.url(forResource: "Shaders", withExtension: nil) else { return }
+        do {
+            let written = try ShaderPreset.installBundled(from: source, game: game)
+            if !written.isEmpty { log.post(.info, "Added filters to \(game.path): \(written.joined(separator: ", "))", source: "Display") }
+        } catch {
+            log.post(.error, "Unable to add the filters to \(game.path): \(error.localizedDescription)", source: "Display")
+        }
     }
 }
 

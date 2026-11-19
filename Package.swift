@@ -16,6 +16,8 @@ let package = Package(
             name: "SMLauncherPlus",
             dependencies: ["SMLauncherPlusKit", .product(name: "Sparkle", package: "Sparkle"),
                            .product(name: "LogKitUI", package: "LogKit")],
+            // Filter presets the launcher adds to each profile's assets/shaders (S-010).
+            resources: [.copy("Shaders")],
             // App code runs on the main thread unless you say otherwise.
             swiftSettings: [.defaultIsolation(MainActor.self)],
             // Sparkle.framework sits in Contents/Frameworks (build.sh copies it).
