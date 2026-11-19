@@ -250,7 +250,10 @@ enum SeedData {
             model.context.insert(profile)
             try? model.context.save()
         }
-        if let profile = model.currentProfile { seedMods(in: profile.gameFolder) }
+        if let profile = model.currentProfile {
+            seedMods(in: profile.gameFolder)
+            seedShaders(in: profile.gameFolder)
+        }
         let log = model.log
         log.post(.info, "Checked the ROM: Super Metroid (Japan, USA)", source: "ROM")
         log.post(.info, "Found SuperMetroidRecomp v0.4.6", source: "Updates")
@@ -281,6 +284,20 @@ enum SeedData {
 
         """.write(to: file, atomically: true, encoding: .utf8)
         return file
+    }
+
+    /// Empty presets named like the game's, for the Display tab's filter list, and the CRT one chosen.
+    private static func seedShaders(in game: URL) {
+        let folder = game.appending(path: ShaderPreset.folder, directoryHint: .isDirectory)
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        for name in ["scanlines-light", "scanlines", "scanlines-strong", "crt-light", "crt", "crt-strong"] {
+            try? Data().write(to: folder.appending(path: "\(name).glslp"))
+        }
+        if !FileManager.default.fileExists(atPath: DisplaySettings.configFile(game: game).path) {
+            var settings = DisplaySettings()
+            settings.shader = "\(ShaderPreset.folder)/crt.glslp"
+            try? settings.write(game: game)
+        }
     }
 
     /// Two small made-up packages for the Mods page snapshots, with each kind of option.

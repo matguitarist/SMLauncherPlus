@@ -162,6 +162,16 @@ enum SelfTest {
         }
         Self.check("Skippable intro and Faster elevators (3x) are saved",
                    introSkip != nil && ModState.read(from: mods.root).isEnabled(introSkip!) && mods.error == nil)
+        // S-010: display settings written where the game reads them.
+        var display = DisplaySettings.read(game: profile.gameFolder)
+        let presets = ShaderPreset.list(game: profile.gameFolder)
+        check("the filter list comes from the game's own shaders", presets.contains { $0.look == "crt" } && presets.contains { $0.look == "scanlines" },
+              "\(presets.map(\.path))")
+        display.widescreen = .ultrawide
+        display.hudAtEdges = false
+        display.shader = presets.first { $0.look == "crt" && $0.strength == "strong" }?.path ?? ""
+        do { try display.write(game: profile.gameFolder) } catch { check("display settings are saved", false, "\(error)") }
+        check("display settings read back as written", DisplaySettings.read(game: profile.gameFolder) == display)
         let before = profile.playTime
         model.play(extraArguments: ["--framedump", frames.path], environment: ["SDL_VIDEODRIVER": "dummy", "SDL_AUDIODRIVER": "dummy"])
         check("Play starts the game", model.isPlaying, model.playFailure?.message ?? "")
@@ -180,6 +190,9 @@ enum SelfTest {
               (try? String(contentsOf: game.log, encoding: .utf8).suffix(400)).map(String.init) ?? "")
         let arguments = (try? String(contentsOf: game.log, encoding: .utf8)) ?? ""
         check("the game read the profile's config.ini", arguments.contains("config parsed"))
+        check("the game uses the widescreen shape and HUD place from the Display tab",
+              arguments.contains("custom renderer: 1 aspect=21:9") && arguments.contains("hud=0"),
+              arguments.components(separatedBy: "\n").first { $0.contains("custom renderer") } ?? "no renderer line")
         check("the game turns on the features chosen on the Mods page",
               arguments.contains("[mods] intro skip: 1/1") && arguments.contains("[mods] elevators 3x"),
               arguments.components(separatedBy: "\n").filter { $0.hasPrefix("[mods]") }.joined(separator: " | "))

@@ -101,6 +101,16 @@
         }
       }
     },
+    "At the window's edges": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aux bords de la fenêtre"
+          }
+        }
+      }
+    },
     "Automatic Updates": {
       "localizations": {
         "fr": {
@@ -121,6 +131,16 @@
         }
       }
     },
+    "CRT": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CRT"
+          }
+        }
+      }
+    },
     "Cancel": {
       "localizations": {
         "fr": {
@@ -136,7 +156,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les changements s’appliquent la prochaine fois que vous jouez à %@."
+            "value": "Les changements s’appliqueront la prochaine fois que vous jouerez à %@."
           }
         }
       }
@@ -241,6 +261,16 @@
         }
       }
     },
+    "Display": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Affichage"
+          }
+        }
+      }
+    },
     "Done": {
       "localizations": {
         "fr": {
@@ -271,12 +301,32 @@
         }
       }
     },
+    "Draw scanlines or an old CRT screen over the game": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter des lignes de balayage ou l’effet d’un vieil écran CRT au jeu"
+          }
+        }
+      }
+    },
     "Drop your ROM here, or choose it.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Déposez votre ROM ici, ou choisissez-la."
+          }
+        }
+      }
+    },
+    "Energy and Map": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Énergie et carte"
           }
         }
       }
@@ -301,12 +351,32 @@
         }
       }
     },
+    "Filter": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filtre"
+          }
+        }
+      }
+    },
     "Finding the latest SuperMetroidRecomp": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Recherche de la dernière version de SuperMetroidRecomp"
+          }
+        }
+      }
+    },
+    "Fit to window": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajusté à la fenêtre"
           }
         }
       }
@@ -347,6 +417,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "De %lld à %lld"
+          }
+        }
+      }
+    },
+    "Fullscreen": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plein écran"
           }
         }
       }
@@ -461,6 +541,16 @@
         }
       }
     },
+    "Install the game to choose how it looks.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installez le jeu pour choisir son affichage."
+          }
+        }
+      }
+    },
     "Installing Super Metroid": {
       "localizations": {
         "fr": {
@@ -531,6 +621,16 @@
         }
       }
     },
+    "Light": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Léger"
+          }
+        }
+      }
+    },
     "Log": {
       "localizations": {
         "fr": {
@@ -571,6 +671,16 @@
         }
       }
     },
+    "Medium": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moyen"
+          }
+        }
+      }
+    },
     "Mods": {
       "localizations": {
         "fr": {
@@ -607,6 +717,56 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aucun jeu installé"
+          }
+        }
+      }
+    },
+    "None": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun"
+          }
+        }
+      }
+    },
+    "Off (original 4:3)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Désactivé (4:3 d’origine)"
+          }
+        }
+      }
+    },
+    "Other (%@)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autre (%@)"
+          }
+        }
+      }
+    },
+    "Over the original picture": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sur l’image d’origine"
+          }
+        }
+      }
+    },
+    "Picture": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image"
           }
         }
       }
@@ -657,6 +817,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aperçu de la couleur d’accentuation"
+          }
+        }
+      }
+    },
+    "Quit the game to change these settings.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quittez le jeu pour modifier ces réglages."
           }
         }
       }
@@ -731,6 +901,16 @@
         }
       }
     },
+    "Scanlines": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lignes de balayage"
+          }
+        }
+      }
+    },
     "Search Mods": {
       "localizations": {
         "fr": {
@@ -771,12 +951,32 @@
         }
       }
     },
+    "Show more of each room on a wide window": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voir une plus grande partie de chaque salle dans une fenêtre large"
+          }
+        }
+      }
+    },
     "Show the log file in Finder": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Afficher le fichier journal dans le Finder"
+          }
+        }
+      }
+    },
+    "Smooth motion with no tearing. Off lowers input lag a little.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mouvement fluide, sans déchirure. Désactivé, la latence baisse un peu."
           }
         }
       }
@@ -817,6 +1017,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Arrêter le jeu ?"
+          }
+        }
+      }
+    },
+    "Strength": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intensité"
+          }
+        }
+      }
+    },
+    "Strong": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fort"
           }
         }
       }
@@ -1131,6 +1351,16 @@
         }
       }
     },
+    "Unable to save the display settings: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d’enregistrer les réglages d’affichage : %@"
+          }
+        }
+      }
+    },
     "Unable to save the report. There may not be enough space on the disk.": {
       "localizations": {
         "fr": {
@@ -1201,6 +1431,16 @@
         }
       }
     },
+    "VSync": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VSync"
+          }
+        }
+      }
+    },
     "Version %@": {
       "localizations": {
         "fr": {
@@ -1227,6 +1467,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ce que fait SM Launcher Plus est noté ici : téléchargements, installations, et chaque démarrage ou arrêt du jeu."
+          }
+        }
+      }
+    },
+    "Widescreen": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Écran large"
+          }
+        }
+      }
+    },
+    "Window": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenêtre"
           }
         }
       }

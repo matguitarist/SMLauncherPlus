@@ -115,14 +115,17 @@ Status: todo
 ## M2 Tune the game (0.1.0)
 
 ### S-010 Choose display settings
-As the player, I set window scale, fullscreen, VSync, renderer, shader and widescreen (Fit, 16:9,
-21:9, 32:9) from the Display tab.
+As the player, I set fullscreen, VSync, a filter (Scanlines or CRT, Light, Medium or Strong), widescreen
+(Off, Fit, 16:9, 21:9, 32:9) and where the energy and map sit, from the Display tab. Window scale and
+renderer stay the game's: it opens at its WindowSize and Fit follows the window, and filters need its
+Auto (OpenGL) renderer, so a filter moves an SDL renderer back to Auto.
 Screens: settings-display
 Depends: S-003
 Acceptance:
 - [unit] Changes are written to the profile's `config.ini` keeping unknown keys, comments and order.
 - [unit] The shader list comes from the profile's `assets/shaders/`.
-Status: todo
+- [self] The game starts with the widescreen shape and HUD place written to `sm-video.ini`.
+Status: done
 
 ### S-011 Sound
 As the player, I set volume and turn audio on or off.
