@@ -18,11 +18,14 @@ struct ContentView: View {
             }
             .navigationSplitViewColumnWidth(min: 180, ideal: 200)
         } detail: {
-            switch model.sidebar ?? .play {
-            case .play: PlayPage()
-            case .mods: ModsPage()
-            case .log: LogPage()
+            Group {
+                switch model.sidebar ?? .play {
+                case .play: PlayPage()
+                case .mods: ModsPage()
+                case .log: LogPage()
+                }
             }
+            .id(model.dataFolderMoves)  // pages that hold a path into the data folder start over after a move (S-013)
         }
         .noInitialFocus()
         .task {

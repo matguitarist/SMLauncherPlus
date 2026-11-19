@@ -261,6 +261,16 @@
         }
       }
     },
+    "Calculating…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calcul en cours…"
+          }
+        }
+      }
+    },
     "Cancel": {
       "localizations": {
         "fr": {
@@ -381,6 +391,16 @@
         }
       }
     },
+    "Choose a folder outside the current data folder.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisissez un dossier en dehors du dossier de données actuel."
+          }
+        }
+      }
+    },
     "Choose your ROM": {
       "localizations": {
         "fr": {
@@ -487,6 +507,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Croix haut"
+          }
+        }
+      }
+    },
+    "Data Folder": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dossier de données"
           }
         }
       }
@@ -1121,6 +1151,16 @@
         }
       }
     },
+    "Location": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emplacement"
+          }
+        }
+      }
+    },
     "Log": {
       "localizations": {
         "fr": {
@@ -1191,6 +1231,36 @@
         }
       }
     },
+    "Move profiles, saves and downloads to another folder, such as an external drive": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déplacer les profils, les sauvegardes et les téléchargements dans un autre dossier, par exemple sur un disque externe"
+          }
+        }
+      }
+    },
+    "Move…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déplacer…"
+          }
+        }
+      }
+    },
+    "Moving the data folder…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déplacement du dossier de données…"
+          }
+        }
+      }
+    },
     "Never played": {
       "localizations": {
         "fr": {
@@ -1237,6 +1307,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aucune connectée"
+          }
+        }
+      }
+    },
+    "Not enough space: the data needs %@, the disk has %@ free.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas assez d’espace : les données occupent %@, le disque n’a que %@ de libre."
           }
         }
       }
@@ -1391,12 +1471,32 @@
         }
       }
     },
+    "Profiles with their saves, downloads and logs. Moving copies them, checks the copy, then deletes the old folder.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les profils avec leurs sauvegardes, les téléchargements et les journaux. Le déplacement les copie, vérifie la copie, puis supprime l’ancien dossier."
+          }
+        }
+      }
+    },
     "Quit the game to change these settings.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Quittez le jeu pour modifier ces réglages."
+          }
+        }
+      }
+    },
+    "Quit the game to move the data folder.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quittez le jeu pour déplacer le dossier de données."
           }
         }
       }
@@ -1457,6 +1557,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Retour"
+          }
+        }
+      }
+    },
+    "Reveal in Finder": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher dans le Finder"
           }
         }
       }
@@ -1721,12 +1831,32 @@
         }
       }
     },
+    "Show the data folder in Finder": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher le dossier de données dans le Finder"
+          }
+        }
+      }
+    },
     "Show the log file in Finder": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Afficher le fichier journal dans le Finder"
+          }
+        }
+      }
+    },
+    "Size": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taille"
           }
         }
       }
@@ -1897,6 +2027,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tab"
+          }
+        }
+      }
+    },
+    "That folder already has an item named “%@”. Choose another folder.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce dossier contient déjà un élément nommé « %@ ». Choisissez un autre dossier."
+          }
+        }
+      }
+    },
+    "The copy doesn't match the original (%@). The old folder is unchanged.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La copie ne correspond pas à l’original (%@). L’ancien dossier n’a pas changé."
+          }
+        }
+      }
+    },
+    "The disk with the data folder isn't connected. Connect it, then reopen SM Launcher Plus.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le disque qui contient le dossier de données n’est pas branché. Branchez-le, puis rouvrez SM Launcher Plus."
           }
         }
       }
@@ -2161,6 +2321,16 @@
         }
       }
     },
+    "Unable to move the data. The old folder is unchanged.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de déplacer les données. L’ancien dossier n’a pas changé."
+          }
+        }
+      }
+    },
     "Unable to prepare your ROM for the game. There may not be enough space on the disk.": {
       "localizations": {
         "fr": {
@@ -2337,6 +2507,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Volume"
+          }
+        }
+      }
+    },
+    "Wait for the install to finish to move the data folder.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attendez la fin de l’installation pour déplacer le dossier de données."
           }
         }
       }

@@ -148,7 +148,7 @@ As the player, I move SM Launcher Plus's data folder to another drive in Setting
 Screens: settings-general
 Acceptance:
 - [unit] Profiles and downloads are moved; a failed move leaves the old folder intact.
-Status: todo
+Status: done
 
 ## M3 Mods (0.2.0)
 

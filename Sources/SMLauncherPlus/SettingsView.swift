@@ -90,7 +90,76 @@ struct GeneralSettings: View {
                 }
             }
         }
+        DataFolderSection()
         AboutSection()
+    }
+}
+
+/// Settings › General's Data Folder (S-013): where profiles, downloads and logs live, and Move… to another drive.
+/// Ported from AM2R Launcher Plus. The database stays in Application Support.
+struct DataFolderSection: View {
+    @Environment(AppModel.self) private var model
+    @State private var choosing = false
+    @State private var size: Int64?
+
+    var body: some View {
+        let folder = DataFolder.url
+        Section {
+            LabeledContent("Location") {
+                Text(verbatim: folder.path(percentEncoded: false).replacingOccurrences(of: NSHomeDirectory(), with: "~"))
+                    .truncationMode(.middle)
+                    .lineLimit(1)
+                    .textSelection(.enabled)
+                    .help(folder.path(percentEncoded: false))
+            }
+            LabeledContent("Size") {
+                Text(size.map { $0.formatted(.byteCount(style: .file).locale(.app)) } ?? String(localized: "Calculating…"))
+            }
+            if let move = model.dataMove {
+                ProgressView(value: Double(move.done), total: Double(max(move.total, 1))) {
+                    Text("Moving the data folder…")
+                }
+            }
+            if DataFolder.isMissing {
+                Label("The disk with the data folder isn't connected. Connect it, then reopen SM Launcher Plus.", systemImage: "externaldrive.badge.exclamationmark")
+                    .symbolRenderingMode(.multicolor)
+            }
+            if let error = model.dataMoveError {
+                Label(error, systemImage: "exclamationmark.triangle.fill")
+                    .symbolRenderingMode(.multicolor)
+            }
+            HStack {
+                Spacer()
+                Button("Reveal in Finder") { NSWorkspace.shared.activateFileViewerSelecting([folder]) }
+                    .help("Show the data folder in Finder")
+                    .disabled(DataFolder.isMissing)
+                Button("Move…") { choosing = true }
+                    .help("Move profiles, saves and downloads to another folder, such as an external drive")
+                    .disabled(model.game != nil || model.install != nil || model.dataMove != nil || DataFolder.isMissing)
+            }
+        } header: {
+            Text("Data Folder")
+        } footer: {
+            Text(footer)
+        }
+        .fileImporter(isPresented: $choosing, allowedContentTypes: [.folder]) { result in
+            guard case .success(let parent) = result else { return }
+            Task {
+                await model.moveDataFolder(into: parent)
+                await measure()
+            }
+        }
+        .task { await measure() }
+    }
+
+    private var footer: String {
+        if model.game != nil { return String(localized: "Quit the game to move the data folder.") }
+        if model.install != nil { return String(localized: "Wait for the install to finish to move the data folder.") }
+        return String(localized: "Profiles with their saves, downloads and logs. Moving copies them, checks the copy, then deletes the old folder.")
+    }
+
+    private func measure() async {
+        size = await Task.detached(priority: .utility) { DataFolder.size() }.value
     }
 }
 

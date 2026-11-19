@@ -1,15 +1,65 @@
 import Foundation
 import SMLauncherPlusKit
 
-/// Where downloads, profiles, saves and caches live: ~/Library/Application Support/SMLauncherPlus,
-/// or `<test store>-data` next to APP_STORE. Moving it is S-013 (port the rest of AM2R's DataFolder then).
+/// Where downloads, profiles, saves and logs live: ~/Library/Application Support/SMLauncherPlus,
+/// or `<test store>-data` next to APP_STORE. The player can move it (S-013); the database stays behind.
 nonisolated enum DataFolder {
-    static var url: URL {
-        let base = Store.isOverridden
+    static let defaultsKey = "dataFolder"
+    /// Test and snapshot runs keep their moved location in memory, never in the real defaults.
+    nonisolated(unsafe) static var testLocation: URL?
+
+    static var defaultURL: URL {
+        Store.isOverridden
             ? Store.url.deletingLastPathComponent().appending(path: Store.url.deletingPathExtension().lastPathComponent + "-data", directoryHint: .isDirectory)
             : URL.applicationSupportDirectory.appending(path: "SMLauncherPlus", directoryHint: .isDirectory)
-        try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
+    }
+
+    /// The location the player chose, if any.
+    private static var chosen: URL? {
+        Store.isOverridden ? testLocation : UserDefaults.standard.string(forKey: defaultsKey).map { URL(fileURLWithPath: $0, isDirectory: true) }
+    }
+
+    /// The chosen location, or the default.
+    static var url: URL {
+        let base = chosen ?? defaultURL
+        // Never recreate a folder on a disk that's unplugged: that would make a fake /Volumes/<disk>.
+        if chosen == nil || FileManager.default.fileExists(atPath: base.deletingLastPathComponent().path) {
+            try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: chosen == nil)
+        }
         return base
+    }
+
+    /// Remembers a new location; the default location is stored as no choice.
+    static func setLocation(_ url: URL) {
+        let isDefault = url.standardizedFileURL.resolvingSymlinksInPath().path == defaultURL.standardizedFileURL.resolvingSymlinksInPath().path
+        if Store.isOverridden {
+            testLocation = isDefault ? nil : url
+        } else if isDefault {
+            UserDefaults.standard.removeObject(forKey: defaultsKey)
+        } else {
+            UserDefaults.standard.set(url.path, forKey: defaultsKey)
+        }
+    }
+
+    /// The data was moved to a disk that isn't connected now.
+    static var isMissing: Bool {
+        guard let chosen else { return false }
+        return !FileManager.default.fileExists(atPath: chosen.deletingLastPathComponent().path)
+    }
+
+    /// What stays behind when the data folder moves: the database, when it sits in the folder (the default).
+    static func keeping(for folder: URL) -> Set<String> {
+        let store = Store.url
+        guard store.deletingLastPathComponent().standardizedFileURL.resolvingSymlinksInPath().path
+                == folder.standardizedFileURL.resolvingSymlinksInPath().path else { return [] }
+        let name = store.lastPathComponent
+        return [name, name + "-shm", name + "-wal"]
+    }
+
+    /// Profiles, downloads and logs, without the database.
+    static func size() -> Int64 {
+        let folder = url
+        return FolderMove.size(of: folder, excluding: keeping(for: folder))
     }
 
     /// Downloaded game zips, one folder per version.

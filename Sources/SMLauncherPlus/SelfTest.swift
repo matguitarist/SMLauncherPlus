@@ -153,6 +153,8 @@ enum SelfTest {
             check("About links to the game, its license and snesrecomp",
                   links == [Credits.project, Credits.license, Credits.framework], "\(links)")
 
+            await checkDataFolderMove(model: model)
+
             print(failures == 0 ? "SELFTEST PASS \(count) checks" : "SELFTEST FAIL \(failures) of \(count) checks")
             finish(code: failures == 0 ? 0 : 1)
         }
@@ -328,6 +330,46 @@ enum SelfTest {
         for _ in 0..<1200 where model.installTask != nil {
             try? await Task.sleep(for: .milliseconds(100))
         }
+    }
+
+    /// S-013: profiles and downloads follow the data folder to another place and back; a refused move changes nothing.
+    private static func checkDataFolderMove(model: AppModel) async {
+        let fm = FileManager.default
+        let profile = Profile(name: "Moving", gameVersion: "0.4.6")
+        model.context.insert(profile)
+        try? model.context.save()
+        try? fm.createDirectory(at: profile.gameFolder, withIntermediateDirectories: true)
+        try? Data("save".utf8).write(to: profile.gameFolder.appending(path: "saves.srm"))
+        let download = DataFolder.downloads.appending(path: "selftest/game.zip")
+        try? fm.createDirectory(at: download.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try? Data("zip".utf8).write(to: download)
+        let original = DataFolder.url
+        let before = files(in: original)
+
+        await model.moveDataFolder(into: original.appending(path: "Profiles"))
+        check("a move into the data folder itself is refused, nothing changes",
+              model.dataMoveError != nil && DataFolder.url == original && files(in: original) == before, model.dataMoveError ?? "no error")
+
+        let target = URL(fileURLWithPath: "/tmp/SMLauncherPlus-self-move-\(UUID().uuidString)", isDirectory: true)
+        try? fm.createDirectory(at: target, withIntermediateDirectories: true)
+        await model.moveDataFolder(into: target)
+        check("the data folder moves", model.dataMoveError == nil
+              && DataFolder.url.deletingLastPathComponent().path == target.resolvingSymlinksInPath().path, model.dataMoveError ?? DataFolder.url.path)
+        check("profiles and downloads follow the data folder", files(in: DataFolder.url) == before
+              && fm.fileExists(atPath: profile.gameFolder.appending(path: "saves.srm").path), "\(files(in: DataFolder.url))")
+        check("the old data folder is gone", !fm.fileExists(atPath: original.path))
+        check("the database stays where it was", fm.fileExists(atPath: Store.url.path)
+              && (try? model.context.fetchCount(FetchDescriptor<Profile>())) ?? 0 > 0)
+        check("pages are rebuilt after a move", model.dataFolderMoves == 1)
+
+        await model.moveDataFolder(into: original.deletingLastPathComponent())
+        check("the data folder moves back", DataFolder.testLocation == nil && files(in: original) == before, DataFolder.url.path)
+        try? fm.removeItem(at: target)
+        try? fm.removeItem(at: profile.folder)
+        try? fm.removeItem(at: download.deletingLastPathComponent())
+        model.context.delete(profile)
+        try? model.context.save()
+        model.dataMoveError = nil
     }
 
     /// Every file under a folder, as paths relative to it.

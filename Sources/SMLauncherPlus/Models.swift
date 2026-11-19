@@ -62,6 +62,24 @@ final class RomSource {
     var name: String { url.lastPathComponent }
 }
 
+extension FolderMove.Failure {
+    /// What Settings › General says when the data folder couldn't move (S-013).
+    @MainActor var message: String {
+        switch self {
+        case .destinationExists(let name):
+            String(localized: "That folder already has an item named “\(name)”. Choose another folder.")
+        case .insideItself:
+            String(localized: "Choose a folder outside the current data folder.")
+        case .notEnoughSpace(let needed, let available):
+            String(localized: "Not enough space: the data needs \(needed.formatted(.byteCount(style: .file).locale(.app))), the disk has \(available.formatted(.byteCount(style: .file).locale(.app))) free.")
+        case .copyFailed:
+            String(localized: "Unable to move the data. The old folder is unchanged.")
+        case .verifyFailed(let path):
+            String(localized: "The copy doesn't match the original (\(path)). The old folder is unchanged.")
+        }
+    }
+}
+
 /// The welcome page's state while the player picks their ROM (S-001).
 enum WelcomeState: Equatable {
     case empty

@@ -137,6 +137,12 @@ final class AppModel {
     var install: InstallState?
     var installTask: Task<Void, Never>?
 
+    /// S-013: the data folder move in progress (bytes copied of total), and why the last one failed.
+    var dataMove: (done: Int64, total: Int64)?
+    var dataMoveError: String?
+    /// Counts finished moves, so pages that hold a path into the data folder are rebuilt.
+    var dataFolderMoves = 0
+
     var isCheckingROM: Bool {
         if case .checking = welcome { return true }
         return false
@@ -175,12 +181,42 @@ final class AppModel {
         }
     }
 
+    /// Moves the data folder into `parent` (S-013). Not while the game runs or an install is going.
+    /// The database stays where it is; profiles, downloads and logs move.
+    func moveDataFolder(into parent: URL) async {
+        guard game == nil, install == nil, dataMove == nil else { return }
+        dataMoveError = nil
+        dataMove = (0, 0)
+        let source = DataFolder.url
+        let keeping = DataFolder.keeping(for: source)
+        let result = await Task.detached(priority: .userInitiated) { () -> Result<URL, FolderMove.Failure> in
+            let scoped = parent.startAccessingSecurityScopedResource()
+            defer { if scoped { parent.stopAccessingSecurityScopedResource() } }
+            return Result { () throws(FolderMove.Failure) in
+                try FolderMove.move(source, into: parent, keeping: keeping) { done, total in
+                    Task { @MainActor in self.dataMove = (done, total) }
+                }
+            }
+        }.value
+        switch result {
+        case .success(let moved):
+            log.post(.info, "Moved the data folder from \(source.path) to \(moved.path)", source: "Data")
+            DataFolder.setLocation(moved)
+            dataFolderMoves += 1
+        case .failure(let failure):
+            log.post(.error, "Unable to move the data folder to \(parent.path): \(failure)", source: "Data")
+            dataMoveError = failure.message
+        }
+        dataMove = nil
+    }
+
     /// Called once at launch.
     func load() {
         let profiles = (try? context.fetchCount(FetchDescriptor<Profile>())) ?? 0
         log.post(.info, "Opened the database (\(profiles) profiles)", source: "App")
         // A temporary ROM copy left by a crash or a forced quit.
         GameLaunch.removeLeftoverROMs(in: DataFolder.runROM)
+        if DataFolder.isMissing { log.post(.warning, "The data folder's disk isn't connected: \(DataFolder.url.path)", source: "Data") }
         // Profiles from an earlier launcher, or a filter that changed in this one.
         for profile in (try? context.fetch(FetchDescriptor<Profile>())) ?? [] { installFilters(in: profile.gameFolder) }
     }
