@@ -10,9 +10,12 @@ public struct IniFile: Equatable, Sendable {
     private let separator: String
     /// Kept from the file, so an edit doesn't rewrite every line ending.
     private let newline: String
+    /// Keys the launcher writes are padded to this width, as keybinds.ini lines up "a       = X".
+    private let keyWidth: Int
 
-    public init(text: String, separator: String = " = ") {
+    public init(text: String, separator: String = " = ", keyWidth: Int = 0) {
         self.separator = separator
+        self.keyWidth = keyWidth
         newline = text.contains("\r\n") ? "\r\n" : "\n"
         lines = text.isEmpty ? [] : text.components(separatedBy: "\n").map {
             // "\r\n" is one Character in Swift, so trim the code unit, not the Character.
@@ -36,7 +39,8 @@ public struct IniFile: Equatable, Sendable {
     /// Sets every line with this key in the section (a later duplicate would otherwise win),
     /// or adds one after the section's last key.
     public mutating func set(_ key: String, to value: String, in section: String) {
-        let line = "\(key)\(separator)\(value)"
+        let padded = key.count < keyWidth ? key.padding(toLength: keyWidth, withPad: " ", startingAt: 0) : key
+        let line = "\(padded)\(separator)\(value)"
         guard let range = range(of: section) else {
             if !lines.isEmpty { lines.append("") }
             lines.append("[\(section)]")

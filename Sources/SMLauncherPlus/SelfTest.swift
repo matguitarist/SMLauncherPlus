@@ -139,6 +139,10 @@ enum SelfTest {
                 model.settingsTab = tab
                 check("the \(tab.rawValue) Settings tab is selectable", model.settingsTab == tab)
             }
+            // S-012: the Controls tab names what GameController sees.
+            let pads = ControllerMonitor().names
+            check("a connected controller is named", pads == ControllerMonitor.connected(),
+                  pads.isEmpty ? "none connected" : pads.joined(separator: ", "))
             // S-006: About credits the game, its version and its license.
             let about = AboutCredits.make(gameVersion: "0.4.6")
             var links = Set<URL>()
@@ -196,6 +200,16 @@ enum SelfTest {
         sound.volume = 80
         do { try sound.write(game: profile.gameFolder) } catch { check("sound settings are saved", false, "\(error)") }
         check("sound settings read back as written", SoundSettings.read(game: profile.gameFolder) == sound)
+        // S-012: player 1's keys in keybinds.ini and controller buttons in config.ini.
+        var controls = ControlSettings.read(game: profile.gameFolder)
+        let configBefore = (try? String(contentsOf: DisplaySettings.configFile(game: profile.gameFolder), encoding: .utf8)) ?? ""
+        do { try controls.write(game: profile.gameFolder) } catch { check("controls are saved", false, "\(error)") }
+        check("unchanged controls leave config.ini as it was",
+              (try? String(contentsOf: DisplaySettings.configFile(game: profile.gameFolder), encoding: .utf8)) == configBefore)
+        controls.keys[.b] = "Space"
+        controls.buttons[.l] = "L2"
+        do { try controls.write(game: profile.gameFolder) } catch { check("controls are saved", false, "\(error)") }
+        check("controls read back as written", ControlSettings.read(game: profile.gameFolder) == controls)
         let before = profile.playTime
         model.play(extraArguments: ["--framedump", frames.path], environment: ["SDL_VIDEODRIVER": "dummy", "SDL_AUDIODRIVER": "dummy"])
         check("Play starts the game", model.isPlaying, model.playFailure?.message ?? "")
@@ -214,6 +228,8 @@ enum SelfTest {
               (try? String(contentsOf: game.log, encoding: .utf8).suffix(400)).map(String.init) ?? "")
         let arguments = (try? String(contentsOf: game.log, encoding: .utf8)) ?? ""
         check("the game read the profile's config.ini", arguments.contains("config parsed"))
+        check("the game read the keys from keybinds.ini", arguments.contains("[Keybinds] Loaded"),
+              arguments.components(separatedBy: "\n").first { $0.contains("Keybinds") } ?? "no Keybinds line")
         check("the game uses the widescreen shape and HUD place from the Display tab",
               arguments.contains("custom renderer: 1 aspect=21:9") && arguments.contains("hud=0"),
               arguments.components(separatedBy: "\n").first { $0.contains("custom renderer") } ?? "no renderer line")

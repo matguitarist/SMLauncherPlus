@@ -121,12 +121,52 @@
         }
       }
     },
+    "Aim down": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Viser en bas"
+          }
+        }
+      }
+    },
+    "Aim up": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Viser en haut"
+          }
+        }
+      }
+    },
+    "Also starts a game shortcut: %@. Change it in config.ini.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déclenche aussi un raccourci du jeu : %@. Modifiez-le dans config.ini."
+          }
+        }
+      }
+    },
     "Also turned on: %@": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Aussi activé : %@"
+          }
+        }
+      }
+    },
+    "Also used for %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aussi utilisée pour %@."
           }
         }
       }
@@ -161,12 +201,42 @@
         }
       }
     },
+    "Back (View)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retour (Affichage)"
+          }
+        }
+      }
+    },
     "Back to Play": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Retour à Jouer"
+          }
+        }
+      }
+    },
+    "Bottom Button": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bouton du bas"
+          }
+        }
+      }
+    },
+    "Button": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bouton"
           }
         }
       }
@@ -197,6 +267,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Annuler"
+          }
+        }
+      }
+    },
+    "Cancel item": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Annuler l’arme"
+          }
+        }
+      }
+    },
+    "Caps Lock": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verr. maj."
           }
         }
       }
@@ -311,12 +401,102 @@
         }
       }
     },
+    "Clear Key": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Effacer la touche"
+          }
+        }
+      }
+    },
+    "Click a key, then press the new one. The keyboard and a controller work at the same time. Changes apply the next time you play %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cliquez sur une touche, puis appuyez sur la nouvelle. Le clavier et une manette fonctionnent en même temps. Les changements s’appliqueront la prochaine fois que vous jouerez à %@."
+          }
+        }
+      }
+    },
     "Close": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Fermer"
+          }
+        }
+      }
+    },
+    "Controller": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manette"
+          }
+        }
+      }
+    },
+    "Controls": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Commandes"
+          }
+        }
+      }
+    },
+    "D-pad Down": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Croix bas"
+          }
+        }
+      }
+    },
+    "D-pad Left": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Croix gauche"
+          }
+        }
+      }
+    },
+    "D-pad Right": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Croix droite"
+          }
+        }
+      }
+    },
+    "D-pad Up": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Croix haut"
+          }
+        }
+      }
+    },
+    "Delete": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer"
           }
         }
       }
@@ -337,6 +517,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Terminé"
+          }
+        }
+      }
+    },
+    "Down": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bas"
+          }
+        }
+      }
+    },
+    "Down Arrow": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flèche bas"
           }
         }
       }
@@ -387,6 +587,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Énergie et carte"
+          }
+        }
+      }
+    },
+    "Escape": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Échap"
           }
         }
       }
@@ -457,6 +667,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Concentration"
+          }
+        }
+      }
+    },
+    "Forward Delete": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer vers la droite"
           }
         }
       }
@@ -581,6 +801,16 @@
         }
       }
     },
+    "Home": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accueil"
+          }
+        }
+      }
+    },
     "In progress": {
       "localizations": {
         "fr": {
@@ -641,6 +871,16 @@
         }
       }
     },
+    "Install the game to choose its controls.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installez le jeu pour choisir ses commandes."
+          }
+        }
+      }
+    },
     "Installing Super Metroid": {
       "localizations": {
         "fr": {
@@ -681,12 +921,52 @@
         }
       }
     },
+    "Jump": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sauter"
+          }
+        }
+      }
+    },
     "Keep Playing": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Continuer à jouer"
+          }
+        }
+      }
+    },
+    "Key for %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Touche pour %@"
+          }
+        }
+      }
+    },
+    "Keyboard": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clavier"
+          }
+        }
+      }
+    },
+    "Keypad": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pavé num."
           }
         }
       }
@@ -717,6 +997,106 @@
           "stringUnit": {
             "state": "translated",
             "value": "Joué %@ · %@ au total"
+          }
+        }
+      }
+    },
+    "Left": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gauche"
+          }
+        }
+      }
+    },
+    "Left Arrow": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flèche gauche"
+          }
+        }
+      }
+    },
+    "Left Button": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bouton de gauche"
+          }
+        }
+      }
+    },
+    "Left Command": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Commande gauche"
+          }
+        }
+      }
+    },
+    "Left Control": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contrôle gauche"
+          }
+        }
+      }
+    },
+    "Left Option": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Option gauche"
+          }
+        }
+      }
+    },
+    "Left Shift": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maj gauche"
+          }
+        }
+      }
+    },
+    "Left Shoulder": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bouton L"
+          }
+        }
+      }
+    },
+    "Left Stick Press": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clic du stick gauche"
+          }
+        }
+      }
+    },
+    "Left Trigger": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gâchette gauche"
           }
         }
       }
@@ -851,12 +1231,32 @@
         }
       }
     },
+    "None connected": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune connectée"
+          }
+        }
+      }
+    },
     "Not installed": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Non installé"
+          }
+        }
+      }
+    },
+    "Not set": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune"
           }
         }
       }
@@ -887,6 +1287,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sur l’image d’origine"
+          }
+        }
+      }
+    },
+    "Pause": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause"
           }
         }
       }
@@ -931,6 +1341,16 @@
         }
       }
     },
+    "Player 1": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Joueur 1"
+          }
+        }
+      }
+    },
     "Playing for %@": {
       "localizations": {
         "fr": {
@@ -947,6 +1367,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "En jeu…"
+          }
+        }
+      }
+    },
+    "Press a key…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appuyez sur une touche…"
           }
         }
       }
@@ -997,6 +1427,146 @@
           "stringUnit": {
             "state": "translated",
             "value": "Redémarrer maintenant"
+          }
+        }
+      }
+    },
+    "Restore Default Key": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rétablir la touche par défaut"
+          }
+        }
+      }
+    },
+    "Restore Defaults": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rétablir les valeurs par défaut"
+          }
+        }
+      }
+    },
+    "Return": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retour"
+          }
+        }
+      }
+    },
+    "Right": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Droite"
+          }
+        }
+      }
+    },
+    "Right Arrow": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flèche droite"
+          }
+        }
+      }
+    },
+    "Right Button": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bouton de droite"
+          }
+        }
+      }
+    },
+    "Right Command": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Commande droite"
+          }
+        }
+      }
+    },
+    "Right Control": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contrôle droite"
+          }
+        }
+      }
+    },
+    "Right Option": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Option droite"
+          }
+        }
+      }
+    },
+    "Right Shift": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maj droite"
+          }
+        }
+      }
+    },
+    "Right Shoulder": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bouton R"
+          }
+        }
+      }
+    },
+    "Right Stick Press": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clic du stick droit"
+          }
+        }
+      }
+    },
+    "Right Trigger": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gâchette droite"
+          }
+        }
+      }
+    },
+    "Run": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Courir"
           }
         }
       }
@@ -1081,6 +1651,16 @@
         }
       }
     },
+    "Select": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select"
+          }
+        }
+      }
+    },
     "Setting up the game": {
       "localizations": {
         "fr": {
@@ -1097,6 +1677,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Net"
+          }
+        }
+      }
+    },
+    "Shoot": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tirer"
           }
         }
       }
@@ -1157,6 +1747,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Son"
+          }
+        }
+      }
+    },
+    "Space": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Espace"
+          }
+        }
+      }
+    },
+    "Start": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start"
+          }
+        }
+      }
+    },
+    "Start (Menu)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start (Menu)"
           }
         }
       }
@@ -1251,12 +1871,32 @@
         }
       }
     },
+    "Switch item": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changer d’arme"
+          }
+        }
+      }
+    },
     "System (%@)": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Système (%@)"
+          }
+        }
+      }
+    },
+    "Tab": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tab"
           }
         }
       }
@@ -1481,6 +2121,16 @@
         }
       }
     },
+    "Top Button": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bouton du haut"
+          }
+        }
+      }
+    },
     "Try Again": {
       "localizations": {
         "fr": {
@@ -1541,6 +2191,16 @@
         }
       }
     },
+    "Unable to save the controls: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d’enregistrer les commandes : %@"
+          }
+        }
+      }
+    },
     "Unable to save the display settings: %@": {
       "localizations": {
         "fr": {
@@ -1597,6 +2257,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "La progression depuis votre dernière station de sauvegarde sera perdue."
+          }
+        }
+      }
+    },
+    "Up": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haut"
+          }
+        }
+      }
+    },
+    "Up Arrow": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flèche haut"
           }
         }
       }

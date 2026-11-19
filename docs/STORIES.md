@@ -138,9 +138,10 @@ Status: done
 As the player, I see which controller is connected and remap buttons and keys.
 Screens: settings-controls
 Acceptance:
-- [unit] `[GamepadMap] Controls` and `[KeyMap]` round-trip without loss.
+- [unit] `[GamepadMap] Controls` (controller buttons) and `keybinds.ini` `[player1]` (keyboard keys;
+  the game reads its keys there, while config.ini's `[KeyMap]` holds its shortcuts) round-trip without loss.
 - [self] A connected controller is named (GameController framework).
-Status: todo
+Status: done
 
 ### S-013 Move the data folder
 As the player, I move SM Launcher Plus's data folder to another drive in Settings › General.
