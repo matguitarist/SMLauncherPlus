@@ -1,0 +1,316 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "1 left": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 restant"
+          }
+        }
+      }
+    },
+    "Accent color": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couleur d’accentuation"
+          }
+        }
+      }
+    },
+    "Add Task": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter"
+          }
+        }
+      }
+    },
+    "Appearance": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apparence"
+          }
+        }
+      }
+    },
+    "Automatic Updates": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mises à jour automatiques"
+          }
+        }
+      }
+    },
+    "Check Now": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechercher maintenant"
+          }
+        }
+      }
+    },
+    "Check for Updates…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechercher des mises à jour…"
+          }
+        }
+      }
+    },
+    "Check for updates automatically": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechercher les mises à jour automatiquement"
+          }
+        }
+      }
+    },
+    "Focus": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concentration"
+          }
+        }
+      }
+    },
+    "General": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Général"
+          }
+        }
+      }
+    },
+    "Inbox": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réception"
+          }
+        }
+      }
+    },
+    "Language": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Langue"
+          }
+        }
+      }
+    },
+    "Log": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Journal"
+          }
+        }
+      }
+    },
+    "Looks once a day for a new version on GitHub.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cherche une nouvelle version sur GitHub une fois par jour."
+          }
+        }
+      }
+    },
+    "Looks once a day for a new version on GitHub. Last checked %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cherche une nouvelle version sur GitHub une fois par jour. Dernière recherche %@."
+          }
+        }
+      }
+    },
+    "No Activity Yet": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune activité"
+          }
+        }
+      }
+    },
+    "Overview": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vue d’ensemble"
+          }
+        }
+      }
+    },
+    "Preview of the accent color": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aperçu de la couleur d’accentuation"
+          }
+        }
+      }
+    },
+    "Restart Now": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redémarrer maintenant"
+          }
+        }
+      }
+    },
+    "SM Launcher Plus": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SM Launcher Plus"
+          }
+        }
+      }
+    },
+    "SM Launcher Plus will install SuperMetroidRecomp from your own ROM, keep it up to date, and let you tune its settings and mods. Your ROM stays where it is.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SM Launcher Plus installera SuperMetroidRecomp à partir de votre propre ROM, le tiendra à jour et vous permettra de régler ses paramètres et ses mods. Votre ROM reste où elle est."
+          }
+        }
+      }
+    },
+    "Show Log": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher le journal"
+          }
+        }
+      }
+    },
+    "Super Metroid, Native on Your Mac": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Super Metroid, natif sur votre Mac"
+          }
+        }
+      }
+    },
+    "SuperMetroidRecomp on GitHub": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SuperMetroidRecomp sur GitHub"
+          }
+        }
+      }
+    },
+    "System (%@)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Système (%@)"
+          }
+        }
+      }
+    },
+    "The library could not be opened: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d’ouvrir la bibliothèque : %@"
+          }
+        }
+      }
+    },
+    "The new language applies after a restart.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La nouvelle langue s’applique après un redémarrage."
+          }
+        }
+      }
+    },
+    "Updates": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mises à jour"
+          }
+        }
+      }
+    },
+    "Updates are off in this build.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les mises à jour sont désactivées dans cette version."
+          }
+        }
+      }
+    },
+    "Version %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version %@"
+          }
+        }
+      }
+    },
+    "What SM Launcher Plus does is written here: downloads, installs, and each time the game starts or stops.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce que fait SM Launcher Plus est noté ici : téléchargements, installations, et chaque démarrage ou arrêt du jeu."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

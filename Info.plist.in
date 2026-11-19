@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>CFBundleIdentifier</key><string>com.mathieu.smlauncherplus</string>
+<key>CFBundleName</key><string>SM Launcher Plus</string>
+<key>CFBundleDisplayName</key><string>SM Launcher Plus</string>
+<key>CFBundleExecutable</key><string>SMLauncherPlus</string>
+<key>CFBundleIconFile</key><string>AppIcon</string>
+<key>CFBundleIconName</key><string>AppIcon</string>
+<key>CFBundlePackageType</key><string>APPL</string>
+<key>CFBundleShortVersionString</key><string>0.1.0</string>
+<key>CFBundleVersion</key><string>__BUILD__</string>
+<key>LSMinimumSystemVersion</key><string>26.0</string>
+<key>LSApplicationCategoryType</key><string>public.app-category.games</string>
+<key>NSHighResolutionCapable</key><true/>
+<key>NSPrincipalClass</key><string>NSApplication</string>
+<key>SUFeedURL</key><string>https://github.com/matguitarist/SMLauncherPlus/releases/latest/download/appcast.xml</string>
+<key>SUPublicEDKey</key><string>mTYq4vuj6f3AGPAp9TuGb3BFNjELoqpmZO3ArkswhdU=</string>
+<key>SUEnableInstallerLauncherService</key><false/>
+<key>CFBundleDevelopmentRegion</key><string>en</string>
+<key>CFBundleLocalizations</key><array><string>en</string><string>fr</string></array>
+</dict></plist>

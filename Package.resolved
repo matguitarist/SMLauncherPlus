@@ -1,0 +1,24 @@
+{
+  "originHash" : "f95abbc861a1c755ca3c334ebe9554578b5ad3bfe2369dbc9717d1fb504623b6",
+  "pins" : [
+    {
+      "identity" : "logkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/matguitarist/LogKit",
+      "state" : {
+        "revision" : "0f7ee59ae05dc81eed6bef56b4d910fd8b83e97f",
+        "version" : "0.6.0"
+      }
+    },
+    {
+      "identity" : "sparkle",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/sparkle-project/Sparkle",
+      "state" : {
+        "revision" : "ab7d71291238df6e0492143b120c9b696a35f603",
+        "version" : "2.10.1"
+      }
+    }
+  ],
+  "version" : 3
+}
