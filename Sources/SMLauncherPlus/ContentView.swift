@@ -74,31 +74,97 @@ struct PlayPage: View {
     }
 }
 
-/// An installed profile. The Play button and the game's log arrive with S-004 and S-005.
+/// An installed profile: name, version, last played, and Play (S-004).
 struct ProfileSummary: View {
+    @Environment(AppModel.self) private var model
     let profile: Profile
 
     var body: some View {
+        @Bindable var model = model
         VStack(spacing: Space.xxl) {
             VStack(spacing: Space.sm) {
                 Text(profile.name)
                     .font(.largeTitle.bold())
                     .accessibilityAddTraits(.isHeader)
-                Text("SuperMetroidRecomp \(profile.gameVersion), installed \(profile.installedAt.formatted(date: .abbreviated, time: .omitted))")
+                Text("SuperMetroidRecomp \(profile.gameVersion)")
                     .foregroundStyle(.secondary)
             }
+            playControls
             VStack(spacing: Space.sm) {
-                Button("Play") {}
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.extraLarge)
-                    .disabled(true)
-                    .help("Playing comes in the next build.")
+                Text(PlayStats.summary(lastPlayed: profile.lastPlayedAt, playTime: profile.playTime))
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                if let failure = model.playFailure, !model.isPlaying {
+                    Label(failure.message, systemImage: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.orange)
+                        .multilineTextAlignment(.center)
+                    if failure.needsROM {
+                        Button("Choose…") { model.forceWelcome = true; model.showChooser = true }
+                    }
+                }
                 Button("Show in Finder") { NSWorkspace.shared.activateFileViewerSelecting([profile.gameFolder]) }
                     .buttonStyle(.borderless)
             }
         }
         .padding(Space.section)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .confirmationDialog("Stop the game?", isPresented: $model.confirmStop) {
+            Button("Stop", role: .destructive) { model.stopGame() }
+            Button("Keep Playing", role: .cancel) {}
+        } message: {
+            Text("Unsaved progress since your last save station is lost.")
+        }
+        .onChange(of: model.playFailure) { _, failure in
+            if let failure { AccessibilityNotification.Announcement(failure.message).post() }
+        }
+    }
+
+    @ViewBuilder var playControls: some View {
+        if let startedAt = model.playStartedAt {
+            VStack(spacing: Space.sm) {
+                HStack(spacing: Space.md) {
+                    Button("Playing…", systemImage: "gamecontroller.fill") {}
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.extraLarge)
+                        .disabled(true)
+                    Button("Stop") { model.confirmStop = true }
+                        .controlSize(.extraLarge)
+                        .help("Stop the game (⌘.)")
+                }
+                TimelineView(.periodic(from: startedAt, by: 1)) { context in
+                    Text(PlayStats.clock(context.date.timeIntervalSince(startedAt)))
+                        .font(.title3.monospacedDigit())
+                        .foregroundStyle(.secondary)
+                        .accessibilityLabel(Text("Playing for \(PlayStats.playTime(context.date.timeIntervalSince(startedAt)))"))
+                }
+            }
+        } else {
+            Button("Play", systemImage: "play.fill") { model.play() }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.extraLarge)
+                .keyboardShortcut(.defaultAction)
+                .help("Start Super Metroid (⌘R)")
+        }
+    }
+}
+
+/// "Last played 1 hour ago · 2 hr, 14 min in total". Ported from AM2R Launcher Plus.
+enum PlayStats {
+    static func summary(lastPlayed: Date?, playTime: Double) -> String {
+        guard let lastPlayed else { return String(localized: "Never played") }
+        let when = lastPlayed.formatted(.relative(presentation: .named).locale(.app))
+        return String(localized: "Last played \(when) · \(Self.playTime(playTime)) in total")
+    }
+
+    /// "2 hr, 14 min", "less than a minute"
+    static func playTime(_ seconds: Double) -> String {
+        seconds < 60 ? String(localized: "less than a minute")
+            : Duration.seconds(seconds).formatted(.units(allowed: [.hours, .minutes], width: .abbreviated).locale(.app))
+    }
+
+    /// "0:12:34" for the running timer.
+    static func clock(_ seconds: Double) -> String {
+        Duration.seconds(max(0, seconds)).formatted(.time(pattern: .hourMinuteSecond))
     }
 }
 
@@ -128,6 +194,8 @@ enum SeedData {
         if model.currentProfile == nil {
             let profile = Profile(name: "Super Metroid", gameVersion: "0.4.6")
             profile.installedAt = Date(timeIntervalSince1970: 1_795_100_000)
+            profile.lastPlayedAt = Date.now.addingTimeInterval(-2 * 3600)
+            profile.playTime = 8040
             model.context.insert(profile)
             try? model.context.save()
         }

@@ -271,6 +271,16 @@
         }
       }
     },
+    "Game": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeu"
+          }
+        }
+      }
+    },
     "General": {
       "localizations": {
         "fr": {
@@ -351,12 +361,32 @@
         }
       }
     },
+    "Keep Playing": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuer à jouer"
+          }
+        }
+      }
+    },
     "Language": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Langue"
+          }
+        }
+      }
+    },
+    "Last played %@ · %@ in total": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Joué %@ · %@ au total"
           }
         }
       }
@@ -391,6 +421,16 @@
         }
       }
     },
+    "Never played": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jamais joué"
+          }
+        }
+      }
+    },
     "No Activity Yet": {
       "localizations": {
         "fr": {
@@ -421,12 +461,22 @@
         }
       }
     },
-    "Playing comes in the next build.": {
+    "Playing for %@": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Jouer arrive dans la prochaine version."
+            "value": "En jeu depuis %@"
+          }
+        }
+      }
+    },
+    "Playing…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En jeu…"
           }
         }
       }
@@ -511,6 +561,46 @@
         }
       }
     },
+    "Start Super Metroid (⌘R)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lancer Super Metroid (⌘R)"
+          }
+        }
+      }
+    },
+    "Stop": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrêter"
+          }
+        }
+      }
+    },
+    "Stop the game (⌘.)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrêter le jeu (⌘.)"
+          }
+        }
+      }
+    },
+    "Stop the game?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrêter le jeu ?"
+          }
+        }
+      }
+    },
     "Super Metroid": {
       "localizations": {
         "fr": {
@@ -521,12 +611,12 @@
         }
       }
     },
-    "SuperMetroidRecomp %@, installed %@": {
+    "SuperMetroidRecomp %@": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "SuperMetroidRecomp %@, installé le %@"
+            "value": "SuperMetroidRecomp %@"
           }
         }
       }
@@ -597,6 +687,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Les fichiers n’ont pas pu être mis en place. Le disque manque peut-être d’espace."
+          }
+        }
+      }
+    },
+    "The game files of this profile are missing. Install the game again.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les fichiers du jeu de ce profil sont introuvables. Installez le jeu de nouveau."
           }
         }
       }
@@ -721,6 +821,16 @@
         }
       }
     },
+    "Unable to prepare your ROM for the game. There may not be enough space on the disk.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de préparer votre ROM pour le jeu. Le disque manque peut-être d’espace."
+          }
+        }
+      }
+    },
     "Unable to reach GitHub. Check your connection, then try again.": {
       "localizations": {
         "fr": {
@@ -737,6 +847,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Impossible de lire ce fichier. Il est peut-être endommagé."
+          }
+        }
+      }
+    },
+    "Unable to start the game: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de lancer le jeu : %@"
+          }
+        }
+      }
+    },
+    "Unsaved progress since your last save station is lost.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La progression depuis votre dernière station de sauvegarde sera perdue."
           }
         }
       }
@@ -801,12 +931,42 @@
         }
       }
     },
+    "Your ROM has changed since it was checked. Choose it again.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre ROM a changé depuis sa vérification. Choisissez-la de nouveau."
+          }
+        }
+      }
+    },
+    "Your ROM moved. Choose it again.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre ROM a été déplacée. Choisissez-la de nouveau."
+          }
+        }
+      }
+    },
     "Your ROM stays where it is. Nothing is uploaded.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Votre ROM reste où elle est. Rien n’est envoyé en ligne."
+          }
+        }
+      }
+    },
+    "less than a minute": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "moins d’une minute"
           }
         }
       }

@@ -49,3 +49,6 @@ belongs to AM2R out: GameMaker, data.win, VCDiff/xdelta, Rosetta, Butterscotch, 
 - `APP_SNAPSHOT_MIN=1 tools/snap.sh` shoots the window at its smallest size.
 - Never test against the real database, `~/Library/Application Support/SMLauncherPlus/SMLauncherPlus.store` (SwiftData, models in `Models.swift`, like AM2R Launcher Plus).
 - Never copy, ship or download the ROM or any Nintendo art. The player's ROM is read where it is.
+  One exception, the owner's choice (2026-11-19): the game can only read a plain .sfc, so a zipped or
+  headered ROM is unpacked at Play into a private temp folder (mode 700) and deleted when the game
+  quits; leftovers are removed at the next launch. A plain .sfc or .smc is always passed in place.

@@ -38,6 +38,14 @@ struct SMLauncherPlusApp: App {
                     .keyboardShortcut("o")
                     .disabled(model.isCheckingROM)
             }
+            CommandMenu("Game") {
+                Button("Play") { model.sidebar = .play; model.play() }
+                    .keyboardShortcut("r")
+                    .disabled(model.isPlaying || model.install != nil || model.currentProfile == nil)
+                Button("Stop") { model.sidebar = .play; model.confirmStop = true }
+                    .keyboardShortcut(".")
+                    .disabled(!model.isPlaying)
+            }
             CommandGroup(after: .appInfo) {
                 Button("Check for Updates…") { Updater.shared.checkForUpdates() }
                     .disabled(!Updater.shared.isAvailable)
@@ -111,6 +119,14 @@ final class AppModel {
     }
 
     /// S-002: the install in progress, shown in place of the welcome page.
+    /// S-004: the game while it runs.
+    var game: GameRunner? { didSet { playStartedAt = game?.startedAt } }
+    /// When the running game started; the Play page shows Playing… and the timer while it's set.
+    var playStartedAt: Date?
+    /// Why Play didn't start, shown under the button.
+    var playFailure: GameRunner.StartError?
+    var confirmStop = false
+
     var install: InstallState?
     var installTask: Task<Void, Never>?
 
@@ -156,6 +172,8 @@ final class AppModel {
     func load() {
         let profiles = (try? context.fetchCount(FetchDescriptor<Profile>())) ?? 0
         log.post(.info, "Opened the database (\(profiles) profiles)", source: "App")
+        // A temporary ROM copy left by a crash or a forced quit.
+        GameLaunch.removeLeftoverROMs(in: DataFolder.runROM)
     }
 }
 

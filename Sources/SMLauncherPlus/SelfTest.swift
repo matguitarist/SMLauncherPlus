@@ -107,6 +107,11 @@ enum SelfTest {
                 await Self.waitForInstall(model)
                 check("a verified download is reused",
                       model.log.entries.contains { $0.message.hasPrefix("Using the downloaded") })
+                if model.rom != nil, ProcessInfo.processInfo.environment["SM_ROM_PATH"] != nil {
+                    await Self.checkPlay(model)
+                } else {
+                    print("SKIP Play: needs SM_ROM_PATH")
+                }
             } else {
                 print("SKIP the real download: set APP_SELFTEST_INSTALL=1 to download the game from GitHub")
             }
@@ -134,6 +139,53 @@ enum SelfTest {
             print(failures == 0 ? "SELFTEST PASS \(count) checks" : "SELFTEST FAIL \(failures) of \(count) checks")
             finish(code: failures == 0 ? 0 : 1)
         }
+    }
+
+    /// S-004: Play starts the game straight to the title screen, then Stop records the time and removes the ROM copy.
+    /// The game runs headless and dumps each frame's RAM; Super Metroid's game state ($0998) is 1 on the title screen.
+    private static func checkPlay(_ model: AppModel) async {
+        guard let profile = model.currentProfile else { return check("Play has a profile", false, "") }
+        let frames = FileManager.default.temporaryDirectory.appending(path: "SMLauncherPlus-frames-\(UUID())", directoryHint: .isDirectory)
+        try? FileManager.default.createDirectory(at: frames, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: frames) }
+        let before = profile.playTime
+        model.play(extraArguments: ["--framedump", frames.path], environment: ["SDL_VIDEODRIVER": "dummy", "SDL_AUDIODRIVER": "dummy"])
+        check("Play starts the game", model.isPlaying, model.playFailure?.message ?? "")
+        guard let game = model.game else { return }
+        let copies = Self.files(in: DataFolder.runROM).filter { $0.hasSuffix(".sfc") }
+        let zipped = model.rom?.kindRaw == ROMCheck.Kind.zip.rawValue
+        check("a zipped ROM is unpacked privately for the run, a plain one is passed in place",
+              zipped ? copies.count == 1 : copies.isEmpty, "\(copies)")
+        var title = false
+        let deadline = Date.now.addingTimeInterval(30)
+        while !title, game.isRunning, Date.now < deadline {
+            try? await Task.sleep(for: .milliseconds(250))
+            title = Self.reachedTitle(in: frames)
+        }
+        check("the game boots past its own launcher to the title screen", title,
+              (try? String(contentsOf: game.log, encoding: .utf8).suffix(400)).map(String.init) ?? "")
+        let arguments = (try? String(contentsOf: game.log, encoding: .utf8)) ?? ""
+        check("the game read the profile's config.ini", arguments.contains("config parsed"))
+        model.stopGame()
+        let stopDeadline = Date.now.addingTimeInterval(10)
+        while model.isPlaying, Date.now < stopDeadline { try? await Task.sleep(for: .milliseconds(100)) }
+        check("Stop ends the game and Play comes back", !model.isPlaying)
+        check("play time and last played are saved", profile.playTime > before && profile.lastPlayedAt != nil,
+              "\(profile.playTime)")
+        check("the temporary ROM copy is deleted when the game quits",
+              Self.files(in: DataFolder.runROM).isEmpty, "\(Self.files(in: DataFolder.runROM))")
+    }
+
+    /// True once a dumped frame shows game state 1 (title screen) at $0998.
+    private static func reachedTitle(in frames: URL) -> Bool {
+        let names = ((try? FileManager.default.contentsOfDirectory(atPath: frames.path)) ?? []).filter { $0.hasSuffix("_wram.bin") }.sorted()
+        // Only the newest few; earlier ones are deleted to keep the dump small.
+        for name in names.dropLast(3) { try? FileManager.default.removeItem(at: frames.appending(path: name)) }
+        for name in names.suffix(3).reversed() {
+            guard let data = try? Data(contentsOf: frames.appending(path: name)), data.count > 0x999 else { continue }
+            if data[0x998] == 1, data[0x999] == 0 { return true }
+        }
+        return false
     }
 
     /// Runs the game with SDL's dummy video and audio, for at most 20 seconds.

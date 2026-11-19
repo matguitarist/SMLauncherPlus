@@ -17,6 +17,16 @@ nonisolated enum DataFolder {
 
     /// One folder per profile: `<id>/game/` and `<id>/profile.json`.
     static var profiles: URL { url.appending(path: "Profiles", directoryHint: .isDirectory) }
+
+    /// Where a zipped or headered ROM is unpacked for one run (S-004), private to this user (mode 700).
+    /// In ~/Library/Caches, never next to the profiles or the player's ROM; emptied at launch.
+    static var runROM: URL {
+        let folder = Store.isOverridden
+            ? url.appending(path: "RunROM", directoryHint: .isDirectory)
+            : URL.cachesDirectory.appending(path: "SMLauncherPlus/RunROM", directoryHint: .isDirectory)
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
+        return folder
+    }
 }
 
 /// Progress of installing the game: download and check (S-002), then set up a profile (S-003).

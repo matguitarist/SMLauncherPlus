@@ -10,6 +10,7 @@ import SwiftUI
 /// Each PNG gets a <page>-<mode>-layout.json with the grid probes (tools/check-layout.swift).
 /// APP_SNAPSHOT_PAGES=play,log limits the pages. Add "settings" to include Settings, and
 /// "install-progress", "install-error", "install-setup-error", "install-ready" for the install page (S-002, S-003), and
+/// "play-running", "play-rom-missing" for the Play page (S-004), and
 /// "welcome", "welcome-checking", "welcome-error" (yellow), "welcome-wrong" (red), "welcome-ready" for the welcome page's states (S-001).
 /// Add APP_ACCENT=<id> to see the pages in another accent.
 /// Add APP_SNAPSHOT_MIN=1 to shrink the main window to its smallest size first.
@@ -95,6 +96,19 @@ enum Snapshot {
                 }
             }
             model.install = nil
+            // Play states (S-004): the game isn't started, only what the page shows.
+            for name in ["play-running", "play-rom-missing"] where only?.contains(name) ?? true {
+                model.sidebar = .play
+                if name == "play-running" { model.playStartedAt = Date.now.addingTimeInterval(-754) }
+                else { model.playFailure = .rom(.missing) }
+                for mode in ["light", "dark"] {
+                    NSApp.appearance = NSAppearance(named: mode == "light" ? .aqua : .darkAqua)
+                    try? await Task.sleep(for: .seconds(0.8))
+                    capture(to: "\(dir)/\(name)-\(mode).png")
+                }
+                model.playStartedAt = nil
+                model.playFailure = nil
+            }
             if only == nil || only?.contains("settings") == true {
                 let main = NSApp.windows.first { $0.canBecomeMain && !$0.isSheet }
                 openSettings()

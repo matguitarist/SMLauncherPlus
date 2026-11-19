@@ -84,7 +84,7 @@ UX:
 - States: running; ROM missing: "Your ROM moved. Choose it again." with Choose….
 - Words: "Play", "Playing…", "Stop".
 - Access: Play is the default button; ⌘R also plays.
-Status: todo
+Status: done
 
 ### S-005 See why the game stopped
 As the player, when the game quits with an error SM Launcher Plus tells me and shows the log.
