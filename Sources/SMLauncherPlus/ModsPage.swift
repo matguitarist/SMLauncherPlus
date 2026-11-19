@@ -1,6 +1,7 @@
 import SMLauncherPlusKit
 import SwiftData
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// S-020: the game's own mod packages, one switch per feature, grouped as the game groups them,
 /// with each feature's options under it while it's on. Saved straight to the profile's
@@ -40,8 +41,19 @@ final class ModsModel {
 
     init(game: URL) {
         root = ModCatalog.root(game: game)
+        reload()
+    }
+
+    /// Reads the packages and the choices again, after an install or a removal.
+    func reload() {
         packages = ModCatalog.packages(in: root)
         state = ModState.read(from: root)
+    }
+
+    /// The packages the player installed in `profile`, by name.
+    func installed(in profile: Profile) -> [ModPackage] {
+        let ids = Set(profile.installedMods.map { String($0.split(separator: "/", maxSplits: 1)[0]) })
+        return packages.filter { ids.contains($0.id) }
     }
 
     /// Features by group, groups in the order they first appear.
@@ -91,11 +103,101 @@ final class ModsModel {
     }
 }
 
+/// What the Mods page says after an install or a removal (S-021).
+enum ModMessage: Equatable {
+    case installed(name: String, version: String)
+    case removed(name: String)
+    case failed(String)
+
+    var text: String {
+        switch self {
+        case .installed(let name, let version):
+            String(localized: "Installed “\(name)” \(version). Its features are below, off until you turn them on.")
+        case .removed(let name): String(localized: "Removed “\(name)”.")
+        case .failed(let reason): reason
+        }
+    }
+
+    var isFailure: Bool { if case .failed = self { true } else { false } }
+}
+
+extension ModArchive.Failure {
+    /// Why a .snesmod wasn't installed, in the player's words.
+    var message: String {
+        switch self {
+        case .notSnesmod: String(localized: "Only .snesmod files can be installed here.")
+        case .damaged: String(localized: "This file is damaged or isn't a mod package.")
+        case .encrypted: String(localized: "This package is password-protected. The game can't read encrypted packages.")
+        case .unsupportedCompression:
+            String(localized: "This package uses a compression the game can't read. Its author can zip it again with standard compression.")
+        case .unsafePath(let path): String(localized: "This package has an unsafe file path (\(path)), so it wasn't installed.")
+        case .tooManyFiles: String(localized: "This package has more than 4096 files, the game's limit.")
+        case .tooLarge: String(localized: "This package is larger than 256 MB unpacked, the game's limit.")
+        case .checksumFailed(let file): String(localized: "The file \(file) in this package is damaged. Download the package again.")
+        case .noManifest: String(localized: "This isn't a mod package: it has no manifest.toml at its top level.")
+        case .invalidManifest: String(localized: "This package's manifest.toml is incomplete or invalid, so the game can't load it.")
+        case .wrongGame(let name, let games):
+            String(localized: "“\(name)” is made for another game (\(games.formatted(.list(type: .and)))), not Super Metroid.")
+        case .wrongROM(let name): String(localized: "“\(name)” is made for another version of Super Metroid than the one the game plays.")
+        case .alreadyInstalled(let name, let version): String(localized: "“\(name)” \(version) is already installed.")
+        case .writeFailed(let reason): String(localized: "Unable to install the package: \(reason)")
+        }
+    }
+}
+
+extension AppModel {
+    /// Installs a .snesmod into `profile`'s game (S-021) and remembers it as the player's.
+    func installMod(_ archive: URL, in profile: Profile, mods: ModsModel) async {
+        guard game == nil else { return }
+        let root = mods.root
+        let result = await Task.detached(priority: .userInitiated) { () -> Result<ModPackage, ModArchive.Failure> in
+            let scoped = archive.startAccessingSecurityScopedResource()
+            defer { if scoped { archive.stopAccessingSecurityScopedResource() } }
+            return Result { () throws(ModArchive.Failure) in try ModArchive.install(archive, into: root) }
+        }.value
+        switch result {
+        case .success(let package):
+            profile.installedMods.append("\(package.id)/\(package.version)")
+            try? context.save()
+            mods.reload()
+            log.post(.info, "Installed \(package.id) \(package.version) from \(archive.lastPathComponent)", source: "Mods")
+            modMessage = .installed(name: package.name, version: package.version)
+        case .failure(let failure):
+            log.post(.warning, "Refused \(archive.lastPathComponent): \(failure)", source: "Mods")
+            modMessage = .failed(failure.message)
+        }
+        if let modMessage { AccessibilityNotification.Announcement(modMessage.text).post() }
+    }
+
+    /// Removes a package the player installed: every version they added, and its choices in state.toml.
+    func removeMod(_ package: ModPackage, from profile: Profile, mods: ModsModel) {
+        let mine = profile.installedMods.filter { $0.hasPrefix(package.id + "/") }
+        do {
+            for entry in mine {
+                try ModArchive.remove(id: package.id, version: String(entry.dropFirst(package.id.count + 1)), from: mods.root)
+            }
+            profile.installedMods.removeAll { mine.contains($0) }
+            try? context.save()
+            log.post(.info, "Removed \(package.id) (\(mine.joined(separator: ", ")))", source: "Mods")
+            modMessage = .removed(name: package.name)
+        } catch {
+            log.post(.error, "Unable to remove \(package.id): \(error)", source: "Mods")
+            modMessage = .failed(String(localized: "Unable to remove “\(package.name)”. Quit the game and try again."))
+        }
+        mods.reload()
+    }
+}
+
 private struct ModList: View {
     @Environment(AppModel.self) private var model
     let profile: Profile
     @State private var mods: ModsModel
     @State private var search = ""
+    @State private var choosing = false
+    @State private var dropTargeted = false
+    @State private var removing: ModPackage?
+
+    static let snesmod = UTType(filenameExtension: "snesmod", conformingTo: .zip) ?? .zip
 
     init(profile: Profile) {
         self.profile = profile
@@ -116,6 +218,27 @@ private struct ModList: View {
                     Label(error, systemImage: "exclamationmark.triangle.fill")
                         .foregroundStyle(.orange)
                 }
+                if let message = model.modMessage {
+                    if message.isFailure {
+                        Label(message.text, systemImage: "exclamationmark.triangle.fill")
+                            .symbolRenderingMode(.multicolor)
+                    } else {
+                        Label(message.text, systemImage: "checkmark.circle.fill")
+                            .symbolRenderingMode(.multicolor)
+                    }
+                }
+            }
+            Section {
+                let installed = mods.installed(in: profile)
+                if installed.isEmpty {
+                    Text("Drop a .snesmod file here, or choose Install Mod…, to add a package made for this game.")
+                        .foregroundStyle(.secondary)
+                }
+                ForEach(installed) { package in
+                    InstalledPackageRow(package: package) { removing = package }
+                }
+            } header: {
+                Text("Your Packages")
             }
             if mods.packages.isEmpty {
                 Section {
@@ -134,11 +257,68 @@ private struct ModList: View {
         .formStyle(.grouped)
         .disabled(model.isPlaying)
         .searchable(text: $search, prompt: Text("Search Mods"))
+        .toolbar {
+            Button("Install Mod…", systemImage: "plus") { choosing = true }
+                .disabled(model.isPlaying)
+                .help(model.isPlaying ? String(localized: "Quit the game to install a mod") : String(localized: "Install a .snesmod package into \(profile.name)"))
+        }
+        .fileImporter(isPresented: $choosing, allowedContentTypes: [Self.snesmod]) { result in
+            guard case .success(let url) = result else { return }
+            Task { await model.installMod(url, in: profile, mods: mods) }
+        }
+        .dropDestination(for: URL.self) { urls, _ in
+            guard !model.isPlaying, let url = urls.first else { return false }
+            Task { await model.installMod(url, in: profile, mods: mods) }
+            return true
+        } isTargeted: { dropTargeted = $0 }
+        .overlay {
+            if dropTargeted {
+                RoundedRectangle(cornerRadius: Radius.card)
+                    .strokeBorder(Palette.accent, lineWidth: Space.xs)
+                    .padding(Space.sm)
+                    .allowsHitTesting(false)
+            }
+        }
+        .onDisappear { model.modMessage = nil }
+        .confirmationDialog(Text("Remove “\(removing?.name ?? "")”?"), isPresented: Binding(get: { removing != nil }, set: { if !$0 { removing = nil } })) {
+            Button("Remove", role: .destructive) {
+                if let removing { model.removeMod(removing, from: profile, mods: mods) }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Its features are turned off and its files deleted. Your saves are kept. You can install it again from its .snesmod file.")
+        }
         .overlay {
             if !search.isEmpty, mods.groups(matching: search).isEmpty {
                 ContentUnavailableView.search(text: search)
             }
         }
+    }
+}
+
+/// A package the player installed: name, version and author, and Remove (S-021).
+private struct InstalledPackageRow: View {
+    let package: ModPackage
+    let remove: () -> Void
+
+    var body: some View {
+        HStack(spacing: Space.md) {
+            VStack(alignment: .leading, spacing: Space.xs) {
+                Text(package.name)
+                Text(details)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            Button("Remove…", action: remove)
+                .help(String(localized: "Remove \(package.name) and its choices"))
+        }
+    }
+
+    private var details: String {
+        package.author.isEmpty
+            ? String(localized: "Version \(package.version)")
+            : String(localized: "Version \(package.version), by \(package.author)")
     }
 }
 

@@ -601,6 +601,16 @@
         }
       }
     },
+    "Drop a .snesmod file here, or choose Install Mod…, to add a package made for this game.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déposez un fichier .snesmod ici, ou choisissez Installer un mod…, pour ajouter un paquet fait pour ce jeu."
+          }
+        }
+      }
+    },
     "Drop your ROM here, or choose it.": {
       "localizations": {
         "fr": {
@@ -871,6 +881,26 @@
         }
       }
     },
+    "Install Mod…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installer un mod…"
+          }
+        }
+      }
+    },
+    "Install a .snesmod package into %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installer un paquet .snesmod dans %@"
+          }
+        }
+      }
+    },
     "Install the game on the Play page, then choose its mods here.": {
       "localizations": {
         "fr": {
@@ -911,6 +941,16 @@
         }
       }
     },
+    "Installed “%@” %@. Its features are below, off until you turn them on.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "« %1$@ » %2$@ est installé. Ses fonctions sont plus bas, désactivées jusqu’à ce que vous les activiez."
+          }
+        }
+      }
+    },
     "Installing Super Metroid": {
       "localizations": {
         "fr": {
@@ -947,6 +987,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Il s’est arrêté avant d’écrire quoi que ce soit."
+          }
+        }
+      }
+    },
+    "Its features are turned off and its files deleted. Your saves are kept. You can install it again from its .snesmod file.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ses fonctions sont désactivées et ses fichiers supprimés. Vos sauvegardes sont conservées. Vous pourrez le réinstaller à partir de son fichier .snesmod."
           }
         }
       }
@@ -1351,6 +1401,16 @@
         }
       }
     },
+    "Only .snesmod files can be installed here.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seuls les fichiers .snesmod peuvent être installés ici."
+          }
+        }
+      }
+    },
     "Other (%@)": {
       "localizations": {
         "fr": {
@@ -1491,6 +1551,16 @@
         }
       }
     },
+    "Quit the game to install a mod": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quittez le jeu pour installer un mod"
+          }
+        }
+      }
+    },
     "Quit the game to move the data folder.": {
       "localizations": {
         "fr": {
@@ -1507,6 +1577,56 @@
           "stringUnit": {
             "state": "translated",
             "value": "Lire ce que le jeu a écrit avant de s’arrêter"
+          }
+        }
+      }
+    },
+    "Remove": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer"
+          }
+        }
+      }
+    },
+    "Remove %@ and its choices": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer %@ et vos choix pour ce paquet"
+          }
+        }
+      }
+    },
+    "Remove “%@”?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer « %@ » ?"
+          }
+        }
+      }
+    },
+    "Removed “%@”.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "« %@ » a été supprimé."
+          }
+        }
+      }
+    },
+    "Remove…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer…"
           }
         }
       }
@@ -2101,6 +2221,16 @@
         }
       }
     },
+    "The file %@ in this package is damaged. Download the package again.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le fichier %@ de ce paquet est endommagé. Téléchargez le paquet de nouveau."
+          }
+        }
+      }
+    },
     "The files couldn't be put in place. There may not be enough space on the disk.": {
       "localizations": {
         "fr": {
@@ -2221,6 +2351,16 @@
         }
       }
     },
+    "This file is damaged or isn't a mod package.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce fichier est endommagé ou n’est pas un paquet de mod."
+          }
+        }
+      }
+    },
     "This file is the wrong size for a SNES ROM.": {
       "localizations": {
         "fr": {
@@ -2247,6 +2387,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ce n’est pas une ROM SNES. Choisissez un fichier .sfc, .smc ou .zip."
+          }
+        }
+      }
+    },
+    "This isn't a mod package: it has no manifest.toml at its top level.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce n’est pas un paquet de mod : il n’a pas de manifest.toml à sa racine."
+          }
+        }
+      }
+    },
+    "This package has an unsafe file path (%@), so it wasn't installed.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce paquet contient un chemin de fichier dangereux (%@). Il n’a donc pas été installé."
+          }
+        }
+      }
+    },
+    "This package has more than 4096 files, the game's limit.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce paquet contient plus de 4 096 fichiers, la limite du jeu."
+          }
+        }
+      }
+    },
+    "This package is larger than 256 MB unpacked, the game's limit.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une fois décompressé, ce paquet dépasse 256 Mo, la limite du jeu."
+          }
+        }
+      }
+    },
+    "This package is password-protected. The game can't read encrypted packages.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce paquet est protégé par un mot de passe. Le jeu ne peut pas lire les paquets chiffrés."
+          }
+        }
+      }
+    },
+    "This package uses a compression the game can't read. Its author can zip it again with standard compression.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce paquet utilise une compression que le jeu ne sait pas lire. Son auteur peut le recompresser avec la compression standard."
+          }
+        }
+      }
+    },
+    "This package's manifest.toml is incomplete or invalid, so the game can't load it.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le manifest.toml de ce paquet est incomplet ou invalide. Le jeu ne peut donc pas le charger."
           }
         }
       }
@@ -2311,6 +2521,16 @@
         }
       }
     },
+    "Unable to install the package: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d’installer le paquet : %@"
+          }
+        }
+      }
+    },
     "Unable to install: %@": {
       "localizations": {
         "fr": {
@@ -2357,6 +2577,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Impossible de lire ce fichier. Il est peut-être endommagé."
+          }
+        }
+      }
+    },
+    "Unable to remove “%@”. Quit the game and try again.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de supprimer « %@ ». Quittez le jeu et réessayez."
           }
         }
       }
@@ -2501,6 +2731,16 @@
         }
       }
     },
+    "Version %@, by %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version %1$@, par %2$@"
+          }
+        }
+      }
+    },
     "Volume": {
       "localizations": {
         "fr": {
@@ -2571,6 +2811,16 @@
         }
       }
     },
+    "Your Packages": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vos paquets"
+          }
+        }
+      }
+    },
     "Your ROM can't be found. The game needs it every time it starts; if it was moved or deleted, choose it again.": {
       "localizations": {
         "fr": {
@@ -2617,6 +2867,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cadriciel snesrecomp"
+          }
+        }
+      }
+    },
+    "“%@” %@ is already installed.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "« %1$@ » %2$@ est déjà installé."
+          }
+        }
+      }
+    },
+    "“%@” is made for another game (%@), not Super Metroid.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "« %1$@ » est fait pour un autre jeu (%2$@), pas pour Super Metroid."
+          }
+        }
+      }
+    },
+    "“%@” is made for another version of Super Metroid than the one the game plays.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "« %@ » est fait pour une autre version de Super Metroid que celle du jeu."
           }
         }
       }

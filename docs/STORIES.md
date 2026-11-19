@@ -173,7 +173,7 @@ Acceptance:
   4096 files and 256 MiB.
 - [unit] A package whose target `game_id` isn't `supermetroid-jpn` is refused with the reason.
 - [unit] Removing a package deletes its folder and its entries in `state.toml`.
-Status: todo
+Status: done
 
 ### S-022 Pick files a mod asks for
 As the player, a feature that declares a resource (like the Zero Mission map art) shows a file picker.

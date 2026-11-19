@@ -12,6 +12,10 @@ public struct ModPackage: Identifiable, Equatable, Sendable {
     public var description: String
     public var gameIDs: [String]
     public var features: [ModFeature]
+    /// `[[target]]` ROM hashes, in the same order as `gameIDs`.
+    public var targetROMs: [String] = []
+    /// `format_version`; the game reads 1 only.
+    public var formatVersion = 0
 }
 
 public struct ModFeature: Identifiable, Equatable, Sendable {
@@ -106,7 +110,7 @@ public enum ModCatalog {
             if line.isEmpty { continue }
             if line.hasPrefix("[") {
                 switch line {
-                case "[[target]]": section = .target; package.gameIDs.append("")
+                case "[[target]]": section = .target; package.gameIDs.append(""); package.targetROMs.append("")
                 case "[[feature]]":
                     section = .feature
                     package.features.append(ModFeature(id: "", packageID: "", name: "", author: "", description: "", group: "General",
@@ -131,10 +135,12 @@ public enum ModCatalog {
                 case "name": package.name = value.string ?? ""
                 case "author": package.author = value.string ?? ""
                 case "description": package.description = value.string ?? ""
+                case "format_version": package.formatVersion = value.int ?? 0
                 default: break
                 }
             case .target:
                 if key == "game_id", let id = value.string { package.gameIDs[package.gameIDs.count - 1] = id }
+                if key == "rom_sha256", let hash = value.string { package.targetROMs[package.targetROMs.count - 1] = hash.lowercased() }
             case .feature:
                 let i = package.features.count - 1
                 switch key {
@@ -179,7 +185,9 @@ public enum ModCatalog {
             }
         }
         guard !package.id.isEmpty, !package.version.isEmpty else { return nil }
-        package.gameIDs.removeAll { $0.isEmpty }
+        let targets = zip(package.gameIDs, package.targetROMs).filter { !$0.0.isEmpty }
+        package.gameIDs = targets.map(\.0)
+        package.targetROMs = targets.map(\.1)
         for i in package.features.indices {
             package.features[i].packageID = package.id
             let id = package.features[i].id

@@ -254,6 +254,10 @@ enum SeedData {
             try? model.context.save()
         }
         if let profile = model.currentProfile {
+            if profile.installedMods.isEmpty {
+                profile.installedMods = ["seed.better-hud/1.2.0"]
+                try? model.context.save()
+            }
             seedMods(in: profile.gameFolder)
             seedShaders(in: profile.gameFolder)
         }
@@ -339,6 +343,20 @@ enum SeedData {
             value = "3x"
             label = "3x"
             """),
+            ("seed.better-hud", """
+            format_version = 1
+            id = "seed.better-hud"
+            version = "1.2.0"
+            name = "Better HUD"
+            author = "Samus Fan Club"
+            [[target]]
+            game_id = "supermetroid-jpn"
+            [[feature]]
+            id = "clock"
+            name = "Real-time clock"
+            description = "Shows the time you've played this run in the corner of the HUD."
+            group = "HUD"
+            """),
             ("seed.combat", """
             format_version = 1
             id = "seed.combat"
@@ -376,7 +394,8 @@ enum SeedData {
             """),
         ]
         for (id, text) in packages {
-            let folder = root.appending(path: "packages/\(id)/1.0.0", directoryHint: .isDirectory)
+            let version = id == "seed.better-hud" ? "1.2.0" : "1.0.0"
+            let folder = root.appending(path: "packages/\(id)/\(version)", directoryHint: .isDirectory)
             try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
             try? text.write(to: folder.appending(path: "manifest.toml"), atomically: true, encoding: .utf8)
         }

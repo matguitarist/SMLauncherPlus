@@ -154,6 +154,7 @@ enum SelfTest {
                   links == [Credits.project, Credits.license, Credits.framework], "\(links)")
 
             await checkDataFolderMove(model: model)
+            await checkModInstall(model: model)
 
             print(failures == 0 ? "SELFTEST PASS \(count) checks" : "SELFTEST FAIL \(failures) of \(count) checks")
             finish(code: failures == 0 ? 0 : 1)
@@ -370,6 +371,68 @@ enum SelfTest {
         model.context.delete(profile)
         try? model.context.save()
         model.dataMoveError = nil
+    }
+
+    /// S-021: a .snesmod made with zip installs into a profile, shows as the player's, and is removed with its choices.
+    private static func checkModInstall(model: AppModel) async {
+        let fm = FileManager.default
+        let profile = Profile(name: "Mods", gameVersion: "0.4.6")
+        model.context.insert(profile)
+        try? model.context.save()
+        let mods = ModsModel(game: profile.gameFolder)
+        try? fm.createDirectory(at: mods.root.appending(path: "packages"), withIntermediateDirectories: true)
+        let work = URL(fileURLWithPath: "/tmp/SMLauncherPlus-self-snesmod-\(UUID().uuidString)", isDirectory: true)
+        defer { try? fm.removeItem(at: work) }
+        func pack(_ name: String, game: String) -> URL {
+            let source = work.appending(path: name, directoryHint: .isDirectory)
+            try? fm.createDirectory(at: source.appending(path: "art"), withIntermediateDirectories: true)
+            try? """
+            format_version = 1
+            id = "selftest.hud"
+            version = "1.0.0"
+            name = "Self-test HUD"
+            [[target]]
+            game_id = "\(game)"
+            rom_sha256 = "\(SupportedROM.sha256)"
+            [[feature]]
+            id = "clock"
+            name = "Clock"
+            group = "HUD"
+            """.write(to: source.appending(path: "manifest.toml"), atomically: true, encoding: .utf8)
+            try? Data(repeating: 1, count: 50_000).write(to: source.appending(path: "art/clock.bin"))
+            let archive = work.appending(path: "\(name).snesmod")
+            let zip = Process()
+            zip.executableURL = URL(fileURLWithPath: "/usr/bin/zip")
+            zip.arguments = ["-q", "-r", "-X", archive.path, "."]
+            zip.currentDirectoryURL = source
+            try? zip.run()
+            zip.waitUntilExit()
+            return archive
+        }
+        await model.installMod(pack("hud", game: ModCatalog.gameID), in: profile, mods: mods)
+        check("a .snesmod installs into the profile", mods.packages.contains { $0.id == "selftest.hud" }
+              && fm.fileExists(atPath: mods.root.appending(path: "packages/selftest.hud/1.0.0/art/clock.bin").path),
+              model.modMessage?.text ?? "no message")
+        check("it's listed as the player's package", mods.installed(in: profile).map(\.id) == ["selftest.hud"]
+              && model.modMessage == .installed(name: "Self-test HUD", version: "1.0.0"))
+        await model.installMod(pack("hud", game: ModCatalog.gameID), in: profile, mods: mods)
+        check("the same version again is refused", model.modMessage == .failed(ModArchive.Failure.alreadyInstalled(name: "Self-test HUD", version: "1.0.0").message))
+        await model.installMod(pack("other", game: "smw-usa"), in: profile, mods: mods)
+        check("a package for another game is refused with the reason",
+              model.modMessage?.text.contains("smw-usa") == true && model.modMessage?.isFailure == true, model.modMessage?.text ?? "")
+        if let feature = mods.packages.first(where: { $0.id == "selftest.hud" })?.features.first {
+            mods.setEnabled(true, feature) { _ in }
+        }
+        if let package = mods.packages.first(where: { $0.id == "selftest.hud" }) {
+            model.removeMod(package, from: profile, mods: mods)
+        }
+        let state = (try? String(contentsOf: mods.root.appending(path: "state.toml"), encoding: .utf8)) ?? ""
+        check("Remove deletes the package and its choices", !fm.fileExists(atPath: mods.root.appending(path: "packages/selftest.hud").path)
+              && !state.contains("selftest.hud") && profile.installedMods.isEmpty && model.modMessage == .removed(name: "Self-test HUD"), state)
+        model.modMessage = nil
+        try? fm.removeItem(at: profile.folder)
+        model.context.delete(profile)
+        try? model.context.save()
     }
 
     /// Every file under a folder, as paths relative to it.

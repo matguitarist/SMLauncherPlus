@@ -15,6 +15,9 @@ final class Profile {
     var playTime: Double = 0
     /// A stable id for folders and links.
     var uuid: UUID = UUID()
+    /// Packages the player installed from .snesmod files (S-021), as "id/version". The game's own
+    /// packages aren't listed: only these can be removed.
+    var installedMods: [String] = []
 
     init(name: String, gameVersion: String) {
         self.name = name

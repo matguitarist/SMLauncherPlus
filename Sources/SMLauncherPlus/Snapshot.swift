@@ -118,6 +118,20 @@ enum Snapshot {
                 }
                 model.lastGameFailure = nil
             }
+            // S-021: the Mods page after an install, and after a refused one.
+            for (name, message) in [("mods-install", ModMessage.installed(name: "Better HUD", version: "1.2.0")),
+                                    ("mods-install-error", ModMessage.failed(ModArchive.Failure.wrongGame(name: "Yoshi Tweaks", games: ["smw-usa"]).message))]
+            where only?.contains(name) ?? true {
+                model.sidebar = .mods
+                try? await Task.sleep(for: .seconds(0.5))
+                model.modMessage = message
+                for mode in ["light", "dark"] {
+                    NSApp.appearance = NSAppearance(named: mode == "light" ? .aqua : .darkAqua)
+                    try? await Task.sleep(for: .seconds(0.8))
+                    capture(to: "\(dir)/\(name)-\(mode).png")
+                }
+                model.modMessage = nil
+            }
             // Play states (S-004): the game isn't started, only what the page shows.
             for name in ["play-running", "play-rom-missing"] where only?.contains(name) ?? true {
                 model.sidebar = .play

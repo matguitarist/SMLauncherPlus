@@ -143,6 +143,9 @@ final class AppModel {
     /// Counts finished moves, so pages that hold a path into the data folder are rebuilt.
     var dataFolderMoves = 0
 
+    /// S-021: what the last .snesmod install or removal did, shown at the top of the Mods page.
+    var modMessage: ModMessage?
+
     var isCheckingROM: Bool {
         if case .checking = welcome { return true }
         return false
