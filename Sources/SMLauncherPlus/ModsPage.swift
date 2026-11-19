@@ -50,6 +50,43 @@ final class ModsModel {
         state = ModState.read(from: root)
     }
 
+    /// S-022: what each chosen file was found to be, by resource and path. Filled by `checkResource`.
+    private(set) var resourceStatus: [String: ModResource.Status] = [:]
+
+    private func statusKey(_ resource: ModResource, _ path: String) -> String {
+        "\(resource.normalizedSHA256)|\(resource.size)|\(resource.format)|\(path)"
+    }
+
+    func path(of resource: ModResource, in feature: ModFeature) -> String {
+        state.path(of: resource, in: feature, catalog: packages)
+    }
+
+    /// The last check of the resource's current file, or nil while it's being checked.
+    func status(of resource: ModResource, in feature: ModFeature) -> ModResource.Status? {
+        let path = path(of: resource, in: feature)
+        return path.isEmpty ? .notChosen : resourceStatus[statusKey(resource, path)]
+    }
+
+    /// Checks the chosen file off the main thread (an 8 MB ROM is hashed).
+    func checkResource(_ resource: ModResource, in feature: ModFeature) async {
+        let path = path(of: resource, in: feature)
+        let status = await Task.detached(priority: .userInitiated) { resource.status(of: path) }.value
+        resourceStatus[statusKey(resource, path)] = status
+    }
+
+    /// A feature can't be turned on while a required file is missing or wrong (the game would refuse to start it).
+    func isBlocked(_ feature: ModFeature) -> Bool {
+        feature.resources.contains { $0.required && !(status(of: $0, in: feature)?.isUsable(required: true) ?? false) }
+    }
+
+    /// Chooses or clears ("") the file for a resource. Clearing a required one turns its feature off.
+    func setPath(_ path: String, of resource: ModResource, in feature: ModFeature, log: (String) -> Void) {
+        var next = state
+        next.setPath(path, of: resource, in: feature)
+        if path.isEmpty, resource.required, next.isEnabled(feature) { next.setEnabled(false, feature, in: packages) }
+        if save(next) { log("\(feature.key) \(resource.id) = \(path.isEmpty ? "(none)" : path)") }
+    }
+
     /// The packages the player installed in `profile`, by name.
     func installed(in profile: Profile) -> [ModPackage] {
         let ids = Set(profile.installedMods.map { String($0.split(separator: "/", maxSplits: 1)[0]) })
@@ -329,6 +366,7 @@ private struct FeatureRow: View {
 
     var body: some View {
         let enabled = mods.state.isEnabled(feature)
+        let blocked = mods.isBlocked(feature)
         Toggle(isOn: Binding(get: { enabled }, set: { mods.setEnabled($0, feature, log: log) })) {
             VStack(alignment: .leading, spacing: Space.xs) {
                 HStack(spacing: Space.sm) {
@@ -346,6 +384,13 @@ private struct FeatureRow: View {
             }
         }
         .help(credit)
+        .disabled(blocked && !enabled)
+        if enabled || blocked {
+            ForEach(feature.resources) { resource in
+                ResourceRow(resource: resource, feature: feature, mods: mods)
+                    .padding(.leading, Space.xl)
+            }
+        }
         if enabled {
             ForEach(feature.options) { option in
                 OptionRow(option: option, feature: feature, mods: mods)
@@ -358,6 +403,89 @@ private struct FeatureRow: View {
         let package = mods.package(of: feature)?.name ?? feature.packageID
         let author = feature.author.isEmpty ? mods.package(of: feature)?.author ?? "" : feature.author
         return author.isEmpty ? String(localized: "From \(package)") : String(localized: "From \(package), by \(author)")
+    }
+
+    private func log(_ line: String) { model.log.post(.info, line, source: "Mods") }
+}
+
+/// A file a feature asks for (S-022): what's chosen and whether it's the right one, Choose… and Clear.
+/// The game reads the file where it is; it's never copied.
+private struct ResourceRow: View {
+    @Environment(AppModel.self) private var model
+    let resource: ModResource
+    let feature: ModFeature
+    let mods: ModsModel
+    @State private var choosing = false
+
+    var body: some View {
+        let path = mods.path(of: resource, in: feature)
+        let status = mods.status(of: resource, in: feature)
+        LabeledContent {
+            HStack(spacing: Space.sm) {
+                if !path.isEmpty {
+                    Button("Clear") { mods.setPath("", of: resource, in: feature, log: log) }
+                        .help(resource.required ? String(localized: "Forget this file. The feature turns off until you choose another.") : String(localized: "Forget this file"))
+                }
+                Button(path.isEmpty ? String(localized: "Choose…") : String(localized: "Change…")) { choosing = true }
+                    .help(resource.isFolder ? String(localized: "Choose a folder for \(resource.label)") : String(localized: "Choose a file for \(resource.label)"))
+            }
+        } label: {
+            Text(resource.label)
+            Label(statusText(status, path: path), systemImage: symbol(status))
+                .symbolRenderingMode(.multicolor)
+                .foregroundStyle(isProblem(status) ? AnyShapeStyle(.orange) : AnyShapeStyle(.secondary))
+        }
+        .help(resource.description)
+        .task(id: path) { await mods.checkResource(resource, in: feature) }
+        .fileImporter(isPresented: $choosing, allowedContentTypes: contentTypes) { result in
+            guard case .success(let url) = result else { return }
+            mods.setPath(url.path, of: resource, in: feature, log: log)
+        }
+        .fileDialogMessage(Text(resource.description.isEmpty ? resource.label : resource.description))
+        .fileDialogConfirmationLabel(Text("Choose"))
+    }
+
+    private var contentTypes: [UTType] {
+        if resource.isFolder { return [.folder] }
+        let types = resource.extensions.compactMap { UTType(filenameExtension: $0) }
+        return types.isEmpty ? [.item] : types
+    }
+
+    private func isProblem(_ status: ModResource.Status?) -> Bool {
+        switch status {
+        case .notFound, .wrongSize, .wrongFile: true
+        case .notChosen: resource.required
+        default: false
+        }
+    }
+
+    private func symbol(_ status: ModResource.Status?) -> String {
+        switch status {
+        case nil: "clock"
+        case .notChosen: resource.required ? "exclamationmark.triangle.fill" : "circle.dashed"
+        case .notFound, .wrongSize, .wrongFile: "exclamationmark.triangle.fill"
+        case .verified: "checkmark.seal.fill"
+        case .chosen: "doc"
+        }
+    }
+
+    private func statusText(_ status: ModResource.Status?, path: String) -> String {
+        let name = (path as NSString).lastPathComponent
+        let expected = resource.fileDescription
+        switch status {
+        case nil: return String(localized: "Checking \(name)…")
+        case .notChosen:
+            if resource.required {
+                return resource.isFolder ? String(localized: "Required: choose a folder to turn this on.")
+                                         : String(localized: "Required: choose a file to turn this on.")
+            }
+            return expected.isEmpty ? String(localized: "Optional. Nothing chosen.") : String(localized: "Optional. Choose your copy of \(expected).")
+        case .notFound: return String(localized: "\(name) wasn't found. It may have been moved or deleted.")
+        case .wrongSize, .wrongFile:
+            return expected.isEmpty ? String(localized: "\(name) isn't the file this feature needs.") : String(localized: "\(name) isn't \(expected).")
+        case .verified: return String(localized: "\(name), checked")
+        case .chosen: return name
+        }
     }
 
     private func log(_ line: String) { model.log.post(.info, line, source: "Mods") }

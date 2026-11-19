@@ -309,6 +309,14 @@ enum SeedData {
     }
 
     /// Two small made-up packages for the Mods page snapshots, with each kind of option.
+    /// A made-up clock face for the S-022 picker (bytes only, not an image), checked like the game checks a file.
+    private static var seedFace: URL { DataFolder.url.appending(path: "Seed/Clock Face.png") }
+    private static var seedFaceHash: String {
+        try? FileManager.default.createDirectory(at: seedFace.deletingLastPathComponent(), withIntermediateDirectories: true)
+        if !FileManager.default.fileExists(atPath: seedFace.path) { try? Data("seed clock face".utf8).write(to: seedFace) }
+        return ModResource.normalizedSHA256(of: seedFace) ?? ""
+    }
+
     private static func seedMods(in game: URL) {
         let root = ModCatalog.root(game: game)
         let packages: [(String, String)] = [
@@ -356,6 +364,26 @@ enum SeedData {
             name = "Real-time clock"
             description = "Shows the time you've played this run in the corner of the HUD."
             group = "HUD"
+            [[resource]]
+            feature = "clock"
+            id = "face"
+            label = "Clock face (optional)"
+            description = "Choose a PNG to draw the clock with."
+            normalized_sha256 = "\(seedFaceHash)"
+            file_patterns = "*.png"
+            file_description = "a clock face PNG"
+            required = false
+            [[feature]]
+            id = "font"
+            name = "Your own HUD font"
+            description = "Draws the HUD's numbers with a font image you made."
+            group = "HUD"
+            [[resource]]
+            feature = "font"
+            id = "font"
+            label = "Font image"
+            description = "A 128×128 PNG with the digits 0 to 9 in one row."
+            file_patterns = "*.png"
             """),
             ("seed.combat", """
             format_version = 1
@@ -401,6 +429,17 @@ enum SeedData {
         }
         try? """
         format_version = 1
+
+        [[feature]]
+        package_id = "seed.better-hud"
+        id = "clock"
+        enabled = true
+
+        [[resource]]
+        package_id = "seed.better-hud"
+        feature_id = "clock"
+        id = "face"
+        path = "\(seedFace.path)"
 
         [[feature]]
         package_id = "seed.combat"

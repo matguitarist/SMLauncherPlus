@@ -31,6 +31,26 @@
         }
       }
     },
+    "%@ isn't %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ n’est pas %2$@."
+          }
+        }
+      }
+    },
+    "%@ isn't the file this feature needs.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ n’est pas le fichier qu’il faut à cette fonction."
+          }
+        }
+      }
+    },
     "%@ not installed yet": {
       "localizations": {
         "fr": {
@@ -47,6 +67,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ sur %@"
+          }
+        }
+      }
+    },
+    "%@ wasn't found. It may have been moved or deleted.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ est introuvable. Il a peut-être été déplacé ou supprimé."
+          }
+        }
+      }
+    },
+    "%@, checked": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, vérifié"
           }
         }
       }
@@ -321,6 +361,16 @@
         }
       }
     },
+    "Change…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changer…"
+          }
+        }
+      }
+    },
     "Check Now": {
       "localizations": {
         "fr": {
@@ -351,6 +401,16 @@
         }
       }
     },
+    "Checking %@…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérification de %@…"
+          }
+        }
+      }
+    },
     "Checking the download": {
       "localizations": {
         "fr": {
@@ -371,6 +431,16 @@
         }
       }
     },
+    "Choose": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisir"
+          }
+        }
+      }
+    },
     "Choose Another…": {
       "localizations": {
         "fr": {
@@ -387,6 +457,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Choisir la ROM…"
+          }
+        }
+      }
+    },
+    "Choose a file for %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisir un fichier pour %@"
+          }
+        }
+      }
+    },
+    "Choose a folder for %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisir un dossier pour %@"
           }
         }
       }
@@ -417,6 +507,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Choisir…"
+          }
+        }
+      }
+    },
+    "Clear": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retirer"
           }
         }
       }
@@ -707,6 +807,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Concentration"
+          }
+        }
+      }
+    },
+    "Forget this file": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oublier ce fichier"
+          }
+        }
+      }
+    },
+    "Forget this file. The feature turns off until you choose another.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oublier ce fichier. La fonction est désactivée jusqu’à ce que vous en choisissiez un autre."
           }
         }
       }
@@ -1411,6 +1531,26 @@
         }
       }
     },
+    "Optional. Choose your copy of %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Facultatif. Choisissez votre copie de %@."
+          }
+        }
+      }
+    },
+    "Optional. Nothing chosen.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Facultatif. Aucun fichier choisi."
+          }
+        }
+      }
+    },
     "Other (%@)": {
       "localizations": {
         "fr": {
@@ -1637,6 +1777,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Signaler un problème"
+          }
+        }
+      }
+    },
+    "Required: choose a file to turn this on.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obligatoire : choisissez un fichier pour activer cette fonction."
+          }
+        }
+      }
+    },
+    "Required: choose a folder to turn this on.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obligatoire : choisissez un dossier pour activer cette fonction."
           }
         }
       }

@@ -155,6 +155,7 @@ enum SelfTest {
 
             await checkDataFolderMove(model: model)
             await checkModInstall(model: model)
+            await checkModResources()
 
             print(failures == 0 ? "SELFTEST PASS \(count) checks" : "SELFTEST FAIL \(failures) of \(count) checks")
             finish(code: failures == 0 ? 0 : 1)
@@ -433,6 +434,67 @@ enum SelfTest {
         try? fm.removeItem(at: profile.folder)
         model.context.delete(profile)
         try? model.context.save()
+    }
+
+    /// S-022: a required file keeps its feature off until it's chosen and checked; a shared file is chosen once.
+    private static func checkModResources() async {
+        let fm = FileManager.default
+        let game = URL(fileURLWithPath: "/tmp/SMLauncherPlus-self-resources-\(UUID().uuidString)/game", isDirectory: true)
+        defer { try? fm.removeItem(at: game.deletingLastPathComponent()) }
+        let art = game.deletingLastPathComponent().appending(path: "art.gba")
+        try? fm.createDirectory(at: game, withIntermediateDirectories: true)
+        try? Data(repeating: 9, count: 32768).write(to: art)
+        let hash = ModResource.normalizedSHA256(of: art) ?? ""
+        let folder = ModCatalog.root(game: game).appending(path: "packages/selftest.map/1.0.0", directoryHint: .isDirectory)
+        try? fm.createDirectory(at: folder, withIntermediateDirectories: true)
+        try? """
+        format_version = 1
+        id = "selftest.map"
+        version = "1.0.0"
+        name = "Map"
+        [[target]]
+        game_id = "supermetroid-jpn"
+        [[feature]]
+        id = "pause"
+        name = "Pause map"
+        [[resource]]
+        feature = "pause"
+        id = "art"
+        label = "Map art"
+        shared_key = "selftest.art"
+        normalized_sha256 = "\(hash)"
+        file_patterns = "*.gba"
+        [[feature]]
+        id = "world"
+        name = "World map"
+        [[resource]]
+        feature = "world"
+        id = "art"
+        label = "Map art (optional)"
+        shared_key = "selftest.art"
+        normalized_sha256 = "\(hash)"
+        required = false
+        """.write(to: folder.appending(path: "manifest.toml"), atomically: true, encoding: .utf8)
+        let mods = ModsModel(game: game)
+        guard let pause = mods.packages.first?.features.first(where: { $0.id == "pause" }),
+              let world = mods.packages.first?.features.first(where: { $0.id == "world" }) else {
+            return check("a feature's [[resource]] is read", false, "\(mods.packages)")
+        }
+        await mods.checkResource(pause.resources[0], in: pause)
+        check("a required file not chosen blocks its feature", mods.isBlocked(pause) && !mods.isBlocked(world))
+        mods.setPath(art.path, of: world.resources[0], in: world) { _ in }
+        await mods.checkResource(pause.resources[0], in: pause)
+        check("a shared file chosen for one feature counts for the other", mods.path(of: pause.resources[0], in: pause) == art.path
+              && mods.status(of: pause.resources[0], in: pause) == .verified && !mods.isBlocked(pause),
+              "\(String(describing: mods.status(of: pause.resources[0], in: pause))), hash \(hash.prefix(8))")
+        mods.setEnabled(true, pause) { _ in }
+        let state = (try? String(contentsOf: mods.root.appending(path: "state.toml"), encoding: .utf8)) ?? ""
+        check("the file's path is saved where the game reads it", state.contains("[[shared_resource]]\nid = \"selftest.art\"\npath = \"\(art.path)\""), state)
+        try? Data(repeating: 1, count: 32768).write(to: art)
+        await mods.checkResource(pause.resources[0], in: pause)
+        check("another file in its place is refused", mods.status(of: pause.resources[0], in: pause) == .wrongFile && mods.isBlocked(pause))
+        mods.setPath("", of: pause.resources[0], in: pause) { _ in }
+        check("clearing a required file turns its feature off", !mods.state.isEnabled(pause))
     }
 
     /// Every file under a folder, as paths relative to it.

@@ -181,7 +181,7 @@ Screens: mods-feature
 Acceptance:
 - [unit] `[[resource]]` entries show a picker with the declared file patterns; required ones block
   the feature until chosen.
-Status: todo
+Status: done
 
 ## M4 Stay current (0.2.0)
 

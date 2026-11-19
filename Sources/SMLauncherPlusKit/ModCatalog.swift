@@ -32,6 +32,8 @@ public struct ModFeature: Identifiable, Equatable, Sendable {
     /// "package/feature" ids this one can't run without.
     public var requires: [String]
     public var options: [ModOption]
+    /// Files the player picks for this feature (S-022).
+    public var resources: [ModResource] = []
 
     /// "package/feature", unique across packages.
     public var key: String { packageID + "/" + id }
@@ -102,7 +104,8 @@ public enum ModCatalog {
         var package = ModPackage(id: "", version: "", name: "", author: "", description: "", gameIDs: [], features: [])
         var options: [(feature: String, option: ModOption, choices: [ModOption.Choice], type: String, min: Int, max: Int, step: Int)] = []
         var plugins: [(feature: String, id: String)] = []
-        enum Section { case root, target, feature, option, choice, plugin, other }
+        var resources: [ModResource] = []
+        enum Section { case root, target, feature, option, choice, plugin, resource, other }
         var section = Section.root
 
         for raw in text.split(omittingEmptySubsequences: false, whereSeparator: \.isNewline) {
@@ -122,6 +125,7 @@ public enum ModCatalog {
                     section = .choice
                     if !options.isEmpty { options[options.count - 1].choices.append(.init(value: "", label: "")) }
                 case "[[plugin]]": section = .plugin; plugins.append(("", ""))
+                case "[[resource]]", "[[external_rom]]": section = .resource; resources.append(ModResource())
                 default: section = .other
                 }
                 continue
@@ -181,6 +185,22 @@ public enum ModCatalog {
                 let i = plugins.count - 1
                 if key == "feature" { plugins[i].feature = value.string ?? "" }
                 if key == "id" { plugins[i].id = value.string ?? "" }
+            case .resource:
+                let i = resources.count - 1
+                switch key {
+                case "feature": resources[i].featureID = value.string ?? ""
+                case "id": resources[i].id = value.string ?? ""
+                case "label": resources[i].label = value.string ?? ""
+                case "description": resources[i].description = value.string ?? ""
+                case "format": resources[i].format = value.string ?? ""
+                case "shared_key": resources[i].sharedKey = value.string ?? ""
+                case "normalized_sha256": resources[i].normalizedSHA256 = (value.string ?? "").lowercased()
+                case "size": resources[i].size = value.int ?? 0
+                case "file_patterns": resources[i].filePatterns = value.string ?? ""
+                case "file_description": resources[i].fileDescription = value.string ?? ""
+                case "required": resources[i].required = value.bool ?? true
+                default: break
+                }
             case .other: break
             }
         }
@@ -192,6 +212,7 @@ public enum ModCatalog {
             package.features[i].packageID = package.id
             let id = package.features[i].id
             package.features[i].plugins = plugins.filter { $0.feature == id }.map(\.id)
+            package.features[i].resources = resources.filter { $0.featureID == id && !$0.id.isEmpty }.map { $0.withDefaults() }
             package.features[i].options = options.filter { $0.feature == id }.map { entry in
                 var option = entry.option
                 switch entry.type {
