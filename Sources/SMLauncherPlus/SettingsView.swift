@@ -26,6 +26,7 @@ struct SettingsView: View {
             switch tab {
             case .general: GeneralSettings()
             case .display: DisplaySettingsView()
+            case .sound: SoundSettingsView()
             case .appearance: AppearanceSettings()
             case .updates: UpdateSettings()
             }
@@ -38,7 +39,7 @@ struct SettingsView: View {
 
 /// The Settings tabs. Snapshot mode walks through every case.
 enum SettingsTab: String, CaseIterable, Identifiable {
-    case general, display, appearance, updates
+    case general, display, sound, appearance, updates
 
     var id: String { rawValue }
 
@@ -46,6 +47,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         switch self {
         case .general: String(localized: "General")
         case .display: String(localized: "Display")
+        case .sound: String(localized: "Sound")
         case .appearance: String(localized: "Appearance")
         case .updates: String(localized: "Updates")
         }
@@ -55,6 +57,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         switch self {
         case .general: "gearshape"
         case .display: "display"
+        case .sound: "speaker.wave.2"
         case .appearance: "paintpalette"
         case .updates: "arrow.triangle.2.circlepath"
         }

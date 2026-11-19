@@ -218,3 +218,46 @@ public struct DisplaySettings: Equatable, Sendable {
         try video.text.write(to: Self.videoFile(game: game), atomically: true, encoding: .utf8)
     }
 }
+
+
+/// The sound settings the launcher shows for a profile (S-011): config.ini's [Sound] EnableAudio and
+/// Volume, 0 to 100. In the game, Keypad + and Keypad - move the volume too, in steps of 5.
+public struct SoundSettings: Equatable, Sendable {
+    public var enabled = true
+    /// Kept within 0 to 100 when read and when written.
+    public var volume = 100
+
+    public static let volumeRange = 0...100
+
+    public init() {}
+
+    public init(config: IniFile) {
+        enabled = config.value("EnableAudio", in: Self.section).map { ["1", "true", "on", "yes"].contains($0.lowercased()) } ?? true
+        volume = config.value("Volume", in: Self.section).flatMap { Double($0) }.map { Self.clamp(Int($0.rounded())) } ?? 100
+    }
+
+    static let section = "Sound"
+
+    public static func clamp(_ volume: Int) -> Int {
+        min(max(volume, volumeRange.lowerBound), volumeRange.upperBound)
+    }
+
+    public func apply(config: inout IniFile) {
+        config.set("EnableAudio", to: enabled ? "1" : "0", in: Self.section)
+        config.set("Volume", to: String(Self.clamp(volume)), in: Self.section)
+    }
+
+    /// The settings in a profile's game folder; the game's defaults for a file it hasn't written yet.
+    public static func read(game: URL) -> SoundSettings {
+        let file = DisplaySettings.configFile(game: game)
+        return SoundSettings(config: IniFile(text: (try? String(contentsOf: file, encoding: .utf8)) ?? ""))
+    }
+
+    /// Writes only these two keys; every other line of config.ini stays as it was.
+    public func write(game: URL) throws {
+        let file = DisplaySettings.configFile(game: game)
+        var config = IniFile(text: (try? String(contentsOf: file, encoding: .utf8)) ?? "")
+        apply(config: &config)
+        try config.text.write(to: file, atomically: true, encoding: .utf8)
+    }
+}

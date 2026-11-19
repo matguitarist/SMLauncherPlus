@@ -131,4 +131,58 @@ import Testing
         #expect(try String(contentsOf: game.appending(path: "assets/shaders/crt.glslp"), encoding: .utf8) == "game's own")
         #expect(ShaderPreset.list(game: game).map(\.look) == ["crt", "sharp"])
     }
+
+    @Test func soundIsReadWithTheGamesDefaults() {
+        #expect(SoundSettings(config: IniFile(text: Self.config)) == SoundSettings())
+        let ini = IniFile(text: "[Sound]\n# 0..100\nVolume = 40\nEnableAudio = 0\nAudioFreq = 32000\n")
+        let settings = SoundSettings(config: ini)
+        #expect(settings.volume == 40 && !settings.enabled)
+    }
+
+    @Test func soundWritesOnlyVolumeAndEnableAudio() {
+        let text = "[Sound]\n# 0..100; VolumeUp / VolumeDown move it.\nVolume = 100\nEnableAudio = 1\nAudioFreq = 32000\n\n[KeyMap]\nUp = Up\n"
+        var ini = IniFile(text: text)
+        var settings = SoundSettings(config: ini)
+        settings.volume = 35
+        settings.enabled = false
+        settings.apply(config: &ini)
+        #expect(ini.text == text.replacingOccurrences(of: "Volume = 100", with: "Volume = 35").replacingOccurrences(of: "EnableAudio = 1", with: "EnableAudio = 0"))
+        #expect(SoundSettings(config: ini) == settings)
+    }
+
+    @Test func soundAddsItsSectionWhenTheFileHasNone() {
+        var ini = IniFile(text: Self.config)
+        SoundSettings().apply(config: &ini)
+        #expect(ini.text.hasSuffix("DisplayPerf = f\n\n[Sound]\nEnableAudio = 1\nVolume = 100\n"))
+    }
+
+    @Test func volumeIsClampedTo0Through100() {
+        var ini = IniFile(text: "[Sound]\nVolume = 250\n")
+        #expect(SoundSettings(config: ini).volume == 100)
+        ini.set("Volume", to: "-20", in: "Sound")
+        #expect(SoundSettings(config: ini).volume == 0)
+        ini.set("Volume", to: "62.6", in: "Sound")
+        #expect(SoundSettings(config: ini).volume == 63)
+        ini.set("Volume", to: "loud", in: "Sound")
+        #expect(SoundSettings(config: ini).volume == 100)
+        var settings = SoundSettings()
+        settings.volume = 140
+        settings.apply(config: &ini)
+        #expect(ini.value("Volume", in: "Sound") == "100")
+        settings.volume = -5
+        settings.apply(config: &ini)
+        #expect(ini.value("Volume", in: "Sound") == "0")
+    }
+
+    @Test func soundRoundTripsThroughAProfileFolder() throws {
+        let game = FileManager.default.temporaryDirectory.appending(path: "SMLauncherPlus-sound-\(UUID())", directoryHint: .isDirectory)
+        try FileManager.default.createDirectory(at: game, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: game) }
+        try Data(Self.config.utf8).write(to: game.appending(path: "config.ini"))
+        var settings = SoundSettings.read(game: game)
+        settings.volume = 55
+        try settings.write(game: game)
+        #expect(SoundSettings.read(game: game) == settings)
+        #expect(DisplaySettings.read(game: game) == DisplaySettings(config: IniFile(text: Self.config), video: IniFile(text: "")))
+    }
 }

@@ -132,7 +132,7 @@ As the player, I set volume and turn audio on or off.
 Screens: settings-sound
 Acceptance:
 - [unit] `[Sound] Volume` and `EnableAudio` are written; values are clamped to 0–100.
-Status: todo
+Status: done
 
 ### S-012 Controller and keys
 As the player, I see which controller is connected and remap buttons and keys.

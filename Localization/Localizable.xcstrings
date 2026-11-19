@@ -211,6 +211,16 @@
         }
       }
     },
+    "Changes apply the next time you play %@. While you play, Keypad + and Keypad − change the volume.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les changements s’appliqueront la prochaine fois que vous jouerez à %@. En jeu, les touches + et − du pavé numérique règlent le volume."
+          }
+        }
+      }
+    },
     "Check Now": {
       "localizations": {
         "fr": {
@@ -621,6 +631,16 @@
         }
       }
     },
+    "Install the game to choose how it sounds.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installez le jeu pour en régler le son."
+          }
+        }
+      }
+    },
     "Installing Super Metroid": {
       "localizations": {
         "fr": {
@@ -901,6 +921,16 @@
         }
       }
     },
+    "Play sound": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activer le son"
+          }
+        }
+      }
+    },
     "Playing for %@": {
       "localizations": {
         "fr": {
@@ -1117,6 +1147,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mouvement fluide, sans déchirure. Désactivé, la latence baisse un peu."
+          }
+        }
+      }
+    },
+    "Sound": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Son"
           }
         }
       }
@@ -1521,6 +1561,16 @@
         }
       }
     },
+    "Unable to save the sound settings: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d’enregistrer les réglages du son : %@"
+          }
+        }
+      }
+    },
     "Unable to save your choice: %@": {
       "localizations": {
         "fr": {
@@ -1597,6 +1647,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Version %@"
+          }
+        }
+      }
+    },
+    "Volume": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volume"
           }
         }
       }

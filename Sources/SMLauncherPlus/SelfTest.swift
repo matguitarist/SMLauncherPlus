@@ -185,6 +185,17 @@ enum SelfTest {
         display.shader = presets.first { $0.look == "crt" && $0.strength == "strong" }?.path ?? ""
         do { try display.write(game: profile.gameFolder) } catch { check("display settings are saved", false, "\(error)") }
         check("display settings read back as written", DisplaySettings.read(game: profile.gameFolder) == display)
+        // S-011: sound settings written to config.ini, clamped, beside the game's other [Sound] keys.
+        var sound = SoundSettings.read(game: profile.gameFolder)
+        sound.volume = 145
+        do { try sound.write(game: profile.gameFolder) } catch { check("sound settings are saved", false, "\(error)") }
+        let soundConfig = IniFile(text: (try? String(contentsOf: DisplaySettings.configFile(game: profile.gameFolder), encoding: .utf8)) ?? "")
+        check("volume is clamped to 100 and the game's other sound keys stay",
+              soundConfig.value("Volume", in: "Sound") == "100" && soundConfig.value("AudioFreq", in: "Sound") != nil,
+              soundConfig.value("Volume", in: "Sound") ?? "no Volume")
+        sound.volume = 80
+        do { try sound.write(game: profile.gameFolder) } catch { check("sound settings are saved", false, "\(error)") }
+        check("sound settings read back as written", SoundSettings.read(game: profile.gameFolder) == sound)
         let before = profile.playTime
         model.play(extraArguments: ["--framedump", frames.path], environment: ["SDL_VIDEODRIVER": "dummy", "SDL_AUDIODRIVER": "dummy"])
         check("Play starts the game", model.isPlaying, model.playFailure?.message ?? "")
