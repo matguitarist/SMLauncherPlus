@@ -170,7 +170,7 @@ final class AppModel {
         (try? context.fetch(FetchDescriptor<RomSource>()))?.first
     }
 
-    /// Checks a .sfc, .smc or .zip and, when it's the supported ROM, keeps it (S-001).
+    /// Checks a .sfc, .smc, .zip or .7z and, when it's the supported ROM, keeps it (S-001).
     /// Only a bookmark to the file is saved; the ROM itself is never copied.
     func choose(_ url: URL) async {
         welcome = .checking(url.lastPathComponent)

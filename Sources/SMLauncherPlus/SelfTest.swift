@@ -237,7 +237,7 @@ enum SelfTest {
                   during.hasPrefix(DataFolder.runROM.resolvingSymlinksInPath().path) || during.hasPrefix(DataFolder.runROM.path), during)
         }
         let copies = Self.files(in: DataFolder.runROM).filter { $0.hasSuffix(".sfc") }
-        let zipped = model.rom?.kindRaw == ROMCheck.Kind.zip.rawValue
+        let zipped = model.rom.map { $0.kindRaw != ROMCheck.Kind.file.rawValue || $0.headered } ?? false
         check("a zipped ROM is unpacked privately for the run, a plain one is passed in place",
               zipped ? copies.count == 1 : copies.isEmpty, "\(copies)")
         var title = false

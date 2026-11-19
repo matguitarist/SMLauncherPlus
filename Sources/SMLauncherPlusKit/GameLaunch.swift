@@ -43,7 +43,7 @@ public enum GameLaunch {
         let data: Data?
         switch rom.kind {
         case .file: data = try? Data(contentsOf: rom.url)
-        case .zip: data = Zip.read(rom.member, in: rom.url, limit: ROMCheck.maxBytes)
+        case .zip, .sevenZip: data = ROMCheck.read(rom.member, in: rom.url, kind: rom.kind)
         }
         guard var bytes = data else { throw .missing }
         if rom.headered, bytes.count % 1024 == 512 { bytes = bytes.dropFirst(512) }

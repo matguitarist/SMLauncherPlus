@@ -81,6 +81,30 @@ import Testing
         #expect(throws: ROMCheck.Problem.zipWithSeveralROMs) { try ROMCheck.check(two) }
     }
 
+    @Test func a7zIsReadLikeAZip() throws {
+        let folder = try Self.tempFolder()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        try Self.fakeROM(title: "ZELDA").write(to: folder.appending(path: "Zelda [!].sfc"))
+        try Data("x".utf8).write(to: folder.appending(path: "readme.txt"))
+        let one = try Self.sevenZip(folder, ["Zelda [!].sfc"], as: "one.7z")
+        let none = try Self.sevenZip(folder, ["readme.txt"], as: "none.7z")
+        #expect(throws: ROMCheck.Problem.otherGame("ZELDA")) { try ROMCheck.check(one) }
+        #expect(throws: ROMCheck.Problem.zipWithoutROM) { try ROMCheck.check(none) }
+        let broken = folder.appending(path: "broken.7z")
+        try Data("7z not really".utf8).write(to: broken)
+        #expect(throws: ROMCheck.Problem.unreadable) { try ROMCheck.check(broken) }
+    }
+
+    static func sevenZip(_ folder: URL, _ files: [String], as name: String) throws -> URL {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/tar")
+        process.currentDirectoryURL = folder
+        process.arguments = ["--format", "7zip", "-cf", name] + files
+        try process.run()
+        process.waitUntilExit()
+        return folder.appending(path: name)
+    }
+
     @Test(.enabled(if: ProcessInfo.processInfo.environment["SM_ROM_PATH"] != nil))
     func thePlayersOwnROMIsAccepted() throws {
         let url = URL(fileURLWithPath: ProcessInfo.processInfo.environment["SM_ROM_PATH"]!)

@@ -141,12 +141,12 @@
         }
       }
     },
-    ".sfc, .smc, or a .zip holding one": {
+    ".sfc, .smc, or a .zip or .7z holding one": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": ".sfc, .smc, ou un .zip qui en contient un"
+            "value": ".sfc, .smc, ou un .zip ou .7z qui en contient un"
           }
         }
       }
@@ -2601,6 +2601,26 @@
         }
       }
     },
+    "This archive has no .sfc or .smc file in it.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette archive ne contient aucun fichier .sfc ou .smc."
+          }
+        }
+      }
+    },
+    "This archive holds more than one ROM. Choose the Super Metroid one on its own.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette archive contient plus d’une ROM. Choisissez celle de Super Metroid seule."
+          }
+        }
+      }
+    },
     "This file is damaged or isn't a mod package.": {
       "localizations": {
         "fr": {
@@ -2631,12 +2651,12 @@
         }
       }
     },
-    "This isn't a SNES ROM. Choose a .sfc, .smc or .zip file.": {
+    "This isn't a SNES ROM. Choose a .sfc, .smc, .zip or .7z file.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ce n’est pas une ROM SNES. Choisissez un fichier .sfc, .smc ou .zip."
+            "value": "Ce n’est pas une ROM SNES. Choisissez un fichier .sfc, .smc, .zip ou .7z."
           }
         }
       }
@@ -2727,26 +2747,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cette version du jeu n’a aucun mod."
-          }
-        }
-      }
-    },
-    "This zip has no .sfc or .smc file in it.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ce zip ne contient aucun fichier .sfc ou .smc."
-          }
-        }
-      }
-    },
-    "This zip holds more than one ROM. Choose the Super Metroid one on its own.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ce zip contient plus d’une ROM. Choisissez celle de Super Metroid seule."
           }
         }
       }

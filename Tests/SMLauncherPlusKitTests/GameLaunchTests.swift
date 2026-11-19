@@ -56,6 +56,19 @@ import Testing
         #expect(!FileManager.default.fileExists(atPath: temp.path))
     }
 
+    @Test func a7zROMIsUnpackedPrivatelyAndDiscarded() throws {
+        let folder = try Self.tempFolder()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        try Self.bytes.write(to: folder.appending(path: "sm.sfc"))
+        let archive = try ROMCheckTests.sevenZip(folder, ["sm.sfc"], as: "sm.7z")
+        let rom = ROMCheck.ROM(url: archive, kind: .sevenZip, member: "sm.sfc", headered: false, sha256: Self.hash)
+        let prepared = try GameLaunch.prepareROM(rom, root: folder.appending(path: "tmp", directoryHint: .isDirectory))
+        let temp = try #require(prepared.temporaryFolder)
+        #expect(try Data(contentsOf: prepared.url) == Self.bytes)
+        prepared.discard()
+        #expect(!FileManager.default.fileExists(atPath: temp.path))
+    }
+
     @Test func aHeaderedROMIsPassedWithoutItsHeader() throws {
         let folder = try Self.tempFolder()
         defer { try? FileManager.default.removeItem(at: folder) }

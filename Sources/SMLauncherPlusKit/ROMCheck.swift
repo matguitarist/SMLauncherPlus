@@ -1,17 +1,17 @@
 import CryptoKit
 import Foundation
 
-/// Recognizes the player's own Super Metroid ROM (S-001): a .sfc or .smc file, or a .zip holding one.
+/// Recognizes the player's own Super Metroid ROM (S-001): a .sfc or .smc file, or a .zip or .7z holding one.
 /// The ROM is read where it is, into memory; nothing is unpacked to disk or copied.
 /// Ported from AM2R Launcher Plus's AM2R11Check.
 public enum ROMCheck {
-    public enum Kind: String, Codable, Sendable { case file, zip }
+    public enum Kind: String, Codable, Sendable { case file, zip, sevenZip = "7z" }
 
     /// A checked, supported ROM.
     public struct ROM: Equatable, Sendable {
         public var url: URL
         public var kind: Kind
-        /// The ROM's name inside the zip, or "" for a plain file.
+        /// The ROM's name inside the archive, or "" for a plain file.
         public var member: String
         /// True when the file starts with a 512-byte copier header, skipped for the check.
         public var headered: Bool
@@ -28,7 +28,7 @@ public enum ROMCheck {
 
     /// Why a file isn't the supported ROM. The app turns each into a sentence (ROMProblem+Message.swift).
     public enum Problem: Error, Equatable, Sendable {
-        /// Not a .sfc, .smc or .zip, or no SNES header inside.
+        /// Not a .sfc, .smc, .zip or .7z, or no SNES header inside.
         case notROM
         case unreadable
         case zipWithoutROM
@@ -56,7 +56,7 @@ public enum ROMCheck {
     /// The largest SNES ROM plus a copier header; anything bigger isn't read.
     static let maxBytes = 8 * 1024 * 1024 + 512
 
-    /// Checks a .sfc, .smc or .zip file.
+    /// Checks a .sfc, .smc, .zip or .7z file.
     public static func check(_ url: URL) throws(Problem) -> ROM {
         let ext = url.pathExtension.lowercased()
         if romExtensions.contains(ext) {
@@ -66,15 +66,24 @@ public enum ROMCheck {
             let (headered, hash) = try identify(data)
             return ROM(url: url, kind: .file, member: "", headered: headered, sha256: hash)
         }
-        guard ext == "zip" else { throw .notROM }
-        guard let entries = Zip.list(url) else { throw .unreadable }
+        guard let kind: Kind = ext == "zip" ? .zip : ext == "7z" ? .sevenZip : nil else { throw .notROM }
+        guard let entries = kind == .zip ? Zip.list(url) : Archive.list(url) else { throw .unreadable }
         let roms = entries.filter { romExtensions.contains(($0 as NSString).pathExtension.lowercased()) && !$0.hasPrefix("__MACOSX/") }
         guard !roms.isEmpty else { throw .zipWithoutROM }
         guard roms.count == 1 else { throw .zipWithSeveralROMs }
-        guard let data = Zip.read(roms[0], in: url, limit: maxBytes) else { throw .unreadable }
+        guard let data = read(roms[0], in: url, kind: kind) else { throw .unreadable }
         guard data.count <= maxBytes else { throw .wrongSize }
         let (headered, hash) = try identify(data)
-        return ROM(url: url, kind: .zip, member: roms[0], headered: headered, sha256: hash)
+        return ROM(url: url, kind: kind, member: roms[0], headered: headered, sha256: hash)
+    }
+
+    /// One member of a .zip (unzip) or .7z (bsdtar), read into memory; nil for a plain file.
+    static func read(_ member: String, in url: URL, kind: Kind) -> Data? {
+        switch kind {
+        case .file: nil
+        case .zip: Zip.read(member, in: url, limit: maxBytes)
+        case .sevenZip: Archive.read(member, in: url, limit: maxBytes)
+        }
     }
 
     /// Checks a ROM's bytes. Returns whether it had a copier header, and its SHA-256 without it.

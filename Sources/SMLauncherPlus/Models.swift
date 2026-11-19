@@ -96,10 +96,10 @@ extension ROMCheck.Problem {
     /// What the welcome page says about a file that isn't the supported ROM.
     var message: String {
         switch self {
-        case .notROM: String(localized: "This isn't a SNES ROM. Choose a .sfc, .smc or .zip file.")
+        case .notROM: String(localized: "This isn't a SNES ROM. Choose a .sfc, .smc, .zip or .7z file.")
         case .unreadable: String(localized: "Unable to read this file. It may be damaged.")
-        case .zipWithoutROM: String(localized: "This zip has no .sfc or .smc file in it.")
-        case .zipWithSeveralROMs: String(localized: "This zip holds more than one ROM. Choose the Super Metroid one on its own.")
+        case .zipWithoutROM: String(localized: "This archive has no .sfc or .smc file in it.")
+        case .zipWithSeveralROMs: String(localized: "This archive holds more than one ROM. Choose the Super Metroid one on its own.")
         case .wrongSize: String(localized: "This file is the wrong size for a SNES ROM.")
         case .otherGame(let title): String(localized: "This is the ROM of “\(title)”, not Super Metroid.")
         case .otherVersion: String(localized: "This ROM isn't the supported version. SM Launcher Plus needs Super Metroid (Japan, USA).")

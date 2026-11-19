@@ -8,8 +8,8 @@ struct WelcomePage: View {
     @Environment(AppModel.self) private var model
     @State private var dropTargeted = false
 
-    /// .sfc, .smc and .zip in the open panel.
-    static let romTypes: [UTType] = [UTType(filenameExtension: "sfc"), UTType(filenameExtension: "smc"), .zip].compactMap { $0 }
+    /// .sfc, .smc, .zip and .7z in the open panel.
+    static let romTypes: [UTType] = [UTType(filenameExtension: "sfc"), UTType(filenameExtension: "smc"), .zip, UTType(filenameExtension: "7z")].compactMap { $0 }
 
     var body: some View {
         @Bindable var model = model
@@ -168,7 +168,7 @@ struct WelcomePage: View {
 
     private var detail: String? {
         switch model.welcome {
-        case .empty: String(localized: ".sfc, .smc, or a .zip holding one")
+        case .empty: String(localized: ".sfc, .smc, or a .zip or .7z holding one")
         case .checking(let name), .failed(_, let name): name
         case .ready: model.rom?.name
         }
