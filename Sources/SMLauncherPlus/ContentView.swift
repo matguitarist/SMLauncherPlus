@@ -53,17 +53,11 @@ enum SidebarItem: String, CaseIterable, Identifiable {
 
 /// What SM Launcher Plus will do, until the Play page arrives (S-001).
 struct OverviewPage: View {
-    @Environment(AppModel.self) private var model
-
     var body: some View {
         ContentUnavailableView {
             Label("Super Metroid, Native on Your Mac", systemImage: "gamecontroller")
         } description: {
-            if let error = model.storeError {
-                Text("The library could not be opened: \(error)")
-            } else {
-                Text("SM Launcher Plus will install SuperMetroidRecomp from your own ROM, keep it up to date, and let you tune its settings and mods. Your ROM stays where it is.")
-            }
+            Text("SM Launcher Plus will install SuperMetroidRecomp from your own ROM, keep it up to date, and let you tune its settings and mods. Your ROM stays where it is.")
         }
         .gridArea("overview")
         .navigationTitle("Overview")

@@ -251,16 +251,6 @@
         }
       }
     },
-    "The library could not be opened: %@": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Impossible d’ouvrir la bibliothèque : %@"
-          }
-        }
-      }
-    },
     "The new language applies after a restart.": {
       "localizations": {
         "fr": {

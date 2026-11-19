@@ -47,5 +47,5 @@ belongs to AM2R out: GameMaker, data.win, VCDiff/xdelta, Rosetta, Butterscotch, 
 ## Checks specific to this app
 
 - `APP_SNAPSHOT_MIN=1 tools/snap.sh` shoots the window at its smallest size.
-- Never test against the real library in `~/Library/Application Support/SMLauncherPlus/`.
+- Never test against the real database, `~/Library/Application Support/SMLauncherPlus/SMLauncherPlus.store` (SwiftData, models in `Models.swift`, like AM2R Launcher Plus).
 - Never copy, ship or download the ROM or any Nintendo art. The player's ROM is read where it is.

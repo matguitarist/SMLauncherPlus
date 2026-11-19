@@ -1,12 +1,13 @@
 import AppKit
 import LogKit
 import LogKitUI
+import SwiftData
 import SwiftUI
 import SMLauncherPlusKit
 
 // SMLauncherPlus
 //   SMLauncherPlus                      the app
-//   APP_STORE=<file> SMLauncherPlus     use <file> (in /tmp) instead of the real library; nothing outside it changes
+//   APP_STORE=<file> SMLauncherPlus     use the database <file> (in /tmp) instead of the real one; nothing outside it changes
 //   APP_SNAPSHOT=<dir> SMLauncherPlus   save a PNG of every sidebar page and Settings tab in light and dark mode, then quit
 //   APP_SEED=1 SMLauncherPlus           with APP_STORE: sample log lines for the snapshots (tools/snap.sh)
 //   SMLauncherPlus --selftest           run the self-test on a /tmp store and quit with 0 or 1 (tools/selftest.sh)
@@ -16,7 +17,7 @@ import SMLauncherPlusKit
 @main
 struct SMLauncherPlusApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
-    @State private var model = AppModel()
+    @State private var model = AppModel(container: Store.makeContainer())
 
     var body: some Scene {
         Window("SM Launcher Plus", id: "main") {
@@ -25,6 +26,7 @@ struct SMLauncherPlusApp: App {
                 .themed()
                 .overlay { if GridOverlay.enabled { GridOverlay() } }
                 .frame(minWidth: 820, minHeight: 520)
+                .modelContainer(model.container)
         }
         .defaultSize(width: 1000, height: 680)
         .windowToolbarStyle(.unified)
@@ -72,7 +74,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
-/// The app's state: the library, the sidebar, the Settings tab, and the log.
+/// The app's state: the database, the sidebar, the Settings tab, and the log.
 @Observable
 final class AppModel {
     var sidebar: SidebarItem? = .overview
@@ -83,52 +85,51 @@ final class AppModel {
     var checksForUpdates = Updater.shared.automaticallyChecks {
         didSet { Updater.shared.automaticallyChecks = checksForUpdates }
     }
-    private(set) var library = Library()
-    /// Why the library could not be read or saved, shown on the Overview page.
-    var storeError: String?
 
+    let container: ModelContainer
+    var context: ModelContext { container.mainContext }
     let log = Store.log
     /// Kept for the whole session, so filters survive leaving the Log page.
     let logViewer: LogViewerModel
 
-    init() {
+    init(container: ModelContainer) {
+        self.container = container
         logViewer = LogViewerModel(store: Store.log)
     }
 
-    /// Reads the library file. Called once at launch.
+    /// Called once at launch.
     func load() {
-        do {
-            library = try Library.load(from: Store.url)
-            try library.save(to: Store.url)
-            storeError = nil
-            log.post(.info, "Opened the library", source: "App")
-        } catch {
-            storeError = error.localizedDescription
-            log.post(.error, "Could not open the library: \(error.localizedDescription)", source: "App")
-        }
+        let profiles = (try? context.fetchCount(FetchDescriptor<Profile>())) ?? 0
+        log.post(.info, "Opened the database (\(profiles) profiles)", source: "App")
     }
 }
 
-/// Where the data lives: ~/Library/Application Support/SMLauncherPlus/library.json.
-/// With APP_STORE set (tests, snapshots, self-test), it lives in that file instead,
+/// Where the data lives: ~/Library/Application Support/SMLauncherPlus/SMLauncherPlus.store.
+/// With APP_STORE set (tests, snapshots, self-test), the database is that file instead,
 /// which must be in /tmp, and the log sits next to it.
-enum Store {
+nonisolated enum Store {
     /// True when APP_STORE points somewhere else (tests, snapshots, self-test).
     static var isOverridden: Bool {
         !(ProcessInfo.processInfo.environment["APP_STORE"] ?? "").isEmpty
     }
 
-    static var folder: URL {
-        URL.applicationSupportDirectory.appending(path: "SMLauncherPlus", directoryHint: .isDirectory)
-    }
-
     static var url: URL {
         if let path = ProcessInfo.processInfo.environment["APP_STORE"], !path.isEmpty {
-            // Test runs never touch the real library.
+            // Test runs never touch the real database.
             precondition(path.hasPrefix("/tmp/") || path.hasPrefix("/private/tmp/"), "APP_STORE must be in /tmp")
             return URL(fileURLWithPath: path)
         }
-        return folder.appending(path: "library.json")
+        let dir = URL.applicationSupportDirectory.appending(path: "SMLauncherPlus", directoryHint: .isDirectory)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir.appending(path: "SMLauncherPlus.store")
+    }
+
+    static func makeContainer() -> ModelContainer {
+        do {
+            return try ModelContainer(for: Profile.self, RomSource.self, configurations: ModelConfiguration(url: url))
+        } catch {
+            fatalError("Could not open the database at \(url.path): \(error)")
+        }
     }
 
     /// ~/Library/Logs/SMLauncherPlus/SMLauncherPlus.log, or next to APP_STORE.
@@ -136,5 +137,5 @@ enum Store {
         isOverridden ? url.deletingPathExtension().appendingPathExtension("log") : LogStore.defaultFileURL(app: "SMLauncherPlus")
     }
 
-    static let log = LogStore(fileURL: logURL)
+    @MainActor static let log = LogStore(fileURL: logURL)
 }

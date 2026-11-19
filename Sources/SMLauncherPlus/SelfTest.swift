@@ -1,10 +1,11 @@
 import AppKit
 import LogKit
+import SwiftData
 import SMLauncherPlusKit
 
 /// Self-test for agents: drives the app model on a /tmp store, prints PASS or
 /// FAIL per check, and quits with exit code 0 or 1.
-///   APP_STORE=/tmp/SMLauncherPlus-self.json ~/Applications/SMLauncherPlus.app/Contents/MacOS/SMLauncherPlus --selftest
+///   APP_STORE=/tmp/SMLauncherPlus-self.store ~/Applications/SMLauncherPlus.app/Contents/MacOS/SMLauncherPlus --selftest
 /// (tools/selftest.sh does this.) Add a check for every story with logic.
 @MainActor
 enum SelfTest {
@@ -24,9 +25,16 @@ enum SelfTest {
             return
         }
         Task {
-            check("the library opens", model.storeError == nil, model.storeError ?? "")
-            check("the library file is written in the test folder", FileManager.default.fileExists(atPath: Store.url.path))
-            check("the real library is untouched", Store.url.path.hasPrefix("/tmp/") || Store.url.path.hasPrefix("/private/tmp/"))
+            let before = (try? model.context.fetchCount(FetchDescriptor<Profile>())) ?? -1
+            check("the database opens empty", before == 0, "\(before) profiles")
+            model.context.insert(Profile(name: "Self-test", gameVersion: "0.4.6"))
+            try? model.context.save()
+            check("a profile is saved and read back",
+                  (try? model.context.fetch(FetchDescriptor<Profile>()))?.map(\.name) == ["Self-test"])
+            check("the database file is in the test folder",
+                  FileManager.default.fileExists(atPath: Store.url.path) && Store.url.path.hasPrefix("/tmp/"))
+            try? model.context.delete(model: Profile.self)
+            try? model.context.save()
 
             model.log.post(.info, "Self-test line", source: "SelfTest")
             try? await Task.sleep(for: .milliseconds(300))
