@@ -36,6 +36,30 @@ enum SelfTest {
             try? model.context.delete(model: Profile.self)
             try? model.context.save()
 
+            // S-001: choosing the ROM
+            let folder = URL(fileURLWithPath: "/tmp/SMLauncherPlus-self-roms", isDirectory: true)
+            try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            let fake = folder.appending(path: "Super Metroid.sfc")
+            try? Data(repeating: 0, count: SupportedROM.size).write(to: fake)
+            check("the welcome page starts empty", model.welcome == .empty, "\(model.welcome)")
+            await model.choose(fake)
+            check("a file that isn't a ROM is refused with its reason", model.welcome == .failed(.notROM, fake.lastPathComponent), "\(model.welcome)")
+            check("a refused file isn't kept", model.rom == nil)
+            try? await Task.sleep(for: .milliseconds(300))  // the log hands lines to the viewer in batches
+            check("the refusal is in the log", model.log.entries.contains { $0.source == "ROM" && $0.level == .warning })
+            try? FileManager.default.removeItem(at: folder)
+            if let real = ProcessInfo.processInfo.environment["SM_ROM_PATH"] {
+                let before = Self.dataFiles()
+                await model.choose(URL(fileURLWithPath: real))
+                check("the player's ROM is accepted", model.welcome == .ready, "\(model.welcome)")
+                check("the ROM is kept with its bookmark", model.rom?.bookmark != nil && model.rom?.url.path == real)
+                check("the ROM is still chosen after a restart",
+                      AppModel(container: model.container).welcome == .ready && AppModel(container: model.container).rom?.path == real)
+                check("the ROM is never copied", Self.dataFiles() == before)
+            } else {
+                print("SKIP the player's ROM: set SM_ROM_PATH to check it")
+            }
+
             model.log.post(.info, "Self-test line", source: "SelfTest")
             try? await Task.sleep(for: .milliseconds(300))
             check("the app writes a log line", model.log.entries.contains { $0.message == "Self-test line" })
@@ -55,6 +79,13 @@ enum SelfTest {
             print(failures == 0 ? "SELFTEST PASS \(count) checks" : "SELFTEST FAIL \(failures) of \(count) checks")
             finish(code: failures == 0 ? 0 : 1)
         }
+    }
+
+    /// Every file next to the test database, to show the ROM wasn't copied there.
+    private static func dataFiles() -> [String] {
+        let folder = Store.url.deletingLastPathComponent()
+        return ((try? FileManager.default.contentsOfDirectory(atPath: folder.path)) ?? [])
+            .filter { $0.hasPrefix("SMLauncherPlus") && !$0.hasSuffix(".log") && !$0.hasPrefix("SMLauncherPlus-shots") }.sorted()
     }
 
     private static func check(_ name: String, _ ok: Bool, _ detail: String = "") {

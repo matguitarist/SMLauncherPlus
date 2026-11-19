@@ -1,6 +1,26 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%@ found": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ trouvé"
+          }
+        }
+      }
+    },
+    ".sfc, .smc, or a .zip holding one": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ".sfc, .smc, ou un .zip qui en contient un"
+          }
+        }
+      }
+    },
     "1 left": {
       "localizations": {
         "fr": {
@@ -81,6 +101,66 @@
         }
       }
     },
+    "Checking your ROM…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérification de votre ROM…"
+          }
+        }
+      }
+    },
+    "Choose Another…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En choisir une autre…"
+          }
+        }
+      }
+    },
+    "Choose ROM…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisir la ROM…"
+          }
+        }
+      }
+    },
+    "Choose your ROM": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisir votre ROM"
+          }
+        }
+      }
+    },
+    "Choose…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisir…"
+          }
+        }
+      }
+    },
+    "Drop your ROM here, or choose it.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déposez votre ROM ici, ou choisissez-la."
+          }
+        }
+      }
+    },
     "Focus": {
       "localizations": {
         "fr": {
@@ -107,6 +187,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Réception"
+          }
+        }
+      }
+    },
+    "Install Game": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installer le jeu"
+          }
+        }
+      }
+    },
+    "Installing the game comes in a later build.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’installation du jeu arrive dans une version ultérieure."
           }
         }
       }
@@ -161,12 +261,22 @@
         }
       }
     },
-    "Overview": {
+    "Play": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vue d’ensemble"
+            "value": "Jouer"
+          }
+        }
+      }
+    },
+    "Play Super Metroid on This Mac": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jouez à Super Metroid sur ce Mac"
           }
         }
       }
@@ -201,12 +311,12 @@
         }
       }
     },
-    "SM Launcher Plus will install SuperMetroidRecomp from your own ROM, keep it up to date, and let you tune its settings and mods. Your ROM stays where it is.": {
+    "SM Launcher Plus installs SuperMetroidRecomp, a native port of Super Metroid, from your own ROM and keeps it up to date.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "SM Launcher Plus installera SuperMetroidRecomp à partir de votre propre ROM, le tiendra à jour et vous permettra de régler ses paramètres et ses mods. Votre ROM reste où elle est."
+            "value": "SM Launcher Plus installe SuperMetroidRecomp, un portage natif de Super Metroid, à partir de votre propre ROM et le tient à jour."
           }
         }
       }
@@ -217,16 +327,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Afficher le journal"
-          }
-        }
-      }
-    },
-    "Super Metroid, Native on Your Mac": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Super Metroid, natif sur votre Mac"
           }
         }
       }
@@ -257,6 +357,86 @@
           "stringUnit": {
             "state": "translated",
             "value": "La nouvelle langue s’applique après un redémarrage."
+          }
+        }
+      }
+    },
+    "This ROM has been patched. Use an unmodified copy; mods are added in SM Launcher Plus.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette ROM a été modifiée. Utilisez une copie intacte ; les mods s’ajoutent dans SM Launcher Plus."
+          }
+        }
+      }
+    },
+    "This ROM isn't the supported version. SM Launcher Plus needs Super Metroid (Japan, USA).": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette ROM n’est pas la version prise en charge. SM Launcher Plus a besoin de Super Metroid (Japan, USA)."
+          }
+        }
+      }
+    },
+    "This file is the wrong size for a SNES ROM.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce fichier n’a pas la bonne taille pour une ROM SNES."
+          }
+        }
+      }
+    },
+    "This is the ROM of “%@”, not Super Metroid.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "C’est la ROM de « %@ », pas de Super Metroid."
+          }
+        }
+      }
+    },
+    "This isn't a SNES ROM. Choose a .sfc, .smc or .zip file.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce n’est pas une ROM SNES. Choisissez un fichier .sfc, .smc ou .zip."
+          }
+        }
+      }
+    },
+    "This zip has no .sfc or .smc file in it.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce zip ne contient aucun fichier .sfc ou .smc."
+          }
+        }
+      }
+    },
+    "This zip holds more than one ROM. Choose the Super Metroid one on its own.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce zip contient plus d’une ROM. Choisissez celle de Super Metroid seule."
+          }
+        }
+      }
+    },
+    "Unable to read this file. It may be damaged.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de lire ce fichier. Il est peut-être endommagé."
           }
         }
       }
@@ -297,6 +477,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ce que fait SM Launcher Plus est noté ici : téléchargements, installations, et chaque démarrage ou arrêt du jeu."
+          }
+        }
+      }
+    },
+    "Your ROM stays where it is. Nothing is uploaded.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre ROM reste où elle est. Rien n’est envoyé en ligne."
           }
         }
       }

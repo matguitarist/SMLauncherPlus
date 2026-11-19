@@ -7,7 +7,8 @@ import SwiftUI
 /// writes <page>-light.png and <page>-dark.png for every sidebar page, and
 /// settings-<tab>-light.png and settings-<tab>-dark.png for every Settings tab, then quits.
 /// Each PNG gets a <page>-<mode>-layout.json with the grid probes (tools/check-layout.swift).
-/// APP_SNAPSHOT_PAGES=overview,log limits the pages. Add "settings" to include Settings.
+/// APP_SNAPSHOT_PAGES=play,log limits the pages. Add "settings" to include Settings, and
+/// "welcome", "welcome-checking", "welcome-error", "welcome-ready" for the welcome page's states (S-001).
 /// Add APP_ACCENT=<id> to see the pages in another accent.
 /// Add APP_SNAPSHOT_MIN=1 to shrink the main window to its smallest size first.
 enum Snapshot {
@@ -44,6 +45,24 @@ enum Snapshot {
                     capture(to: "\(dir)/\(page.rawValue)-\(mode).png")
                 }
             }
+            // Welcome page states (S-001).
+            let welcomeStates: [(String, WelcomeState)] = [
+                ("welcome", .empty),
+                ("welcome-checking", .checking("Super Metroid (Japan, USA) (En,Ja).zip")),
+                ("welcome-error", .failed(.patched, "Super Metroid (Japan, USA) (En,Ja).sfc")),
+                ("welcome-ready", .ready),
+            ]
+            let savedWelcome = model.welcome
+            for (name, state) in welcomeStates where only?.contains(name) ?? true {
+                model.sidebar = .play
+                model.welcome = state
+                for mode in ["light", "dark"] {
+                    NSApp.appearance = NSAppearance(named: mode == "light" ? .aqua : .darkAqua)
+                    try? await Task.sleep(for: .seconds(0.8))
+                    capture(to: "\(dir)/\(name)-\(mode).png")
+                }
+            }
+            model.welcome = savedWelcome
             if only == nil || only?.contains("settings") == true {
                 let main = NSApp.windows.first { $0.canBecomeMain && !$0.isSheet }
                 openSettings()

@@ -33,7 +33,11 @@ struct SMLauncherPlusApp: App {
         .commands {
             SidebarCommands()
             ToolbarCommands()
-            CommandGroup(replacing: .newItem) {}
+            CommandGroup(replacing: .newItem) {
+                Button("Choose ROM…") { model.sidebar = .play; model.showChooser = true }
+                    .keyboardShortcut("o")
+                    .disabled(model.isCheckingROM)
+            }
             CommandGroup(after: .appInfo) {
                 Button("Check for Updates…") { Updater.shared.checkForUpdates() }
                     .disabled(!Updater.shared.isAvailable)
@@ -77,7 +81,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 /// The app's state: the database, the sidebar, the Settings tab, and the log.
 @Observable
 final class AppModel {
-    var sidebar: SidebarItem? = .overview
+    var sidebar: SidebarItem? = .play
     var settingsTab: SettingsTab = .general
     var language = AppLanguage.current {
         didSet { language.apply() }
@@ -92,9 +96,45 @@ final class AppModel {
     /// Kept for the whole session, so filters survive leaving the Log page.
     let logViewer: LogViewerModel
 
+    /// S-001: the welcome page's state and its open panel.
+    var welcome = WelcomeState.empty
+    var showChooser = false
+    var isCheckingROM: Bool {
+        if case .checking = welcome { return true }
+        return false
+    }
+
     init(container: ModelContainer) {
         self.container = container
         logViewer = LogViewerModel(store: Store.log)
+        if rom != nil { welcome = .ready }
+    }
+
+    /// The accepted ROM, kept where it is.
+    var rom: RomSource? {
+        (try? context.fetch(FetchDescriptor<RomSource>()))?.first
+    }
+
+    /// Checks a .sfc, .smc or .zip and, when it's the supported ROM, keeps it (S-001).
+    /// Only a bookmark to the file is saved; the ROM itself is never copied.
+    func choose(_ url: URL) async {
+        welcome = .checking(url.lastPathComponent)
+        let result = await Task.detached(priority: .userInitiated) { () -> Result<ROMCheck.ROM, ROMCheck.Problem> in
+            let scoped = url.startAccessingSecurityScopedResource()
+            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+            return Result { () throws(ROMCheck.Problem) in try ROMCheck.check(url) }
+        }.value
+        switch result {
+        case .success(let found):
+            log.post(.info, "ROM accepted: \(found.url.path)\(found.member.isEmpty ? "" : " (\(found.member))")\(found.headered ? ", with a copier header" : "")", source: "ROM")
+            for old in (try? context.fetch(FetchDescriptor<RomSource>())) ?? [] { context.delete(old) }
+            context.insert(RomSource(rom: found))
+            try? context.save()
+            welcome = .ready
+        case .failure(let problem):
+            log.post(.warning, "ROM refused: \(url.path): \(problem)", source: "ROM")
+            welcome = .failed(problem, url.lastPathComponent)
+        }
     }
 
     /// Called once at launch.

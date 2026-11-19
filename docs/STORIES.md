@@ -28,7 +28,7 @@ UX:
 - States: empty "Play Super Metroid natively on this Mac. Drop your ROM here, or choose it."; loading "Checking your ROM…"; error inline: "This ROM isn't the supported version. SM Launcher Plus needs Super Metroid (Japan, USA)." / "This ROM has been patched. Use an unmodified copy; mods are added in SM Launcher Plus."; done: checkmark + file name (middle-truncated, full path in tooltip).
 - Words: "Choose…", "Choose Another…", "Install Game"; note under the zone: "Your ROM stays where it is. Nothing is uploaded."
 - Access: the drop zone is a button ("Choose your ROM"); status changes are announced; the error has an icon and words, not only red.
-Status: todo
+Status: done
 
 ### S-002 Download the latest game build
 As the player, after my ROM is accepted SM Launcher Plus downloads the latest macOS build of SuperMetroidRecomp

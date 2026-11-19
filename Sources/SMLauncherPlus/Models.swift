@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import SMLauncherPlusKit
 
 /// One installed, playable copy of SuperMetroidRecomp with its own saves and settings (S-003).
 /// Same shape as AM2R Launcher Plus's Profile.
@@ -27,13 +28,21 @@ final class RomSource {
     var path: String
     /// Bookmark so the ROM is found again after it's renamed or moved on the same disk.
     var bookmark: Data?
+    var kindRaw: String
+    /// The ROM's name inside the zip, or "" for a plain .sfc or .smc.
+    var member: String
+    /// The file starts with a 512-byte copier header.
+    var headered: Bool
     var sha256: String
     var checkedAt: Date = Date.now
 
-    init(url: URL, sha256: String) {
-        path = url.path
-        bookmark = try? url.bookmarkData(options: .minimalBookmark)
-        self.sha256 = sha256
+    init(rom: ROMCheck.ROM) {
+        path = rom.url.path
+        bookmark = try? rom.url.bookmarkData(options: .minimalBookmark)
+        kindRaw = rom.kind.rawValue
+        member = rom.member
+        headered = rom.headered
+        sha256 = rom.sha256
     }
 
     /// The current location: follows the bookmark, falls back to the saved path.
@@ -46,4 +55,29 @@ final class RomSource {
     }
 
     var name: String { url.lastPathComponent }
+}
+
+/// The welcome page's state while the player picks their ROM (S-001).
+enum WelcomeState: Equatable {
+    case empty
+    /// The file's name.
+    case checking(String)
+    case failed(ROMCheck.Problem, String)
+    case ready
+}
+
+extension ROMCheck.Problem {
+    /// What the welcome page says about a file that isn't the supported ROM.
+    var message: String {
+        switch self {
+        case .notROM: String(localized: "This isn't a SNES ROM. Choose a .sfc, .smc or .zip file.")
+        case .unreadable: String(localized: "Unable to read this file. It may be damaged.")
+        case .zipWithoutROM: String(localized: "This zip has no .sfc or .smc file in it.")
+        case .zipWithSeveralROMs: String(localized: "This zip holds more than one ROM. Choose the Super Metroid one on its own.")
+        case .wrongSize: String(localized: "This file is the wrong size for a SNES ROM.")
+        case .otherGame(let title): String(localized: "This is the ROM of “\(title)”, not Super Metroid.")
+        case .otherVersion: String(localized: "This ROM isn't the supported version. SM Launcher Plus needs Super Metroid (Japan, USA).")
+        case .patched: String(localized: "This ROM has been patched. Use an unmodified copy; mods are added in SM Launcher Plus.")
+        }
+    }
 }

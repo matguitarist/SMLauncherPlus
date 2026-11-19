@@ -1,5 +1,5 @@
-import LogKit
 import LogKitUI
+import SMLauncherPlusKit
 import SwiftUI
 
 struct ContentView: View {
@@ -16,14 +16,14 @@ struct ContentView: View {
             }
             .navigationSplitViewColumnWidth(min: 180, ideal: 200)
         } detail: {
-            switch model.sidebar ?? .overview {
-            case .overview: OverviewPage()
+            switch model.sidebar ?? .play {
+            case .play: PlayPage()
             case .log: LogPage()
             }
         }
         .task {
             model.load()
-            SeedData.addIfRequested(log: model.log)
+            SeedData.addIfRequested(model: model)
             SelfTest.runIfRequested(model: model)
             Snapshot.runIfRequested(model: model, openSettings: openSettings)
         }
@@ -32,35 +32,30 @@ struct ContentView: View {
 
 /// The sidebar. Snapshot mode walks through every case; rawValue names the PNG.
 enum SidebarItem: String, CaseIterable, Identifiable {
-    case overview, log
+    case play, log
 
     var id: String { rawValue }
 
     var title: String {
         switch self {
-        case .overview: String(localized: "Overview")
+        case .play: String(localized: "Play")
         case .log: String(localized: "Log")
         }
     }
 
     var symbol: String {
         switch self {
-        case .overview: "gamecontroller"
+        case .play: "play.fill"
         case .log: "doc.text.magnifyingglass"
         }
     }
 }
 
-/// What SM Launcher Plus will do, until the Play page arrives (S-001).
-struct OverviewPage: View {
+/// The Play page. Until a game is installed (S-002 to S-004) it's the welcome page.
+struct PlayPage: View {
     var body: some View {
-        ContentUnavailableView {
-            Label("Super Metroid, Native on Your Mac", systemImage: "gamecontroller")
-        } description: {
-            Text("SM Launcher Plus will install SuperMetroidRecomp from your own ROM, keep it up to date, and let you tune its settings and mods. Your ROM stays where it is.")
-        }
-        .gridArea("overview")
-        .navigationTitle("Overview")
+        WelcomePage()
+            .navigationTitle("Play")
     }
 }
 
@@ -77,10 +72,17 @@ struct LogPage: View {
     }
 }
 
-/// Seed mode for snapshots: a few log lines so the Log page has something to show.
+/// Seed mode for snapshots: a chosen ROM (only its path; there is no file), and a few log lines.
 enum SeedData {
-    static func addIfRequested(log: LogStore) {
+    static func addIfRequested(model: AppModel) {
         guard ProcessInfo.processInfo.environment["APP_SEED"] == "1", Store.isOverridden else { return }
+        if model.rom == nil {
+            let url = URL(fileURLWithPath: "/Users/Shared/ROMs/Super Metroid (Japan, USA) (En,Ja).zip")
+            model.context.insert(RomSource(rom: ROMCheck.ROM(url: url, kind: .zip, member: "Super Metroid (Japan, USA) (En,Ja).sfc",
+                                                             headered: false, sha256: SupportedROM.sha256)))
+            try? model.context.save()
+        }
+        let log = model.log
         log.post(.info, "Checked the ROM: Super Metroid (Japan, USA)", source: "ROM")
         log.post(.info, "Found SuperMetroidRecomp v0.4.6", source: "Updates")
         log.post(.debug, "Downloading supermetroid-v0.4.6-macos-arm64.zip", source: "Updates")
