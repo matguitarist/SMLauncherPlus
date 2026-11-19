@@ -65,7 +65,7 @@ UX:
 - States: error: "SM Launcher Plus couldn't set up the game. <reason>" with Try Again and Show Log.
 - Words: profile default name "Super Metroid".
 - Access: focus moves to Play.
-Status: todo
+Status: done
 
 ### S-004 Play
 As the player, I press Play and the game starts with my ROM, straight into the game (not the game's

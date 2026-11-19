@@ -83,14 +83,30 @@ enum SelfTest {
                       model.install == nil && !Self.files(in: DataFolder.downloads).contains { $0.hasSuffix(".partial") })
                 model.startInstall()
                 await Self.waitForInstall(model)
-                check("the latest build downloads and matches its checksum", model.install?.downloaded == true, model.install?.failure ?? "")
                 let zips = Self.files(in: DataFolder.downloads).filter { $0.hasSuffix("-macos-\(GameRelease.architecture).zip") }
-                check("the zip is kept in Downloads/<version>/", zips.count == 1, "\(Self.files(in: DataFolder.downloads))")
-                model.install = nil
+                check("the latest build downloads, matches its checksum and is kept in Downloads/<version>/",
+                      zips.count == 1, model.install?.failure ?? "\(Self.files(in: DataFolder.downloads))")
+                // S-003: the profile
+                let profiles = (try? model.context.fetch(FetchDescriptor<Profile>())) ?? []
+                check("the install adds one profile named Super Metroid",
+                      profiles.count == 1 && profiles.first?.name == String(localized: "Super Metroid"), "\(profiles.map(\.name))")
+                if let profile = profiles.first {
+                    check("the Play page opens on the new profile",
+                          model.install == nil && model.sidebar == .play && model.currentProfile?.uuid == profile.uuid && !model.forceWelcome)
+                    check("the game is unpacked into Profiles/<id>/game/",
+                          FileManager.default.isExecutableFile(atPath: profile.executable.path))
+                    let info = ProfileBuilder.Info.read(from: profile.folder)
+                    check("profile.json records the version and the ROM",
+                          info?.version == profile.gameVersion && info?.romSHA256 == SupportedROM.sha256)
+                    check("the game has no quarantine flag", !ProfileBuilder.isQuarantined(profile.executable))
+                    let help = Self.runHeadless(profile.executable, ["--help"])
+                    check("the game runs right after unpacking (--help)", help.status == 0 && help.output.contains("usage:"),
+                          "exit \(help.status): \(help.output.prefix(200))")
+                }
                 model.startInstall()
                 await Self.waitForInstall(model)
-                check("a verified download is reused", model.install?.reused == true && model.install?.downloaded == true)
-                model.install = nil
+                check("a verified download is reused",
+                      model.log.entries.contains { $0.message.hasPrefix("Using the downloaded") })
             } else {
                 print("SKIP the real download: set APP_SELFTEST_INSTALL=1 to download the game from GitHub")
             }
@@ -118,6 +134,27 @@ enum SelfTest {
             print(failures == 0 ? "SELFTEST PASS \(count) checks" : "SELFTEST FAIL \(failures) of \(count) checks")
             finish(code: failures == 0 ? 0 : 1)
         }
+    }
+
+    /// Runs the game with SDL's dummy video and audio, for at most 20 seconds.
+    private static func runHeadless(_ executable: URL, _ arguments: [String]) -> (status: Int32, output: String) {
+        let process = Process()
+        process.executableURL = executable
+        process.arguments = arguments
+        process.currentDirectoryURL = executable.deletingLastPathComponent()
+        var environment = ProcessInfo.processInfo.environment
+        environment["SDL_VIDEODRIVER"] = "dummy"
+        environment["SDL_AUDIODRIVER"] = "dummy"
+        process.environment = environment
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        process.standardError = pipe
+        do { try process.run() } catch { return (-1, "\(error)") }
+        let deadline = Date.now.addingTimeInterval(20)
+        while process.isRunning, Date.now < deadline { Thread.sleep(forTimeInterval: 0.1) }
+        if process.isRunning { process.terminate(); return (-2, "timed out") }
+        let output = String(decoding: pipe.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
+        return (process.terminationStatus, output)
     }
 
     /// Waits until the install task finishes (up to two minutes, for a real download).

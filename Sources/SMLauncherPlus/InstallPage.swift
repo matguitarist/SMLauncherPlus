@@ -60,11 +60,6 @@ struct InstallPage: View {
                         .foregroundStyle(.secondary)
                         .monospacedDigit()
                 }
-                if step == .setUp, state.downloaded {
-                    Text("Setting up the game comes in a later build.")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                }
                 if status == .failed, let failure = state.failure {
                     Text(failure)
                         .font(.callout)
@@ -79,14 +74,15 @@ struct InstallPage: View {
     }
 
     @ViewBuilder private var footer: some View {
-        if state.downloaded {
-            Button("Done") { model.install = nil }
-                .controlSize(.large)
-                .keyboardShortcut(.defaultAction)
+        if state.finishedName != nil {
+            EmptyView()
         } else if state.failure != nil {
             HStack(spacing: Space.md) {
                 Button("Cancel") { model.cancelInstall() }
                     .keyboardShortcut(.cancelAction)
+                if state.step == .setUp {
+                    Button("Show Log") { model.sidebar = .log }
+                }
                 Button("Try Again") { model.install = nil; model.startInstall() }
                     .buttonStyle(.borderedProminent)
                     .keyboardShortcut(.defaultAction)
@@ -113,7 +109,7 @@ struct InstallPage: View {
     }
 
     private func status(of step: InstallState.Step) -> Status {
-        if state.downloaded { return step == .setUp ? .pending : .done }
+        if state.finishedName != nil { return .done }
         if step < state.step { return .done }
         if step > state.step { return .pending }
         return state.failure == nil ? .active : .failed

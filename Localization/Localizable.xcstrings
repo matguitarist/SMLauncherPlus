@@ -1,6 +1,16 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%@ Is Ready": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ est prêt"
+          }
+        }
+      }
+    },
     "%@ found": {
       "localizations": {
         "fr": {
@@ -77,6 +87,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mises à jour automatiques"
+          }
+        }
+      }
+    },
+    "Back to Play": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retour à Jouer"
           }
         }
       }
@@ -401,6 +421,16 @@
         }
       }
     },
+    "Playing comes in the next build.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jouer arrive dans la prochaine version."
+          }
+        }
+      }
+    },
     "Preview of the accent color": {
       "localizations": {
         "fr": {
@@ -431,6 +461,16 @@
         }
       }
     },
+    "SM Launcher Plus couldn't set up the game. %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SM Launcher Plus n’a pas pu préparer le jeu. %@"
+          }
+        }
+      }
+    },
     "SM Launcher Plus installs SuperMetroidRecomp, a native port of Super Metroid, from your own ROM and keeps it up to date.": {
       "localizations": {
         "fr": {
@@ -451,16 +491,6 @@
         }
       }
     },
-    "Setting up the game comes in a later build.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La préparation du jeu arrive dans une version ultérieure."
-          }
-        }
-      }
-    },
     "Show Log": {
       "localizations": {
         "fr": {
@@ -471,12 +501,32 @@
         }
       }
     },
-    "SuperMetroidRecomp %@ Is Downloaded": {
+    "Show in Finder": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "SuperMetroidRecomp %@ est téléchargé"
+            "value": "Afficher dans le Finder"
+          }
+        }
+      }
+    },
+    "Super Metroid": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Super Metroid"
+          }
+        }
+      }
+    },
+    "SuperMetroidRecomp %@, installed %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SuperMetroidRecomp %@, installé le %@"
           }
         }
       }
@@ -501,12 +551,52 @@
         }
       }
     },
+    "The download has no SuperMetroidSNESRecomp in it.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le téléchargement ne contient pas SuperMetroidSNESRecomp."
+          }
+        }
+      }
+    },
+    "The download holds a file that would land outside the game folder (%@).": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le téléchargement contient un fichier qui sortirait du dossier du jeu (%@)."
+          }
+        }
+      }
+    },
     "The download is damaged. Try again.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Le téléchargement est endommagé. Réessayez."
+          }
+        }
+      }
+    },
+    "The downloaded zip can't be opened.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le zip téléchargé ne peut pas être ouvert."
+          }
+        }
+      }
+    },
+    "The files couldn't be put in place. There may not be enough space on the disk.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les fichiers n’ont pas pu être mis en place. Le disque manque peut-être d’espace."
           }
         }
       }

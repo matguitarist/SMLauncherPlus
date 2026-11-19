@@ -34,7 +34,7 @@ struct SMLauncherPlusApp: App {
             SidebarCommands()
             ToolbarCommands()
             CommandGroup(replacing: .newItem) {
-                Button("Choose ROM…") { model.sidebar = .play; model.showChooser = true }
+                Button("Choose ROM…") { model.sidebar = .play; model.forceWelcome = true; model.showChooser = true }
                     .keyboardShortcut("o")
                     .disabled(model.isCheckingROM)
             }
@@ -99,6 +99,17 @@ final class AppModel {
     /// S-001: the welcome page's state and its open panel.
     var welcome = WelcomeState.empty
     var showChooser = false
+    /// The profile shown on the Play page (S-003); nil picks the newest.
+    var selection: UUID?
+    /// The welcome page is open over an installed profile, to choose another ROM (⌘O).
+    var forceWelcome = false
+
+    /// The selected profile, or the most recently installed one.
+    var currentProfile: Profile? {
+        let all = (try? context.fetch(FetchDescriptor<Profile>(sortBy: [SortDescriptor(\.installedAt, order: .reverse)]))) ?? []
+        return all.first { $0.uuid == selection } ?? all.first
+    }
+
     /// S-002: the install in progress, shown in place of the welcome page.
     var install: InstallState?
     var installTask: Task<Void, Never>?

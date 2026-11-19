@@ -25,6 +25,11 @@ struct WelcomePage: View {
             }
             dropZone
             footer
+            if model.forceWelcome, model.currentProfile != nil {
+                Button("Back to Play") { model.forceWelcome = false }
+                    .buttonStyle(.borderless)
+                    .keyboardShortcut(.cancelAction)
+            }
         }
         .padding(Space.section)
         .frame(maxWidth: .infinity, maxHeight: .infinity)

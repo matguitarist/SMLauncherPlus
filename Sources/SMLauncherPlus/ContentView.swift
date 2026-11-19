@@ -1,5 +1,7 @@
+import AppKit
 import LogKitUI
 import SMLauncherPlusKit
+import SwiftData
 import SwiftUI
 
 struct ContentView: View {
@@ -55,16 +57,48 @@ enum SidebarItem: String, CaseIterable, Identifiable {
 /// The Play page: the welcome page until a game is installed, the install progress while it installs.
 struct PlayPage: View {
     @Environment(AppModel.self) private var model
+    // Read so the page redraws when a profile is added.
+    @Query private var profiles: [Profile]
 
     var body: some View {
         Group {
             if let install = model.install {
                 InstallPage(state: install)
+            } else if !model.forceWelcome, !profiles.isEmpty, let profile = model.currentProfile {
+                ProfileSummary(profile: profile)
             } else {
                 WelcomePage()
             }
         }
         .navigationTitle("Play")
+    }
+}
+
+/// An installed profile. The Play button and the game's log arrive with S-004 and S-005.
+struct ProfileSummary: View {
+    let profile: Profile
+
+    var body: some View {
+        VStack(spacing: Space.xxl) {
+            VStack(spacing: Space.sm) {
+                Text(profile.name)
+                    .font(.largeTitle.bold())
+                    .accessibilityAddTraits(.isHeader)
+                Text("SuperMetroidRecomp \(profile.gameVersion), installed \(profile.installedAt.formatted(date: .abbreviated, time: .omitted))")
+                    .foregroundStyle(.secondary)
+            }
+            VStack(spacing: Space.sm) {
+                Button("Play") {}
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.extraLarge)
+                    .disabled(true)
+                    .help("Playing comes in the next build.")
+                Button("Show in Finder") { NSWorkspace.shared.activateFileViewerSelecting([profile.gameFolder]) }
+                    .buttonStyle(.borderless)
+            }
+        }
+        .padding(Space.section)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -89,6 +123,12 @@ enum SeedData {
             let url = URL(fileURLWithPath: "/Users/Shared/ROMs/Super Metroid (Japan, USA) (En,Ja).zip")
             model.context.insert(RomSource(rom: ROMCheck.ROM(url: url, kind: .zip, member: "Super Metroid (Japan, USA) (En,Ja).sfc",
                                                              headered: false, sha256: SupportedROM.sha256)))
+            try? model.context.save()
+        }
+        if model.currentProfile == nil {
+            let profile = Profile(name: "Super Metroid", gameVersion: "0.4.6")
+            profile.installedAt = Date(timeIntervalSince1970: 1_795_100_000)
+            model.context.insert(profile)
             try? model.context.save()
         }
         let log = model.log

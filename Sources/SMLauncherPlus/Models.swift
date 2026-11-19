@@ -20,6 +20,11 @@ final class Profile {
         self.name = name
         self.gameVersion = gameVersion
     }
+
+    /// `<data folder>/Profiles/<uuid>/`: the game in `game/`, and `profile.json`.
+    var folder: URL { DataFolder.profiles.appending(path: uuid.uuidString, directoryHint: .isDirectory) }
+    var gameFolder: URL { folder.appending(path: "game", directoryHint: .isDirectory) }
+    var executable: URL { gameFolder.appending(path: ProfileBuilder.executable) }
 }
 
 /// The player's own ROM, checked and remembered where it is (S-001). Never copied.

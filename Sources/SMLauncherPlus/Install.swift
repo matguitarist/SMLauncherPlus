@@ -14,9 +14,12 @@ nonisolated enum DataFolder {
 
     /// Downloaded game zips, one folder per version.
     static var downloads: URL { url.appending(path: "Downloads", directoryHint: .isDirectory) }
+
+    /// One folder per profile: `<id>/game/` and `<id>/profile.json`.
+    static var profiles: URL { url.appending(path: "Profiles", directoryHint: .isDirectory) }
 }
 
-/// Progress of installing the game (S-002, then S-003 sets it up).
+/// Progress of installing the game: download and check (S-002), then set up a profile (S-003).
 struct InstallState: Equatable {
     enum Step: Int, CaseIterable, Comparable {
         case download, check, setUp
@@ -32,8 +35,8 @@ struct InstallState: Equatable {
     /// The zip was already downloaded and verified.
     var reused = false
     var failure: String?
-    /// Download and check are done. Setting up the game arrives with S-003.
-    var downloaded = false
+    /// Set when the profile is ready; the page shows it for a moment, then Play.
+    var finishedName: String?
 
     func title(of step: Step) -> String {
         switch step {
@@ -46,7 +49,7 @@ struct InstallState: Equatable {
     }
 
     var title: String {
-        if downloaded, let version { return String(localized: "SuperMetroidRecomp \(version) Is Downloaded") }
+        if let finishedName { return String(localized: "\(finishedName) Is Ready") }
         return String(localized: "Installing Super Metroid")
     }
 }
@@ -67,10 +70,23 @@ extension GameRelease.Failure {
     }
 }
 
+extension ProfileBuilder.Failure {
+    /// Why setting up failed, after "SM Launcher Plus couldn't set up the game."
+    var reason: String {
+        switch self {
+        case .unreadableZip: String(localized: "The downloaded zip can't be opened.")
+        case .unsafePath(let path): String(localized: "The download holds a file that would land outside the game folder (\(path)).")
+        case .missingExecutable: String(localized: "The download has no SuperMetroidSNESRecomp in it.")
+        case .copyFailed: String(localized: "The files couldn't be put in place. There may not be enough space on the disk.")
+        }
+    }
+}
+
 extension AppModel {
-    /// Reads the latest release, then downloads and checks it (S-002).
+    /// Reads the latest release, downloads and checks it (S-002), then sets it up as a new profile (S-003).
     func startInstall() {
-        guard rom != nil, installTask == nil else { return }
+        guard let rom, installTask == nil else { return }
+        let romSHA256 = rom.sha256
         install = InstallState()
         log.post(.info, "Looking for the latest SuperMetroidRecomp", source: "Install")
         let session = Self.installSession
@@ -90,9 +106,27 @@ extension AppModel {
                     Task { @MainActor in self.install?.step = .check }
                 })
                 try Task.checkCancellation()
-                install?.step = .setUp
-                install?.downloaded = true
                 log.post(.info, "\(release.zipName) matches its checksum: \(zip.path)", source: "Install")
+                install?.step = .setUp
+                let uuid = UUID()
+                let folder = DataFolder.profiles.appending(path: uuid.uuidString, directoryHint: .isDirectory)
+                let info = ProfileBuilder.Info(version: release.version, romSHA256: romSHA256)
+                let game = try await Task.detached(priority: .userInitiated) {
+                    try ProfileBuilder.build(zip: zip, profile: folder, info: info)
+                }.value
+                try Task.checkCancellation()
+                let profile = Profile(name: String(localized: "Super Metroid"), gameVersion: release.version)
+                profile.uuid = uuid
+                profile.installedAt = info.installedAt
+                context.insert(profile)
+                try? context.save()
+                log.post(.info, "\(profile.name) \(release.version) is ready in \(game.path)", source: "Install")
+                selection = uuid
+                forceWelcome = false
+                install?.finishedName = profile.name
+                try? await Task.sleep(for: .seconds(1))
+                install = nil
+                sidebar = .play
             } catch where error is CancellationError || Task.isCancelled {
                 // A request stopped by Cancel fails like any other; the cancel is what happened.
                 log.post(.info, "Install cancelled", source: "Install")
@@ -100,6 +134,9 @@ extension AppModel {
             } catch let failure as GameRelease.Failure {
                 log.post(.error, "\(failure.message) (\(failure))", source: "Install")
                 install?.failure = failure.message
+            } catch let failure as ProfileBuilder.Failure {
+                log.post(.error, "Setting up failed: \(failure)", source: "Install")
+                install?.failure = String(localized: "SM Launcher Plus couldn't set up the game. \(failure.reason)")
             } catch {
                 log.post(.error, "Install failed: \(error)", source: "Install")
                 install?.failure = String(localized: "Unable to install: \(error.localizedDescription)")
