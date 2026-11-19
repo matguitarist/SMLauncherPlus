@@ -214,10 +214,27 @@ enum SelfTest {
         controls.buttons[.l] = "L2"
         do { try controls.write(game: profile.gameFolder) } catch { check("controls are saved", false, "\(error)") }
         check("controls read back as written", ControlSettings.read(game: profile.gameFolder) == controls)
+        // S-022: the Zero Mission map art chosen inside the player's .zip (SM_GBA_ZIP), read in place.
+        let gbaZip = ProcessInfo.processInfo.environment["SM_GBA_ZIP"]
+        let pauseMap = mods.packages.flatMap(\.features).first { $0.key == "super-metroid.map-hud/pause-map" }
+        if let gbaZip, let pauseMap, let art = pauseMap.resources.first {
+            mods.setEnabled(true, pauseMap) { _ in }
+            mods.setPath(gbaZip, of: art, in: pauseMap) { _ in }
+            await mods.checkResource(art, in: pauseMap)
+            check("the Zero Mission ROM inside its .zip is recognized", mods.status(of: art, in: pauseMap) == .verified,
+                  "\(String(describing: mods.status(of: art, in: pauseMap)))")
+        } else if gbaZip == nil {
+            print("SKIP the Zero Mission map art: set SM_GBA_ZIP to your zipped Metroid: Zero Mission (USA) ROM")
+        }
         let before = profile.playTime
         model.play(extraArguments: ["--framedump", frames.path], environment: ["SDL_VIDEODRIVER": "dummy", "SDL_AUDIODRIVER": "dummy"])
         check("Play starts the game", model.isPlaying, model.playFailure?.message ?? "")
         guard let game = model.game else { return }
+        if gbaZip != nil, pauseMap != nil {
+            let during = ModState.read(from: mods.root).sharedResources["metroid.zero-mission-us"] ?? ""
+            check("for the run, the game is pointed at a private unpacked copy",
+                  during.hasPrefix(DataFolder.runROM.resolvingSymlinksInPath().path) || during.hasPrefix(DataFolder.runROM.path), during)
+        }
         let copies = Self.files(in: DataFolder.runROM).filter { $0.hasSuffix(".sfc") }
         let zipped = model.rom?.kindRaw == ROMCheck.Kind.zip.rawValue
         check("a zipped ROM is unpacked privately for the run, a plain one is passed in place",
@@ -256,6 +273,13 @@ enum SelfTest {
               "\(profile.playTime)")
         check("the temporary ROM copy is deleted when the game quits",
               Self.files(in: DataFolder.runROM).isEmpty, "\(Self.files(in: DataFolder.runROM))")
+        if let gbaZip, pauseMap != nil {
+            let after = ModState.read(from: mods.root).sharedResources["metroid.zero-mission-us"]
+            check("after the run, state.toml names the .zip again", after == gbaZip, after ?? "none")
+            let lines = ((try? String(contentsOf: game.log, encoding: .utf8)) ?? "").components(separatedBy: "\n")
+            check("the game loads the Zero Mission map art", lines.contains { $0.contains("Zero Mission donor map tiles/palette loaded") },
+                  lines.filter { $0.hasPrefix("[mods]") }.joined(separator: " | "))
+        }
         // S-005
         check("Stop isn't reported as a problem", model.lastGameFailure == nil)
         let reported = GameReport.files(game: profile.gameFolder, sessionLog: game.log, pid: game.pid).map(\.lastPathComponent)

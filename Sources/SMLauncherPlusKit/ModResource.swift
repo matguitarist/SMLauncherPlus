@@ -46,7 +46,7 @@ public struct ModResource: Identifiable, Equatable, Sendable {
         return out
     }
 
-    public enum Status: Equatable, Sendable {
+    public enum Status: Error, Equatable, Sendable {
         case notChosen
         case notFound
         case wrongSize
@@ -56,23 +56,64 @@ public struct ModResource: Identifiable, Equatable, Sendable {
         case verified
         /// Chosen; the manifest gives nothing to check it against.
         case chosen
+        /// A .zip or .7z with no file of the right type in it.
+        case noFileInArchive
+        /// A .zip or .7z with more than one file of the right type: which one is meant isn't clear.
+        case severalFilesInArchive
 
         /// Whether the game accepts it on Play (validate_resource_file).
         public func isUsable(required: Bool) -> Bool {
             switch self {
             case .verified, .chosen: true
             case .notChosen: !required
-            case .notFound, .wrongSize, .wrongFile: false
+            case .notFound, .wrongSize, .wrongFile, .noFileInArchive, .severalFilesInArchive: false
             }
         }
     }
 
-    /// validate_resource_file: the path exists, its size and its SHA-256 match.
+    /// The archives a file may be chosen in (the owner's choice): it's unpacked for each run.
+    public static let archiveExtensions = ["zip", "7z"]
+
+    /// Whether `path` is a .zip or .7z holding this resource's file, rather than the file itself.
+    public func isArchive(_ path: String) -> Bool {
+        let ext = (path as NSString).pathExtension.lowercased()
+        return !isFolder && Self.archiveExtensions.contains(ext) && !extensions.contains(ext)
+    }
+
+    /// The one file in `archive` this resource can use: matching its patterns, Finder's extras left out.
+    public func member(in archive: URL) -> Result<String, Status> {
+        guard let entries = Archive.list(archive) else { return .failure(.notFound) }
+        let matches = entries.filter { name in
+            let base = (name as NSString).lastPathComponent
+            guard !name.hasSuffix("/"), !name.hasPrefix("__MACOSX/"), !base.hasPrefix("._"), !base.isEmpty else { return false }
+            return extensions.isEmpty || extensions.contains((base as NSString).pathExtension.lowercased())
+        }
+        if matches.isEmpty { return .failure(.noFileInArchive) }
+        if matches.count > 1 { return .failure(.severalFilesInArchive) }
+        return .success(matches[0])
+    }
+
+    static let maxBytes = 64 * 1024 * 1024
+
+    /// validate_resource_file: the path exists, its size and its SHA-256 match. In a .zip or .7z,
+    /// the same checks on the one matching file inside.
     public func status(of path: String) -> Status {
         guard !path.isEmpty else { return .notChosen }
         var isDirectory: ObjCBool = false
         guard FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory), isDirectory.boolValue == isFolder else { return .notFound }
         if isFolder { return .chosen }
+        if isArchive(path) {
+            let archive = URL(fileURLWithPath: path)
+            let member: String
+            switch self.member(in: archive) {
+            case .success(let name): member = name
+            case .failure(let status): return status
+            }
+            guard let data = Archive.read(member, in: archive, limit: Self.maxBytes) else { return size != 0 ? .wrongSize : .notFound }
+            if size != 0, data.count != size { return .wrongSize }
+            guard !normalizedSHA256.isEmpty else { return .chosen }
+            return Self.normalizedSHA256(of: data) == normalizedSHA256 ? .verified : .wrongFile
+        }
         let actual = ((try? FileManager.default.attributesOfItem(atPath: path)[.size]) as? NSNumber)?.intValue ?? -1
         if size != 0, actual != size { return .wrongSize }
         guard !normalizedSHA256.isEmpty else { return .chosen }
@@ -84,6 +125,10 @@ public struct ModResource: Identifiable, Equatable, Sendable {
     /// SHA-256 of a file, leaving out a 512-byte copier header (length % 32768 == 512).
     public static func normalizedSHA256(of url: URL) -> String? {
         guard let data = try? Data(contentsOf: url, options: .alwaysMapped) else { return nil }
+        return normalizedSHA256(of: data)
+    }
+
+    static func normalizedSHA256(of data: Data) -> String {
         let body = data.count % 32768 == 512 ? data.dropFirst(512) : data[...]
         return SHA256.hash(data: body).map { String(format: "%02x", $0) }.joined()
     }

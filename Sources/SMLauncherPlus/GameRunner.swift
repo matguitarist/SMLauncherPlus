@@ -12,6 +12,8 @@ final class GameRunner {
     let log: URL
     private let process: Process
     private let rom: GameLaunch.ROMFile
+    /// Mod files unpacked from a .zip or .7z for this run (S-022), put back when it ends.
+    private let modFiles: ModFiles.Run
     private(set) var stoppedByUser = false
     /// The game's folder, and the crash files in it before this run (S-005).
     let gameFolder: URL
@@ -49,6 +51,7 @@ final class GameRunner {
         let fm = FileManager.default
         guard fm.isExecutableFile(atPath: profile.executable.path) else { throw .gameMissing }
         do { rom = try GameLaunch.prepareROM(source, root: DataFolder.runROM) } catch { throw .rom(error) }
+        modFiles = ModFiles.prepare(root: ModCatalog.root(game: profile.gameFolder), runRoot: DataFolder.runROM)
 
         let logs = Self.logFolder(for: profile)
         try? fm.createDirectory(at: logs, withIntermediateDirectories: true)
@@ -72,15 +75,17 @@ final class GameRunner {
             process.standardOutput = handle
             process.standardError = handle
         }
-        let rom = rom
+        let rom = rom, modFiles = modFiles
         process.terminationHandler = { finished in
             let status = finished.terminationStatus
-            // The temporary ROM copy goes the moment the game quits.
+            // The temporary ROM copy goes the moment the game quits, and so do unpacked mod files.
             rom.discard()
+            modFiles.restore()
             Task { @MainActor in onExit(status) }
         }
         do { try process.run() } catch {
             rom.discard()
+            modFiles.restore()
             throw .couldNotStart(error.localizedDescription)
         }
         pid = process.processIdentifier

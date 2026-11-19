@@ -31,6 +31,36 @@
         }
       }
     },
+    "%@ has no %@ file in it.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ ne contient aucun fichier %2$@."
+          }
+        }
+      }
+    },
+    "%@ has no file in it.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ne contient aucun fichier."
+          }
+        }
+      }
+    },
+    "%@ holds more than one file this could be. Choose a .zip or .7z with only one.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ contient plusieurs fichiers qui pourraient convenir. Choisissez un .zip ou un .7z qui n’en contient qu’un."
+          }
+        }
+      }
+    },
     "%@ isn't %@.": {
       "localizations": {
         "fr": {

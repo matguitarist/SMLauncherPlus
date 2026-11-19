@@ -219,6 +219,7 @@ final class AppModel {
         log.post(.info, "Opened the database (\(profiles) profiles)", source: "App")
         // A temporary ROM copy left by a crash or a forced quit.
         GameLaunch.removeLeftoverROMs(in: DataFolder.runROM)
+        ModFiles.restoreLeftovers(in: DataFolder.runROM)
         if DataFolder.isMissing { log.post(.warning, "The data folder's disk isn't connected: \(DataFolder.url.path)", source: "Data") }
         // Profiles from an earlier launcher, or a filter that changed in this one.
         for profile in (try? context.fetch(FetchDescriptor<Profile>())) ?? [] { installFilters(in: profile.gameFolder) }

@@ -317,6 +317,8 @@ private struct ModList: View {
             }
         }
         .onDisappear { model.modMessage = nil }
+        // While the game runs, state.toml points at unpacked copies; read it again once they're put back.
+        .onChange(of: model.isPlaying) { mods.reload() }
         .confirmationDialog(Text("Remove “\(removing?.name ?? "")”?"), isPresented: Binding(get: { removing != nil }, set: { if !$0 { removing = nil } })) {
             Button("Remove", role: .destructive) {
                 if let removing { model.removeMod(removing, from: profile, mods: mods) }
@@ -448,12 +450,14 @@ private struct ResourceRow: View {
     private var contentTypes: [UTType] {
         if resource.isFolder { return [.folder] }
         let types = resource.extensions.compactMap { UTType(filenameExtension: $0) }
-        return types.isEmpty ? [.item] : types
+        guard !types.isEmpty else { return [.item] }
+        // The owner's choice: the file may also be chosen inside a .zip or .7z; it's unpacked for each run.
+        return types + [.zip] + [UTType(filenameExtension: "7z")].compactMap { $0 }
     }
 
     private func isProblem(_ status: ModResource.Status?) -> Bool {
         switch status {
-        case .notFound, .wrongSize, .wrongFile: true
+        case .notFound, .wrongSize, .wrongFile, .noFileInArchive, .severalFilesInArchive: true
         case .notChosen: resource.required
         default: false
         }
@@ -463,7 +467,7 @@ private struct ResourceRow: View {
         switch status {
         case nil: "clock"
         case .notChosen: resource.required ? "exclamationmark.triangle.fill" : "circle.dashed"
-        case .notFound, .wrongSize, .wrongFile: "exclamationmark.triangle.fill"
+        case .notFound, .wrongSize, .wrongFile, .noFileInArchive, .severalFilesInArchive: "exclamationmark.triangle.fill"
         case .verified: "checkmark.seal.fill"
         case .chosen: "doc"
         }
@@ -483,6 +487,10 @@ private struct ResourceRow: View {
         case .notFound: return String(localized: "\(name) wasn't found. It may have been moved or deleted.")
         case .wrongSize, .wrongFile:
             return expected.isEmpty ? String(localized: "\(name) isn't the file this feature needs.") : String(localized: "\(name) isn't \(expected).")
+        case .noFileInArchive:
+            let kinds = resource.extensions.map { "." + $0 }.formatted(.list(type: .or))
+            return kinds.isEmpty ? String(localized: "\(name) has no file in it.") : String(localized: "\(name) has no \(kinds) file in it.")
+        case .severalFilesInArchive: return String(localized: "\(name) holds more than one file this could be. Choose a .zip or .7z with only one.")
         case .verified: return String(localized: "\(name), checked")
         case .chosen: return name
         }

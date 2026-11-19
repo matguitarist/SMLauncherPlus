@@ -52,3 +52,6 @@ belongs to AM2R out: GameMaker, data.win, VCDiff/xdelta, Rosetta, Butterscotch, 
   One exception, the owner's choice (2026-11-19): the game can only read a plain .sfc, so a zipped or
   headered ROM is unpacked at Play into a private temp folder (mode 700) and deleted when the game
   quits; leftovers are removed at the next launch. A plain .sfc or .smc is always passed in place.
+  The same goes for files a mod asks for (S-022), the owner's choice (2026-11-19): a .zip or .7z
+  holding one (like the Zero Mission .gba) is accepted, unpacked at Play into that private folder,
+  pointed to from state.toml for the run, then deleted and state.toml set back to the archive.
