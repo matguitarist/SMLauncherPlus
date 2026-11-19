@@ -101,7 +101,7 @@ UX:
 - States: no log: "The game left no log."
 - Words: "Show Log", "Report a Problem", "Close".
 - Access: banner announced; the log sheet is searchable with ⌘F.
-Status: todo
+Status: done
 
 ### S-006 Bundle nothing, credit everything
 As the player, About and the README credit SuperMetroidRecomp, snesrecomp and their license, and

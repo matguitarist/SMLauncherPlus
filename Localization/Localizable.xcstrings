@@ -231,6 +231,16 @@
         }
       }
     },
+    "Close": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fermer"
+          }
+        }
+      }
+    },
     "Done": {
       "localizations": {
         "fr": {
@@ -351,6 +361,16 @@
         }
       }
     },
+    "Game Log": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Journal du jeu"
+          }
+        }
+      }
+    },
     "General": {
       "localizations": {
         "fr": {
@@ -451,6 +471,36 @@
         }
       }
     },
+    "It quit with code %d and left a crash report.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il s’est arrêté avec le code %d et a laissé un rapport de plantage."
+          }
+        }
+      }
+    },
+    "It quit with code %d.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il s’est arrêté avec le code %d."
+          }
+        }
+      }
+    },
+    "It stopped before writing anything.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il s’est arrêté avant d’écrire quoi que ce soit."
+          }
+        }
+      }
+    },
     "Keep Playing": {
       "localizations": {
         "fr": {
@@ -487,6 +537,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Journal"
+          }
+        }
+      }
+    },
+    "Log — %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Journal — %@"
           }
         }
       }
@@ -601,6 +661,26 @@
         }
       }
     },
+    "Read what the game wrote before it stopped": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lire ce que le jeu a écrit avant de s’arrêter"
+          }
+        }
+      }
+    },
+    "Report a Problem": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signaler un problème"
+          }
+        }
+      }
+    },
     "Restart Now": {
       "localizations": {
         "fr": {
@@ -641,6 +721,16 @@
         }
       }
     },
+    "Save the log, replay and crash files to a zip on your Desktop, without your ROM": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enregistrer le journal, les fichiers de reprise et de plantage dans un zip sur votre bureau, sans votre ROM"
+          }
+        }
+      }
+    },
     "Search Mods": {
       "localizations": {
         "fr": {
@@ -677,6 +767,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Afficher dans le Finder"
+          }
+        }
+      }
+    },
+    "Show the log file in Finder": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher le fichier journal dans le Finder"
           }
         }
       }
@@ -827,6 +927,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Le jeu est en cours. Les changements s’appliqueront la prochaine fois que vous jouerez."
+          }
+        }
+      }
+    },
+    "The game left no log.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le jeu n’a laissé aucun journal."
+          }
+        }
+      }
+    },
+    "The game left nothing to report.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le jeu n’a rien laissé à signaler."
+          }
+        }
+      }
+    },
+    "The game stopped unexpectedly": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le jeu s’est arrêté de façon inattendue"
           }
         }
       }
@@ -997,6 +1127,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Impossible de lire ce fichier. Il est peut-être endommagé."
+          }
+        }
+      }
+    },
+    "Unable to save the report. There may not be enough space on the disk.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d’enregistrer le rapport. Le disque manque peut-être d’espace."
           }
         }
       }

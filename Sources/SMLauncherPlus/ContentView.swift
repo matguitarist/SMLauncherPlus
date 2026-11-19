@@ -97,6 +97,9 @@ struct ProfileSummary: View {
                 Text(PlayStats.summary(lastPlayed: profile.lastPlayedAt, playTime: profile.playTime))
                     .font(.callout)
                     .foregroundStyle(.secondary)
+                if let failure = model.lastGameFailure, failure.profile == profile.uuid, !model.isPlaying {
+                    FailureBanner(failure: failure)
+                }
                 if let failure = model.playFailure, !model.isPlaying {
                     Label(failure.message, systemImage: "exclamationmark.triangle.fill")
                         .foregroundStyle(.orange)
@@ -116,6 +119,12 @@ struct ProfileSummary: View {
             Button("Keep Playing", role: .cancel) {}
         } message: {
             Text("Unsaved progress since your last save station is lost.")
+        }
+        .sheet(item: $model.logSheet) { item in
+            LogSheet(item: item)
+        }
+        .onChange(of: model.lastGameFailure) { _, failure in
+            if failure != nil { AccessibilityNotification.Announcement(String(localized: "The game stopped unexpectedly")).post() }
         }
         .onChange(of: model.playFailure) { _, failure in
             if let failure { AccessibilityNotification.Announcement(failure.message).post() }
@@ -148,6 +157,45 @@ struct ProfileSummary: View {
                 .keyboardShortcut(.defaultAction)
                 .help("Start Super Metroid (⌘R)")
         }
+    }
+}
+
+/// The game quit with an error: inline on the Play page, not an alert (S-005).
+struct FailureBanner: View {
+    @Environment(AppModel.self) private var model
+    let failure: GameFailure
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Space.md) {
+            Label {
+                VStack(alignment: .leading, spacing: Space.xs) {
+                    Text("The game stopped unexpectedly")
+                        .font(.headline)
+                    Text(failure.newCrashFiles.isEmpty
+                         ? String(localized: "It quit with code \(failure.status).")
+                         : String(localized: "It quit with code \(failure.status) and left a crash report."))
+                        .foregroundStyle(.secondary)
+                    if let error = model.reportError {
+                        Text(error).foregroundStyle(.orange)
+                    }
+                }
+            } icon: {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .symbolRenderingMode(.multicolor)
+            }
+            HStack(spacing: Space.md) {
+                Button("Show Log") { model.showGameLog() }
+                    .help("Read what the game wrote before it stopped")
+                Button("Report a Problem") { model.reportProblem() }
+                    .help("Save the log, replay and crash files to a zip on your Desktop, without your ROM")
+            }
+            .padding(.leading, Space.xxl)
+        }
+        .padding(Space.lg)
+        .frame(width: 480, alignment: .leading)
+        .background(.background.secondary, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: Radius.card, style: .continuous).strokeBorder(.separator, lineWidth: 1))
+        .accessibilityElement(children: .contain)
     }
 }
 
@@ -211,6 +259,28 @@ enum SeedData {
         log.post(.info, "Started the game", source: "Game")
         log.post(.warning, "The game took 4 seconds to open its window", source: "Game")
         log.post(.error, "The game quit with code 6", source: "Game")
+    }
+
+    /// A short made-up game log in the game's own style, for the log sheet snapshot.
+    static func gameLog() -> URL {
+        let folder = DataFolder.url.appending(path: "Logs/seed", directoryHint: .isDirectory)
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let file = folder.appending(path: "2026-11-19T14-32-52.log")
+        try? """
+        [sm] session pid=8519; console=off
+        [host +0.000s] host_report: Super Metroid 0.4.6
+        [host +0.002s] config parsed: output=0 new_renderer=1 scale=3 fullscreen=0 audio=1
+        [host +0.023s] rom resolved: Super Metroid.sfc
+        [host +0.051s] SDL init ok: video=cocoa audio=coreaudio
+        [mods] vanilla bug fixes: 13/13 on
+        [mods] intro skip: 1/1 hooks
+        [Gamepad] No joysticks detected.
+        [host +0.083s] entering main loop
+        [host +812.410s] error: audio device lost
+        [host +812.412s] fatal: renderer failed to present frame
+
+        """.write(to: file, atomically: true, encoding: .utf8)
+        return file
     }
 
     /// Two small made-up packages for the Mods page snapshots, with each kind of option.

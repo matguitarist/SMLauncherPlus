@@ -13,6 +13,11 @@ final class GameRunner {
     private let process: Process
     private let rom: GameLaunch.ROMFile
     private(set) var stoppedByUser = false
+    /// The game's folder, and the crash files in it before this run (S-005).
+    let gameFolder: URL
+    let crashFilesBefore: Set<String>
+    /// Replay files carry the process id in their names.
+    private(set) var pid: Int32 = 0
 
     static func logFolder(for profile: Profile) -> URL {
         DataFolder.url.appending(path: "Logs/\(profile.uuid.uuidString)", directoryHint: .isDirectory)
@@ -52,6 +57,8 @@ final class GameRunner {
         log = logs.appending(path: "\(stamp).log")
         fm.createFile(atPath: log.path, contents: nil)
         profileID = profile.uuid
+        gameFolder = profile.gameFolder
+        crashFilesBefore = GameReport.crashFiles(in: profile.gameFolder)
 
         process = Process()
         process.executableURL = profile.executable
@@ -76,6 +83,7 @@ final class GameRunner {
             rom.discard()
             throw .couldNotStart(error.localizedDescription)
         }
+        pid = process.processIdentifier
     }
 
     var isRunning: Bool { process.isRunning }
@@ -108,6 +116,7 @@ extension AppModel {
     func play(extraArguments: [String] = [], environment: [String: String] = [:]) {
         guard game == nil, install == nil, let profile = currentProfile else { return }
         playFailure = nil
+        lastGameFailure = nil
         guard let source = rom else {
             playFailure = .rom(.missing)
             return
@@ -136,10 +145,81 @@ extension AppModel {
             profile.lastPlayedAt = .now
             try? context.save()
         }
+        let crashFiles = GameReport.crashFiles(in: game.gameFolder)
+        if GameReport.isFailure(status: status, stoppedByUser: game.stoppedByUser, crashFilesBefore: game.crashFilesBefore, after: crashFiles) {
+            lastGameFailure = GameFailure(profile: game.profileID, log: game.log, status: status, pid: game.pid, gameFolder: game.gameFolder,
+                                          newCrashFiles: crashFiles.subtracting(game.crashFilesBefore).sorted())
+        }
         let seconds = Int(Date.now.timeIntervalSince(game.startedAt))
         log.post(status == 0 || game.stoppedByUser ? .info : .error,
                  "The game ended after \(seconds) s with status \(status)\(game.stoppedByUser ? " (stopped)" : ""). Log: \(game.log.path)",
                  source: "Play")
         self.game = nil
+    }
+}
+
+/// A run that ended with an error code or a crash file (S-005).
+struct GameFailure: Equatable {
+    var profile: UUID
+    var log: URL
+    var status: Int32
+    var pid: Int32
+    var gameFolder: URL
+    var newCrashFiles: [String]
+}
+
+/// The game log shown in a sheet.
+struct LogSheetItem: Identifiable, Equatable {
+    var log: URL
+    var profileName: String
+    var id: URL { log }
+}
+
+extension AppModel {
+    /// Show Log on the failure banner: the failed run's log in a sheet.
+    func showGameLog() {
+        guard let failure = lastGameFailure else { return }
+        let name = currentProfile?.name ?? String(localized: "Super Metroid")
+        logSheet = LogSheetItem(log: failure.log, profileName: name)
+    }
+
+    /// Where Report a Problem saves its zip: the Desktop, or the test data folder.
+    static var reportFolder: URL {
+        Store.isOverridden ? DataFolder.url.appending(path: "Reports", directoryHint: .isDirectory) : URL.desktopDirectory
+    }
+
+    /// Report a Problem: the files the game's README asks for, zipped, then shown in Finder.
+    @discardableResult
+    func reportProblem(reveal: Bool = true) -> URL? {
+        guard let failure = lastGameFailure else { return nil }
+        let profile = currentProfile
+        let files = GameReport.files(game: failure.gameFolder, sessionLog: failure.log, pid: failure.pid)
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
+        let about = """
+        SM Launcher Plus \(version)
+        SuperMetroidRecomp \(profile?.gameVersion ?? "?")
+        macOS \(ProcessInfo.processInfo.operatingSystemVersionString), \(GameRelease.architecture)
+        Exit code: \(failure.status)
+        New crash files: \(failure.newCrashFiles.isEmpty ? "none" : failure.newCrashFiles.joined(separator: ", "))
+        Date: \(Date.now.formatted(.iso8601))
+
+        What happened, and roughly when:
+
+        """
+        let folder = Self.reportFolder
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        do {
+            let zip = try GameReport.makeZip(files: files, about: about, in: folder)
+            log.post(.info, "Saved a problem report with \(files.count) files: \(zip.path)", source: "Report")
+            if reveal { NSWorkspace.shared.activateFileViewerSelecting([zip]) }
+            reportError = nil
+            return zip
+        } catch {
+            log.post(.error, "Report a Problem failed: \(error)", source: "Report")
+            reportError = error == .nothingToReport
+                ? String(localized: "The game left nothing to report.")
+                : String(localized: "Unable to save the report. There may not be enough space on the disk.")
+            return nil
+        }
     }
 }

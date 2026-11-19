@@ -126,6 +126,10 @@ final class AppModel {
     /// Why Play didn't start, shown under the button.
     var playFailure: GameRunner.StartError?
     var confirmStop = false
+    /// S-005: the last run failed; the Play page shows a banner until the next Play.
+    var lastGameFailure: GameFailure?
+    var logSheet: LogSheetItem?
+    var reportError: String?
 
     var install: InstallState?
     var installTask: Task<Void, Never>?

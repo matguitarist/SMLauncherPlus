@@ -199,6 +199,42 @@ enum SelfTest {
               "\(profile.playTime)")
         check("the temporary ROM copy is deleted when the game quits",
               Self.files(in: DataFolder.runROM).isEmpty, "\(Self.files(in: DataFolder.runROM))")
+        // S-005
+        check("Stop isn't reported as a problem", model.lastGameFailure == nil)
+        let reported = GameReport.files(game: profile.gameFolder, sessionLog: game.log, pid: game.pid).map(\.lastPathComponent)
+        check("a report takes the run's replay files and its run report",
+              reported.contains { $0.hasSuffix(".replay") } && reported.contains { $0.hasSuffix(".replay.sav") }
+                && reported.contains("last_run_report.json"), "\(reported)")
+        model.play(extraArguments: ["--no-such-option"], environment: ["SDL_VIDEODRIVER": "dummy", "SDL_AUDIODRIVER": "dummy"])
+        let failDeadline = Date.now.addingTimeInterval(15)
+        while model.isPlaying, Date.now < failDeadline { try? await Task.sleep(for: .milliseconds(100)) }
+        check("a game that quits with an error shows the banner", model.lastGameFailure?.status == 2,
+              "\(String(describing: model.lastGameFailure))")
+        model.showGameLog()
+        check("Show Log opens the run's log", model.logSheet?.log == model.lastGameFailure?.log && model.logSheet != nil)
+        model.logSheet = nil
+        if let zip = model.reportProblem(reveal: false) {
+            let names = Self.zipNames(zip)
+            check("Report a Problem saves a zip with the log and about.txt, never the ROM",
+                  names.contains("about.txt") && names.contains { $0.hasSuffix(".log") }
+                    && !names.contains { ["sfc", "smc", "zip"].contains(($0 as NSString).pathExtension.lowercased()) }, "\(names)")
+        } else {
+            check("Report a Problem saves a zip", false, model.reportError ?? "")
+        }
+        model.play(extraArguments: ["--help"], environment: ["SDL_VIDEODRIVER": "dummy", "SDL_AUDIODRIVER": "dummy"])
+        check("Play clears the banner", model.lastGameFailure == nil)
+        while model.isPlaying { try? await Task.sleep(for: .milliseconds(100)) }
+    }
+
+    private static func zipNames(_ zip: URL) -> [String] {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/zipinfo")
+        process.arguments = ["-1", zip.path]
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        try? process.run()
+        process.waitUntilExit()
+        return String(decoding: pipe.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self).split(separator: "\n").map(String.init)
     }
 
     /// True once a dumped frame shows game state 1 (title screen) at $0998.

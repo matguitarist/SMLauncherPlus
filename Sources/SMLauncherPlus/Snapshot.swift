@@ -10,7 +10,7 @@ import SwiftUI
 /// Each PNG gets a <page>-<mode>-layout.json with the grid probes (tools/check-layout.swift).
 /// APP_SNAPSHOT_PAGES=play,log limits the pages. Add "settings" to include Settings, and
 /// "install-progress", "install-error", "install-setup-error", "install-ready" for the install page (S-002, S-003), and
-/// "play-running", "play-rom-missing" for the Play page (S-004), and
+/// "play-running", "play-rom-missing" for the Play page (S-004), "play-failed", "log-sheet" (S-005), and
 /// "welcome", "welcome-checking", "welcome-error" (yellow), "welcome-wrong" (red), "welcome-ready" for the welcome page's states (S-001).
 /// Add APP_ACCENT=<id> to see the pages in another accent.
 /// Add APP_SNAPSHOT_MIN=1 to shrink the main window to its smallest size first.
@@ -96,6 +96,28 @@ enum Snapshot {
                 }
             }
             model.install = nil
+            // S-005: the failure banner, then the log sheet over it.
+            if let profile = model.currentProfile, only == nil || only?.contains("play-failed") == true || only?.contains("log-sheet") == true {
+                let log = SeedData.gameLog()
+                model.sidebar = .play
+                model.lastGameFailure = GameFailure(profile: profile.uuid, log: log, status: 6, pid: 1, gameFolder: profile.gameFolder, newCrashFiles: [])
+                for mode in ["light", "dark"] where only?.contains("play-failed") ?? true {
+                    NSApp.appearance = NSAppearance(named: mode == "light" ? .aqua : .darkAqua)
+                    try? await Task.sleep(for: .seconds(0.8))
+                    capture(to: "\(dir)/play-failed-\(mode).png")
+                }
+                if only?.contains("log-sheet") ?? true {
+                    model.showGameLog()
+                    for mode in ["light", "dark"] {
+                        NSApp.appearance = NSAppearance(named: mode == "light" ? .aqua : .darkAqua)
+                        try? await Task.sleep(for: .seconds(1.2))
+                        capture(to: "\(dir)/log-sheet-\(mode).png", window: NSApp.windows.first { $0.isSheet && $0.isVisible })
+                    }
+                    model.logSheet = nil
+                    try? await Task.sleep(for: .seconds(0.5))
+                }
+                model.lastGameFailure = nil
+            }
             // Play states (S-004): the game isn't started, only what the page shows.
             for name in ["play-running", "play-rom-missing"] where only?.contains(name) ?? true {
                 model.sidebar = .play
