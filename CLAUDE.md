@@ -20,6 +20,30 @@ Shared rules for how every project is laid out and named:
 - `Icon/AppIcon.icon` the app icon, an Icon Composer file (JSON plus SVG layers). `build.sh` compiles it with `tools/make_icon.sh`; `tools/icon_review.sh` renders every look into one PNG.
 - `docs/` the brief, the screen index, and the user stories, when they exist.
 
+## Start from AM2R Launcher Plus
+
+`~/Developer/AM2RLauncherPlus` is the sibling app with the same flow. Before you code a story, read
+its version of that story, then port and rename its code rather than writing new code. Keep what
+belongs to AM2R out: GameMaker, data.win, VCDiff/xdelta, Rosetta, Butterscotch, randomizer, room log.
+
+| Story here | Start from there |
+| --- | --- |
+| S-001 ROM check | `Kit/AM2R11Check.swift` (hash rule, `HashCache`, zip reading), `WelcomePage.swift`, the bookmark in `Models.swift` |
+| S-002 download | `Kit/PatchData.swift` (GitHub API, download with progress, typed `Failure`), `InstallPage.swift` |
+| S-003 profile | `Kit/ProfileBuilder.swift`, `Kit/ProfileName.swift`, the `Profile` model in `Models.swift` (SwiftData) |
+| S-004 play | `GameRunner.swift` (start, watch, play time) |
+| S-005 why it stopped | `LogSheet.swift`, `DebugLogWindow.swift`, `LauncherLog.swift`, `Kit/DebugLog.swift` |
+| S-010 to S-012 settings | `Kit/GameConfig.swift` (`IniFile` edits only the keys asked for), `GameSettingsView.swift` |
+| S-013 data folder | `Kit/FolderMove.swift` |
+| S-020 to S-022 mods | `Kit/ModPackage.swift`, `Kit/ModCatalog.swift`, `ModsPage.swift` |
+| S-030, S-031 updates | `Kit/UpdateCheck.swift` (once a day, cached answer) |
+| S-032 profiles | `ContentView.swift` (profile list, delete with kept saves) |
+| S-033 saves | `Kit/SaveBackup.swift`, `BackupsSheet.swift` |
+| Snapshots, self-test, seed | `Snapshot.swift`, `SelfTest.swift`, `SeedData.swift` |
+
+`Kit/` means `Sources/AM2RLauncherPlusKit/`; the rest is in `Sources/AM2RLauncherPlus/`. Its
+`docs/FIXLOG.md` lists bugs already fixed there; don't bring them back.
+
 ## Checks specific to this app
 
 - `APP_SNAPSHOT_MIN=1 tools/snap.sh` shoots the window at its smallest size.
