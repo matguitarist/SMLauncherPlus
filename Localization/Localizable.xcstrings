@@ -31,6 +31,16 @@
         }
       }
     },
+    "%lld, from %lld to %lld": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld, de %lld à %lld"
+          }
+        }
+      }
+    },
     ".sfc, .smc, or a .zip holding one": {
       "localizations": {
         "fr": {
@@ -71,6 +81,16 @@
         }
       }
     },
+    "Also turned on: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aussi activé : %@"
+          }
+        }
+      }
+    },
     "Appearance": {
       "localizations": {
         "fr": {
@@ -107,6 +127,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Annuler"
+          }
+        }
+      }
+    },
+    "Changes apply the next time you play %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les changements s’appliquent la prochaine fois que vous jouez à %@."
           }
         }
       }
@@ -241,6 +271,16 @@
         }
       }
     },
+    "Experimental": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expérimental"
+          }
+        }
+      }
+    },
     "Failed": {
       "localizations": {
         "fr": {
@@ -267,6 +307,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Concentration"
+          }
+        }
+      }
+    },
+    "From %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De %@"
+          }
+        }
+      }
+    },
+    "From %@, by %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De %@, par %@"
+          }
+        }
+      }
+    },
+    "From %lld to %lld": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De %lld à %lld"
           }
         }
       }
@@ -321,6 +391,16 @@
         }
       }
     },
+    "Go to Play": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aller à Jouer"
+          }
+        }
+      }
+    },
     "In progress": {
       "localizations": {
         "fr": {
@@ -347,6 +427,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Installer le jeu"
+          }
+        }
+      }
+    },
+    "Install the game on the Play page, then choose its mods here.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installez le jeu dans la page Jouer, puis choisissez ses mods ici."
           }
         }
       }
@@ -421,6 +511,16 @@
         }
       }
     },
+    "Mods": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mods"
+          }
+        }
+      }
+    },
     "Never played": {
       "localizations": {
         "fr": {
@@ -437,6 +537,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aucune activité"
+          }
+        }
+      }
+    },
+    "No Game Installed": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun jeu installé"
           }
         }
       }
@@ -527,6 +637,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "SM Launcher Plus installe SuperMetroidRecomp, un portage natif de Super Metroid, à partir de votre propre ROM et le tient à jour."
+          }
+        }
+      }
+    },
+    "Search Mods": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechercher des mods"
           }
         }
       }
@@ -701,6 +821,16 @@
         }
       }
     },
+    "The game is running. Changes apply the next time you play.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le jeu est en cours. Les changements s’appliqueront la prochaine fois que vous jouerez."
+          }
+        }
+      }
+    },
     "The latest release can't be checked: it has no checksum for the Mac build. Try again later.": {
       "localizations": {
         "fr": {
@@ -781,6 +911,16 @@
         }
       }
     },
+    "This version of the game has no mods.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette version du jeu n’a aucun mod."
+          }
+        }
+      }
+    },
     "This zip has no .sfc or .smc file in it.": {
       "localizations": {
         "fr": {
@@ -807,6 +947,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Réessayer"
+          }
+        }
+      }
+    },
+    "Turned off: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Désactivé : %@"
           }
         }
       }
@@ -847,6 +997,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Impossible de lire ce fichier. Il est peut-être endommagé."
+          }
+        }
+      }
+    },
+    "Unable to save your choice: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d’enregistrer votre choix : %@"
           }
         }
       }

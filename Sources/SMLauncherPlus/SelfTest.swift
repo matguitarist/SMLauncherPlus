@@ -148,6 +148,20 @@ enum SelfTest {
         let frames = FileManager.default.temporaryDirectory.appending(path: "SMLauncherPlus-frames-\(UUID())", directoryHint: .isDirectory)
         try? FileManager.default.createDirectory(at: frames, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: frames) }
+        // S-020: the game's own packages, and choices written the way the game writes them.
+        let mods = ModsModel(game: profile.gameFolder)
+        let stateFile = mods.root.appending(path: "state.toml")
+        Self.check("the Mods page reads the game's packages", mods.packages.count >= 5, "\(mods.packages.map(\.id))")
+        let features = mods.packages.flatMap(\.features)
+        let introSkip = features.first { $0.key == "super-metroid.pacing/intro-skip" }
+        let elevators = features.first { $0.key == "super-metroid.pacing/elevators" }
+        if let introSkip, let elevators, let speed = elevators.options.first(where: { $0.id == "speed" }) {
+            mods.setEnabled(true, introSkip) { _ in }
+            mods.setEnabled(true, elevators) { _ in }
+            mods.setValue("3x", of: speed, in: elevators) { _ in }
+        }
+        Self.check("Skippable intro and Faster elevators (3x) are saved",
+                   introSkip != nil && ModState.read(from: mods.root).isEnabled(introSkip!) && mods.error == nil)
         let before = profile.playTime
         model.play(extraArguments: ["--framedump", frames.path], environment: ["SDL_VIDEODRIVER": "dummy", "SDL_AUDIODRIVER": "dummy"])
         check("Play starts the game", model.isPlaying, model.playFailure?.message ?? "")
@@ -166,6 +180,17 @@ enum SelfTest {
               (try? String(contentsOf: game.log, encoding: .utf8).suffix(400)).map(String.init) ?? "")
         let arguments = (try? String(contentsOf: game.log, encoding: .utf8)) ?? ""
         check("the game read the profile's config.ini", arguments.contains("config parsed"))
+        check("the game turns on the features chosen on the Mods page",
+              arguments.contains("[mods] intro skip: 1/1") && arguments.contains("[mods] elevators 3x"),
+              arguments.components(separatedBy: "\n").filter { $0.hasPrefix("[mods]") }.joined(separator: " | "))
+        // The game rewrites state.toml when it starts: the launcher's reading and writing must give back the same text.
+        let original = (try? String(contentsOf: stateFile, encoding: .utf8)) ?? ""
+        let rewritten = ModState.parse(original).text()
+        let difference = zip(original.components(separatedBy: "\n"), rewritten.components(separatedBy: "\n"))
+            .enumerated().first { $0.element.0 != $0.element.1 }
+            .map { "line \($0.offset + 1): \($0.element.0) → \($0.element.1)" } ?? "\(original.count) vs \(rewritten.count) characters"
+        check("the launcher writes state.toml exactly as the game does", !original.isEmpty && rewritten == original, difference)
+        check("the game keeps the launcher's choices", original.contains("speed = \"3x\""))
         model.stopGame()
         let stopDeadline = Date.now.addingTimeInterval(10)
         while model.isPlaying, Date.now < stopDeadline { try? await Task.sleep(for: .milliseconds(100)) }

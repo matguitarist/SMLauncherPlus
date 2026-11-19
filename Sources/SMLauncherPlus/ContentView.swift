@@ -20,6 +20,7 @@ struct ContentView: View {
         } detail: {
             switch model.sidebar ?? .play {
             case .play: PlayPage()
+            case .mods: ModsPage()
             case .log: LogPage()
             }
         }
@@ -35,13 +36,14 @@ struct ContentView: View {
 
 /// The sidebar. Snapshot mode walks through every case; rawValue names the PNG.
 enum SidebarItem: String, CaseIterable, Identifiable {
-    case play, log
+    case play, mods, log
 
     var id: String { rawValue }
 
     var title: String {
         switch self {
         case .play: String(localized: "Play")
+        case .mods: String(localized: "Mods")
         case .log: String(localized: "Log")
         }
     }
@@ -49,6 +51,7 @@ enum SidebarItem: String, CaseIterable, Identifiable {
     var symbol: String {
         switch self {
         case .play: "play.fill"
+        case .mods: "puzzlepiece.extension"
         case .log: "doc.text.magnifyingglass"
         }
     }
@@ -199,6 +202,7 @@ enum SeedData {
             model.context.insert(profile)
             try? model.context.save()
         }
+        if let profile = model.currentProfile { seedMods(in: profile.gameFolder) }
         let log = model.log
         log.post(.info, "Checked the ROM: Super Metroid (Japan, USA)", source: "ROM")
         log.post(.info, "Found SuperMetroidRecomp v0.4.6", source: "Updates")
@@ -207,5 +211,100 @@ enum SeedData {
         log.post(.info, "Started the game", source: "Game")
         log.post(.warning, "The game took 4 seconds to open its window", source: "Game")
         log.post(.error, "The game quit with code 6", source: "Game")
+    }
+
+    /// Two small made-up packages for the Mods page snapshots, with each kind of option.
+    private static func seedMods(in game: URL) {
+        let root = ModCatalog.root(game: game)
+        let packages: [(String, String)] = [
+            ("seed.pacing", """
+            format_version = 1
+            id = "seed.pacing"
+            version = "1.0.0"
+            name = "Pacing"
+            author = "Seed"
+            [[target]]
+            game_id = "supermetroid-jpn"
+            [[feature]]
+            id = "intro-skip"
+            name = "Skippable intro"
+            description = "Press Start during the story intro to go straight to the flight to Ceres."
+            group = "Pacing"
+            [[feature]]
+            id = "elevators"
+            name = "Faster elevators"
+            description = "Elevators travel faster between areas."
+            group = "Pacing"
+            [[option]]
+            feature = "elevators"
+            id = "speed"
+            label = "Speed"
+            type = "choice"
+            default = "2x"
+            [[option.choice]]
+            value = "2x"
+            label = "2x"
+            [[option.choice]]
+            value = "3x"
+            label = "3x"
+            """),
+            ("seed.combat", """
+            format_version = 1
+            id = "seed.combat"
+            version = "1.0.0"
+            name = "Combat"
+            author = "Seed"
+            [[target]]
+            game_id = "supermetroid-jpn"
+            [[feature]]
+            id = "bomb-limit"
+            name = "More bombs at once"
+            description = "Lay more bombs before the first one explodes."
+            group = "Combat"
+            experimental = true
+            [[option]]
+            feature = "bomb-limit"
+            id = "limit"
+            label = "Bombs at once"
+            type = "integer"
+            default = 8
+            min = 5
+            max = 10
+            step = 1
+            [[option]]
+            feature = "bomb-limit"
+            id = "sound"
+            label = "Play the original sound"
+            type = "boolean"
+            default = true
+            [[feature]]
+            id = "beam-select"
+            name = "Beam combos with Select"
+            description = "Cycle through beam combinations with the Select button."
+            group = "Combat"
+            """),
+        ]
+        for (id, text) in packages {
+            let folder = root.appending(path: "packages/\(id)/1.0.0", directoryHint: .isDirectory)
+            try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            try? text.write(to: folder.appending(path: "manifest.toml"), atomically: true, encoding: .utf8)
+        }
+        try? """
+        format_version = 1
+
+        [[feature]]
+        package_id = "seed.combat"
+        id = "bomb-limit"
+        enabled = true
+
+        [[feature]]
+        package_id = "seed.pacing"
+        id = "elevators"
+        enabled = true
+
+        [feature.values]
+        speed = "3x"
+
+        """.write(to: root.appending(path: "state.toml"), atomically: true, encoding: .utf8)
     }
 }

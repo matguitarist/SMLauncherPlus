@@ -159,7 +159,7 @@ Acceptance:
 - [unit] Choices are written to `mods/preloaded/state.toml` in the game's format; the game reads them
   on next launch.
 - [self] Turning on a feature changes the game (e.g. widescreen 16:9).
-Status: todo
+Status: done
 
 ### S-021 Install a .snesmod package
 As the player, I drop a `.snesmod` file on the Mods page to install it.
