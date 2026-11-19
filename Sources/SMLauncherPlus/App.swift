@@ -99,6 +99,10 @@ final class AppModel {
     /// S-001: the welcome page's state and its open panel.
     var welcome = WelcomeState.empty
     var showChooser = false
+    /// S-002: the install in progress, shown in place of the welcome page.
+    var install: InstallState?
+    var installTask: Task<Void, Never>?
+
     var isCheckingROM: Bool {
         if case .checking = welcome { return true }
         return false

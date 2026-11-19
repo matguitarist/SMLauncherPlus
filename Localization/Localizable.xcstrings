@@ -11,6 +11,16 @@
         }
       }
     },
+    "%@ of %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ sur %@"
+          }
+        }
+      }
+    },
     ".sfc, .smc, or a .zip holding one": {
       "localizations": {
         "fr": {
@@ -71,6 +81,16 @@
         }
       }
     },
+    "Cancel": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Annuler"
+          }
+        }
+      }
+    },
     "Check Now": {
       "localizations": {
         "fr": {
@@ -97,6 +117,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Rechercher les mises à jour automatiquement"
+          }
+        }
+      }
+    },
+    "Checking the download": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérification du téléchargement"
           }
         }
       }
@@ -151,12 +181,62 @@
         }
       }
     },
+    "Done": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminé"
+          }
+        }
+      }
+    },
+    "Download": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Téléchargement"
+          }
+        }
+      }
+    },
+    "Downloading SuperMetroidRecomp %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Téléchargement de SuperMetroidRecomp %@"
+          }
+        }
+      }
+    },
     "Drop your ROM here, or choose it.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Déposez votre ROM ici, ou choisissez-la."
+          }
+        }
+      }
+    },
+    "Failed": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Échec"
+          }
+        }
+      }
+    },
+    "Finding the latest SuperMetroidRecomp": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recherche de la dernière version de SuperMetroidRecomp"
           }
         }
       }
@@ -181,6 +261,46 @@
         }
       }
     },
+    "GitHub answered with an error (%lld). Try again later.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GitHub a répondu par une erreur (%lld). Réessayez plus tard."
+          }
+        }
+      }
+    },
+    "GitHub is limiting downloads right now. Try again in a few minutes.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GitHub limite les téléchargements en ce moment. Réessayez dans quelques minutes."
+          }
+        }
+      }
+    },
+    "GitHub sent an unexpected answer. Try again later.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GitHub a envoyé une réponse inattendue. Réessayez plus tard."
+          }
+        }
+      }
+    },
+    "In progress": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En cours"
+          }
+        }
+      }
+    },
     "Inbox": {
       "localizations": {
         "fr": {
@@ -201,12 +321,12 @@
         }
       }
     },
-    "Installing the game comes in a later build.": {
+    "Installing Super Metroid": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "L’installation du jeu arrive dans une version ultérieure."
+            "value": "Installation de Super Metroid"
           }
         }
       }
@@ -321,12 +441,42 @@
         }
       }
     },
+    "Setting up the game": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Préparation du jeu"
+          }
+        }
+      }
+    },
+    "Setting up the game comes in a later build.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La préparation du jeu arrive dans une version ultérieure."
+          }
+        }
+      }
+    },
     "Show Log": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Afficher le journal"
+          }
+        }
+      }
+    },
+    "SuperMetroidRecomp %@ Is Downloaded": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SuperMetroidRecomp %@ est téléchargé"
           }
         }
       }
@@ -347,6 +497,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Système (%@)"
+          }
+        }
+      }
+    },
+    "The download is damaged. Try again.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le téléchargement est endommagé. Réessayez."
+          }
+        }
+      }
+    },
+    "The latest release can't be checked: it has no checksum for the Mac build. Try again later.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La dernière version ne peut pas être vérifiée : elle n’a pas de somme de contrôle pour la version Mac. Réessayez plus tard."
+          }
+        }
+      }
+    },
+    "The latest release has no build for this Mac yet. Try again later.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La dernière version n’a pas encore de version pour ce Mac. Réessayez plus tard."
           }
         }
       }
@@ -431,6 +611,36 @@
         }
       }
     },
+    "Try Again": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réessayer"
+          }
+        }
+      }
+    },
+    "Unable to install: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installation impossible : %@"
+          }
+        }
+      }
+    },
+    "Unable to reach GitHub. Check your connection, then try again.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de joindre GitHub. Vérifiez votre connexion, puis réessayez."
+          }
+        }
+      }
+    },
     "Unable to read this file. It may be damaged.": {
       "localizations": {
         "fr": {
@@ -461,12 +671,32 @@
         }
       }
     },
+    "Using the downloaded %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utilisation de la version %@ déjà téléchargée"
+          }
+        }
+      }
+    },
     "Version %@": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Version %@"
+          }
+        }
+      }
+    },
+    "Waiting": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En attente"
           }
         }
       }

@@ -89,13 +89,10 @@ struct WelcomePage: View {
         switch model.welcome {
         case .ready:
             VStack(spacing: Space.sm) {
-                // Installing arrives with S-002.
-                Button("Install Game") {}
+                Button("Install Game") { model.startInstall() }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.large)
                     .keyboardShortcut(.defaultAction)
-                    .disabled(true)
-                    .help("Installing the game comes in a later build.")
                 Button("Choose Another…") { model.showChooser = true }
                     .buttonStyle(.borderless)
             }

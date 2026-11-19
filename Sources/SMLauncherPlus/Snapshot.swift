@@ -1,5 +1,6 @@
 import AppKit
 import IOKit.pwr_mgt
+import SMLauncherPlusKit
 import SwiftUI
 
 /// Screenshot mode for agents.
@@ -8,6 +9,7 @@ import SwiftUI
 /// settings-<tab>-light.png and settings-<tab>-dark.png for every Settings tab, then quits.
 /// Each PNG gets a <page>-<mode>-layout.json with the grid probes (tools/check-layout.swift).
 /// APP_SNAPSHOT_PAGES=play,log limits the pages. Add "settings" to include Settings, and
+/// "install-progress", "install-error", "install-downloaded" for the install page (S-002), and
 /// "welcome", "welcome-checking", "welcome-error" (yellow), "welcome-wrong" (red), "welcome-ready" for the welcome page's states (S-001).
 /// Add APP_ACCENT=<id> to see the pages in another accent.
 /// Add APP_SNAPSHOT_MIN=1 to shrink the main window to its smallest size first.
@@ -64,6 +66,28 @@ enum Snapshot {
                 }
             }
             model.welcome = savedWelcome
+            // Install states (S-002): install-progress, install-error, install-downloaded.
+            var downloading = InstallState()
+            downloading.version = "0.4.6"
+            downloading.bytesDone = 7_340_032
+            downloading.bytesTotal = 16_355_313
+            var offline = InstallState()
+            offline.failure = GameRelease.Failure.offline.message
+            var downloaded = InstallState()
+            downloaded.version = "0.4.6"
+            downloaded.step = .setUp
+            downloaded.downloaded = true
+            for (name, state) in [("install-progress", downloading), ("install-error", offline), ("install-downloaded", downloaded)]
+            where only?.contains(name) ?? true {
+                model.sidebar = .play
+                model.install = state
+                for mode in ["light", "dark"] {
+                    NSApp.appearance = NSAppearance(named: mode == "light" ? .aqua : .darkAqua)
+                    try? await Task.sleep(for: .seconds(0.8))
+                    capture(to: "\(dir)/\(name)-\(mode).png")
+                }
+            }
+            model.install = nil
             if only == nil || only?.contains("settings") == true {
                 let main = NSApp.windows.first { $0.canBecomeMain && !$0.isSheet }
                 openSettings()

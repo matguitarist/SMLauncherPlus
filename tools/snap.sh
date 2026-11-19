@@ -10,5 +10,6 @@ shots=/tmp/SMLauncherPlus-shots
 rm -rf ~/Library/Saved\ Application\ State/com.mathieu.smlauncherplus.savedState
 # Seed data only fills an empty store, so start from nothing.
 rm -f $store $store-shm $store-wal ${store:r}.log
+rm -rf ${store:r}-data
 rm -rf $shots
 APP_STORE=$store APP_SEED=1 APP_SNAPSHOT=$shots $app

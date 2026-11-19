@@ -5,4 +5,5 @@ set -u
 rm -rf ~/Library/Saved\ Application\ State/com.mathieu.smlauncherplus.savedState
 store=/tmp/SMLauncherPlus-self.store
 rm -f $store $store-shm $store-wal ${store:r}.log
+rm -rf ${store:r}-data
 APP_STORE=$store ~/Applications/SMLauncherPlus.app/Contents/MacOS/SMLauncherPlus --selftest

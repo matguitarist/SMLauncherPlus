@@ -52,11 +52,19 @@ enum SidebarItem: String, CaseIterable, Identifiable {
     }
 }
 
-/// The Play page. Until a game is installed (S-002 to S-004) it's the welcome page.
+/// The Play page: the welcome page until a game is installed, the install progress while it installs.
 struct PlayPage: View {
+    @Environment(AppModel.self) private var model
+
     var body: some View {
-        WelcomePage()
-            .navigationTitle("Play")
+        Group {
+            if let install = model.install {
+                InstallPage(state: install)
+            } else {
+                WelcomePage()
+            }
+        }
+        .navigationTitle("Play")
     }
 }
 

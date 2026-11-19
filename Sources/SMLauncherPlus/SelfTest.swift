@@ -60,6 +60,45 @@ enum SelfTest {
                 print("SKIP the player's ROM: set SM_ROM_PATH to check it")
             }
 
+            // S-002: downloading the game. Offline first, on a pretend ROM, then the real download when asked.
+            let hadROM = model.rom != nil
+            if !hadROM {
+                model.context.insert(RomSource(rom: ROMCheck.ROM(url: URL(fileURLWithPath: "/tmp/none.sfc"), kind: .file, member: "",
+                                                                 headered: false, sha256: SupportedROM.sha256)))
+            }
+            AppModel.simulateOffline = true
+            model.startInstall()
+            await Self.waitForInstall(model)
+            check("offline, the install says GitHub can't be reached",
+                  model.install?.failure == GameRelease.Failure.offline.message && model.install?.step == .download)
+            check("offline, nothing is left in Downloads", Self.files(in: DataFolder.downloads).isEmpty)
+            model.cancelInstall()
+            check("Cancel on a failed install goes back to the welcome page", model.install == nil)
+            AppModel.simulateOffline = false
+            if ProcessInfo.processInfo.environment["APP_SELFTEST_INSTALL"] == "1" {
+                model.startInstall()
+                model.cancelInstall()
+                await Self.waitForInstall(model)
+                check("Cancel stops the download and removes its partial file",
+                      model.install == nil && !Self.files(in: DataFolder.downloads).contains { $0.hasSuffix(".partial") })
+                model.startInstall()
+                await Self.waitForInstall(model)
+                check("the latest build downloads and matches its checksum", model.install?.downloaded == true, model.install?.failure ?? "")
+                let zips = Self.files(in: DataFolder.downloads).filter { $0.hasSuffix("-macos-\(GameRelease.architecture).zip") }
+                check("the zip is kept in Downloads/<version>/", zips.count == 1, "\(Self.files(in: DataFolder.downloads))")
+                model.install = nil
+                model.startInstall()
+                await Self.waitForInstall(model)
+                check("a verified download is reused", model.install?.reused == true && model.install?.downloaded == true)
+                model.install = nil
+            } else {
+                print("SKIP the real download: set APP_SELFTEST_INSTALL=1 to download the game from GitHub")
+            }
+            if !hadROM {
+                try? model.context.delete(model: RomSource.self)
+                try? model.context.save()
+            }
+
             model.log.post(.info, "Self-test line", source: "SelfTest")
             try? await Task.sleep(for: .milliseconds(300))
             check("the app writes a log line", model.log.entries.contains { $0.message == "Self-test line" })
@@ -79,6 +118,18 @@ enum SelfTest {
             print(failures == 0 ? "SELFTEST PASS \(count) checks" : "SELFTEST FAIL \(failures) of \(count) checks")
             finish(code: failures == 0 ? 0 : 1)
         }
+    }
+
+    /// Waits until the install task finishes (up to two minutes, for a real download).
+    private static func waitForInstall(_ model: AppModel) async {
+        for _ in 0..<1200 where model.installTask != nil {
+            try? await Task.sleep(for: .milliseconds(100))
+        }
+    }
+
+    /// Every file under a folder, as paths relative to it.
+    private static func files(in folder: URL) -> [String] {
+        (FileManager.default.subpaths(atPath: folder.path) ?? []).filter { !$0.hasSuffix("/") }.sorted()
     }
 
     /// Every file next to the test database, to show the ROM wasn't copied there.

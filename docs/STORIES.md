@@ -48,7 +48,7 @@ UX:
 - States: determinate bar "Downloading — 18 of 42 MB"; error inline under the failed step: "Unable to reach GitHub. Check your connection, then try again." / "The download is damaged. Try again." with Try Again; cached: "Using the downloaded 0.4.6".
 - Words: "Cancel", "Try Again".
 - Access: the bar has a label and value; step changes announced; Escape = Cancel.
-Status: todo
+Status: done
 
 ### S-003 Make a playable profile
 As the player, the verified build is unpacked into a profile with its own saves, settings and mods.
