@@ -35,7 +35,7 @@ final class GameRunner {
         var message: String {
             switch self {
             case .gameMissing: String(localized: "The game files of this profile are missing. Install the game again.")
-            case .rom(.missing): String(localized: "Your ROM moved. Choose it again.")
+            case .rom(.missing): String(localized: "Your ROM can't be found. The game needs it every time it starts; if it was moved or deleted, choose it again.")
             case .rom(.changed): String(localized: "Your ROM has changed since it was checked. Choose it again.")
             case .rom(.unwritable): String(localized: "Unable to prepare your ROM for the game. There may not be enough space on the disk.")
             case .couldNotStart(let reason): String(localized: "Unable to start the game: \(reason)")

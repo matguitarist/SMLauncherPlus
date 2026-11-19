@@ -1711,6 +1711,16 @@
         }
       }
     },
+    "Your ROM can't be found. The game needs it every time it starts; if it was moved or deleted, choose it again.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre ROM est introuvable. Le jeu en a besoin à chaque démarrage ; si elle a été déplacée ou supprimée, choisissez-la de nouveau."
+          }
+        }
+      }
+    },
     "Your ROM has changed since it was checked. Choose it again.": {
       "localizations": {
         "fr": {
@@ -1721,22 +1731,12 @@
         }
       }
     },
-    "Your ROM moved. Choose it again.": {
+    "Your ROM stays where it is and nothing is uploaded. The game reads it every time it starts, so keep it in a folder you won't clean out.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Votre ROM a été déplacée. Choisissez-la de nouveau."
-          }
-        }
-      }
-    },
-    "Your ROM stays where it is. Nothing is uploaded.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Votre ROM reste où elle est. Rien n’est envoyé en ligne."
+            "value": "Votre ROM reste où elle est et rien n’est envoyé en ligne. Le jeu la lit à chaque démarrage : gardez-la dans un dossier que vous ne videz pas."
           }
         }
       }

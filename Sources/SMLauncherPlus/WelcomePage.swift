@@ -109,8 +109,9 @@ struct WelcomePage: View {
                 Button("Choose…") { model.showChooser = true }
                     .controlSize(.large)
                     .disabled(isChecking)
-                Text("Your ROM stays where it is. Nothing is uploaded.")
+                Text("Your ROM stays where it is and nothing is uploaded. The game reads it every time it starts, so keep it in a folder you won't clean out.")
                     .font(.callout)
+                    .multilineTextAlignment(.center)
                     .foregroundStyle(.secondary)
             }
         }
