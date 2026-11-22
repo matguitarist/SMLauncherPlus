@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- A ringed planet with two craters behind the spires, and three stars. -->
+  <path fill-rule="evenodd" fill="#FFFFFF" d="M512 150 A250 250 0 1 1 511.9 150 Z M430 282 A54 54 0 1 0 430.1 282 Z M560 470 A30 30 0 1 0 560.1 470 Z"/>
+  <circle cx="150" cy="170" r="24" fill="#FFFFFF"/>
+  <circle cx="880" cy="140" r="20" fill="#FFFFFF"/>
+  <circle cx="900" cy="330" r="14" fill="#FFFFFF"/>
+</svg>
