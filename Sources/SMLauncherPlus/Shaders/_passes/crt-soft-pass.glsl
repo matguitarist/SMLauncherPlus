@@ -17,11 +17,18 @@ uniform vec2 InputSize;
 in vec2 vTexCoord;
 out vec4 FragColor;
 
+// SNES pixels in the picture. With the enhanced renderer the game hands the filter the picture already
+// upscaled (768×672 at scale 3, wider in widescreen), so one SNES pixel is several texels.
+vec2 snesSize(vec2 inputSize) {
+    return inputSize / max(1.0, floor(inputSize.y / 224.0 + 0.5));
+}
+
 void main() {
     vec4 c = texture(Texture, vTexCoord);
-    float y = fract(vTexCoord.y * InputSize.y);
+    vec2 p = vTexCoord * snesSize(InputSize);
+    float y = fract(p.y);
     float scan = mix(0.72, 1.08, smoothstep(0.18, 0.50, y) * (1.0 - smoothstep(0.55, 0.92, y)));
-    vec2 triad = fract(vTexCoord * InputSize * vec2(0.75, 1.0));
+    vec2 triad = fract(p * vec2(0.75, 1.0));
     float mask = mix(0.92, 1.04, step(triad.x, 0.33));
     vec3 warm = c.rgb * vec3(1.05, 1.00, 0.94);
     FragColor = vec4(clamp(warm * scan * mask, 0.0, 1.0), c.a);

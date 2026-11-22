@@ -13,12 +13,18 @@ void main() {
 
 #ifdef FRAGMENT
 uniform sampler2D Texture;
-uniform vec2 TextureSize;
+uniform vec2 InputSize;
 in vec2 vTexCoord;
 out vec4 FragColor;
 
+// SNES pixels in the picture. With the enhanced renderer the game hands the filter the picture already
+// upscaled (768×672 at scale 3, wider in widescreen), so one SNES pixel is several texels.
+vec2 snesSize(vec2 inputSize) {
+    return inputSize / max(1.0, floor(inputSize.y / 224.0 + 0.5));
+}
+
 void main() {
-    vec2 texel = 1.0 / TextureSize;
+    vec2 texel = 1.0 / snesSize(InputSize);
     vec4 c = texture(Texture, vTexCoord);
     vec4 blur = (
         texture(Texture, vTexCoord + vec2(texel.x, 0.0)) +

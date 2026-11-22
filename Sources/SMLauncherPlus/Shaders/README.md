@@ -5,3 +5,7 @@ snesrecomp (https://github.com/mstan/snesrecomp, `runner/assets/shaders`), origi
 for Mega Man X Recomp. The GLSL passes are public domain / CC0-1.0; their attribution is kept
 in each file. SuperMetroidRecomp doesn't include them, so the launcher copies them into each
 profile's `assets/shaders/`, next to the game's own Scanlines and CRT presets.
+
+Changed from the catalog: each pass measures SNES pixels (`snesSize(InputSize)`), because with the
+enhanced renderer the game hands a filter the picture already upscaled, and LCD Grid's grid formula
+is fixed (docs/FIXLOG.md, 2026-11-22). `ShaderPassTests` renders each pass through OpenGL.
