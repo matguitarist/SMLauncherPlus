@@ -158,6 +158,17 @@ enum Snapshot {
                 }
                 model.modMessage = nil
             }
+            // S-032: the Profiles page after Delete, Keep Saves.
+            if only?.contains("profiles-kept") ?? (only == nil) {
+                model.sidebar = .profiles
+                model.profileMessage = .kept(name: "Practice", folder: DataFolder.keptSaves)
+                for mode in ["light", "dark"] {
+                    NSApp.appearance = NSAppearance(named: mode == "light" ? .aqua : .darkAqua)
+                    try? await Task.sleep(for: .seconds(0.8))
+                    capture(to: "\(dir)/profiles-kept-\(mode).png")
+                }
+                model.profileMessage = nil
+            }
             // Play states (S-004): the game isn't started, only what the page shows.
             for name in ["play-running", "play-rom-missing"] where only?.contains(name) ?? true {
                 model.sidebar = .play

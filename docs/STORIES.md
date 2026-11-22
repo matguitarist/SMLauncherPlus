@@ -152,6 +152,27 @@ Status: done
 
 ## M3 Mods (0.2.0)
 
+### S-014 Get more filters from RetroArch's shader collection
+As the player, I download RetroArch's GLSL filters (CRT-Royale, xBR, Lottes, ...) and pick one in
+Settings › Display, like the launcher's own.
+Proposed 2026-11-22, waits on the owner's choice below.
+Findings:
+- The game's filter loader (snesrecomp `runner/src/desktop/glsl_shader.c`) is Snes9x's RetroArch
+  `.glslp` loader: passes, scale types, LUT textures, Orig/Prev/PassPrev, aliases, `#pragma parameter`
+  and `#include`. Presets from github.com/libretro/glsl-shaders should mostly load as they are.
+- That repo is public (about 56 MB, 623 presets); each shader carries its own license (mostly GPL,
+  some public domain or MIT). Download it on request into the data folder; never bundle it.
+- The catch: with the enhanced renderer on (`NewRenderer = 1`, the default) the game hands a filter
+  the picture already upscaled (768×672 at scale 3), while RetroArch filters expect 256×224. CRT and
+  scanline filters then draw per upscaled texel and lose their effect, the same cause as the LCD Grid
+  fix (FIXLOG 2026-11-22). Owner's choice: turn the enhanced renderer off while a RetroArch filter is
+  on (losing what it adds), or only offer filters that check well upscaled.
+Acceptance:
+- [self] Every listed preset compiles and renders through OpenGL (Tests/Support/render_pass.c);
+  one that doesn't is left out of the list.
+- [snap] Settings › Display lists the downloaded filters under their folder, with Get More Filters….
+Status: proposed
+
 ### S-020 See and switch mod features
 As the player, the Mods page lists the game's packages and their features (HUD, map, controls,
 balance, bug fixes…), and I turn each on or off and set its options.
@@ -208,7 +229,8 @@ the old build stays in `previous/` until the next update or Roll Back in Setting
 ### S-032 Manage profiles
 As the player, I rename, duplicate, show in Finder and delete profiles (optionally keeping saves).
 Screens: profiles, profiles-delete
-Status: todo
+Status: done (Profiles page and Profile menu; Delete, Keep Saves moves `saves/` with config.ini,
+keybinds.ini, sm-video.ini and state.toml to Kept Saves/<name – date>/)
 
 ### S-033 Back up and restore saves
 As the player, I back up `save.srm` and restore it, and a backup is made before each update.

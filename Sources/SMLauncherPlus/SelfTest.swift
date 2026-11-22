@@ -175,6 +175,7 @@ enum SelfTest {
 
             await checkUpdateBanner(model: model)
             await checkUpdateAndRollBack(model: model)
+            await checkManageProfiles(model: model)
             await checkDataFolderMove(model: model)
             await checkModInstall(model: model)
             await checkModResources()
@@ -576,6 +577,49 @@ enum SelfTest {
               profile.gameVersion == "0.4.6" && text("VERSION") == "0.4.6\n" && text("saves/save.srm") == "samus in 0.4.7"
               && model.previousVersion(of: profile) == nil, model.updateCheckMessage ?? "")
         model.updateCheckMessage = nil
+    }
+
+    /// S-032: rename, duplicate, and delete with or without the saves.
+    private static func checkManageProfiles(model: AppModel) async {
+        let fm = FileManager.default
+        let original = Profile(name: "Managed", gameVersion: "0.4.11")
+        model.context.insert(original)
+        try? model.context.save()
+        for path in ["saves/save.srm", "config.ini", ProfileBuilder.executable] {
+            let file = original.gameFolder.appending(path: path)
+            try? fm.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try? Data(path.utf8).write(to: file)
+        }
+        model.rename(original, to: "  My   Run ")
+        check("Rename cleans the name", original.name == "My Run")
+        model.rename(original, to: "   ")
+        check("an empty name becomes Super Metroid", original.name == String(localized: "Super Metroid"))
+        model.rename(original, to: "My Run")
+        let copy = await model.duplicate(original)
+        check("Duplicate adds a copy and puts it on the Play page", copy?.name == "My Run \(String(localized: "Copy"))"
+              && model.currentProfile?.uuid == copy?.uuid, copy?.name ?? "none")
+        if let copy {
+            check("the copy has the game, saves and settings", fm.fileExists(atPath: copy.gameFolder.appending(path: "saves/save.srm").path)
+                  && fm.fileExists(atPath: copy.gameFolder.appending(path: "config.ini").path) && copy.gameVersion == original.gameVersion)
+            model.deleteTarget = copy
+            check("Delete asks first", fm.fileExists(atPath: copy.folder.path) && model.profiles.contains { $0.uuid == copy.uuid })
+            model.deleteTarget = nil
+            let folder = copy.folder
+            model.delete(copy, keepSaves: false)
+            check("Delete without the saves removes the profile and its files",
+                  !fm.fileExists(atPath: folder.path) && !model.profiles.contains { $0.name == "My Run \(String(localized: "Copy"))" })
+            check("the Play page goes back to another profile", model.currentProfile != nil)
+        }
+        let folder = original.folder, id = original.uuid
+        model.delete(original, keepSaves: true)
+        var keptFolder: URL?
+        if case .kept(_, let folder) = model.profileMessage { keptFolder = folder }
+        check("Delete, Keep Saves moves the saves and settings to Kept Saves",
+              keptFolder.map { fm.fileExists(atPath: $0.appending(path: "saves/save.srm").path) && fm.fileExists(atPath: $0.appending(path: "config.ini").path) } == true
+              && keptFolder?.deletingLastPathComponent().lastPathComponent == "Kept Saves", keptFolder?.path ?? "none")
+        check("the deleted profile and its files are gone", !fm.fileExists(atPath: folder.path) && !model.profiles.contains { $0.uuid == id })
+        if let keptFolder { try? fm.removeItem(at: keptFolder) }
+        model.profileMessage = nil
     }
 
     /// S-022: a required file keeps its feature off until it's chosen and checked; a shared file is chosen once.

@@ -53,6 +53,22 @@ struct SMLauncherPlusApp: App {
                 .keyboardShortcut("u", modifiers: [.command, .shift])
                 .disabled(!model.canUpdate)
             }
+            CommandMenu("Profile") {
+                let profile = model.currentProfile
+                let off = profile == nil || model.renameTarget != nil || model.deleteTarget != nil
+                Button("Rename…") { model.renameTarget = profile }
+                    .disabled(off)
+                Button("Duplicate") { if let profile { model.startDuplicate(profile) } }
+                    .keyboardShortcut("d")
+                    .disabled(off || model.duplicating || profile.map(model.isBusy) == true)
+                Button("Show in Finder") { if let profile { model.reveal(profile) } }
+                    .keyboardShortcut("r", modifiers: [.command, .option])
+                    .disabled(off)
+                Divider()
+                Button("Delete…") { model.deleteTarget = profile }
+                    .keyboardShortcut(.delete)
+                    .disabled(off || profile.map(model.isBusy) == true)
+            }
             CommandGroup(replacing: .appInfo) {
                 Button("About SM Launcher Plus") { AboutCredits.show(gameVersion: model.currentProfile?.gameVersion) }
             }
@@ -154,6 +170,12 @@ final class AppModel {
     var dataMoveError: String?
     /// Counts finished moves, so pages that hold a path into the data folder are rebuilt.
     var dataFolderMoves = 0
+
+    /// S-032: the profile being renamed or deleted (the dialogs ask), a duplicate in progress, and what the last action did.
+    var renameTarget: Profile?
+    var deleteTarget: Profile?
+    var duplicating = false
+    var profileMessage: ProfileMessage?
 
     /// S-021: what the last .snesmod install or removal did, shown at the top of the Mods page.
     var modMessage: ModMessage?

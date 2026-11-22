@@ -631,6 +631,16 @@
         }
       }
     },
+    "Copy": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "copie"
+          }
+        }
+      }
+    },
     "D-pad Down": {
       "localizations": {
         "fr": {
@@ -687,6 +697,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "Supprimer"
+          }
+        }
+      }
+    },
+    "Delete %@?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer « %@ » ?"
+          }
+        }
+      }
+    },
+    "Delete Profile and Saves": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer le profil et les sauvegardes"
+          }
+        }
+      }
+    },
+    "Delete, Keep Saves": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer, garder les sauvegardes"
+          }
+        }
+      }
+    },
+    "Delete…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer…"
           }
         }
       }
@@ -777,6 +827,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Déposez votre ROM ici, ou choisissez-la."
+          }
+        }
+      }
+    },
+    "Duplicate": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dupliquer"
           }
         }
       }
@@ -1111,6 +1171,16 @@
         }
       }
     },
+    "Install the game from the Play page.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installez le jeu depuis la page Jouer."
+          }
+        }
+      }
+    },
     "Install the game on the Play page, then choose its mods here.": {
       "localizations": {
         "fr": {
@@ -1277,6 +1347,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Langue"
+          }
+        }
+      }
+    },
+    "Last Played": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernière partie"
           }
         }
       }
@@ -1551,6 +1631,26 @@
         }
       }
     },
+    "Name": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nom"
+          }
+        }
+      }
+    },
+    "Never": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jamais"
+          }
+        }
+      }
+    },
     "Never played": {
       "localizations": {
         "fr": {
@@ -1577,6 +1677,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aucun jeu installé"
+          }
+        }
+      }
+    },
+    "No Profiles": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun profil"
           }
         }
       }
@@ -1657,6 +1767,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Désactivé (4:3 d’origine)"
+          }
+        }
+      }
+    },
+    "On the Play page": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sur la page Jouer"
           }
         }
       }
@@ -1751,6 +1871,16 @@
         }
       }
     },
+    "Play Time": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temps de jeu"
+          }
+        }
+      }
+    },
     "Play sound": {
       "localizations": {
         "fr": {
@@ -1807,6 +1937,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aperçu de la couleur d’accentuation"
+          }
+        }
+      }
+    },
+    "Profile": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profil"
+          }
+        }
+      }
+    },
+    "Profiles": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profils"
           }
         }
       }
@@ -1927,6 +2077,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Supprimer…"
+          }
+        }
+      }
+    },
+    "Rename": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renommer"
+          }
+        }
+      }
+    },
+    "Rename Profile": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renommer le profil"
+          }
+        }
+      }
+    },
+    "Rename…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renommer…"
           }
         }
       }
@@ -2611,6 +2791,16 @@
         }
       }
     },
+    "The game files are removed. Kept saves go to Kept Saves in the data folder with the profile's settings, so you can bring them back later.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les fichiers du jeu sont supprimés. Les sauvegardes gardées vont dans le dossier « Kept Saves » du dossier de données, avec les réglages du profil, pour les récupérer plus tard."
+          }
+        }
+      }
+    },
     "The game files of this profile are missing. Install the game again.": {
       "localizations": {
         "fr": {
@@ -2697,6 +2887,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "La nouvelle langue s’applique après un redémarrage."
+          }
+        }
+      }
+    },
+    "The saves of %@ are in Kept Saves, with its settings.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les sauvegardes de « %@ » sont dans « Kept Saves », avec ses réglages."
           }
         }
       }
@@ -2911,6 +3111,16 @@
         }
       }
     },
+    "Unable to duplicate %@. %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de dupliquer « %1$@ ». %2$@"
+          }
+        }
+      }
+    },
     "Unable to go back to the earlier version. %@": {
       "localizations": {
         "fr": {
@@ -2937,6 +3147,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Installation impossible : %@"
+          }
+        }
+      }
+    },
+    "Unable to keep the saves of %@. Nothing was deleted.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de garder les sauvegardes de « %@ ». Rien n’a été supprimé."
           }
         }
       }
@@ -3177,6 +3397,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "VSync"
+          }
+        }
+      }
+    },
+    "Version": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version"
           }
         }
       }

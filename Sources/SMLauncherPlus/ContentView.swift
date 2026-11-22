@@ -22,12 +22,14 @@ struct ContentView: View {
                 switch model.sidebar ?? .play {
                 case .play: PlayPage()
                 case .mods: ModsPage()
+                case .profiles: ProfilesPage()
                 case .log: LogPage()
                 }
             }
             .id(model.dataFolderMoves)  // pages that hold a path into the data folder start over after a move (S-013)
         }
         .noInitialFocus()
+        .modifier(ProfileDialogs())
         .task {
             model.load()
             SeedData.addIfRequested(model: model)
@@ -42,7 +44,7 @@ struct ContentView: View {
 
 /// The sidebar. Snapshot mode walks through every case; rawValue names the PNG.
 enum SidebarItem: String, CaseIterable, Identifiable {
-    case play, mods, log
+    case play, mods, profiles, log
 
     var id: String { rawValue }
 
@@ -50,6 +52,7 @@ enum SidebarItem: String, CaseIterable, Identifiable {
         switch self {
         case .play: String(localized: "Play")
         case .mods: String(localized: "Mods")
+        case .profiles: String(localized: "Profiles")
         case .log: String(localized: "Log")
         }
     }
@@ -58,6 +61,7 @@ enum SidebarItem: String, CaseIterable, Identifiable {
         switch self {
         case .play: "play.fill"
         case .mods: "puzzlepiece.extension"
+        case .profiles: "square.stack"
         case .log: "doc.text.magnifyingglass"
         }
     }
@@ -216,6 +220,11 @@ enum PlayStats {
         return String(localized: "Last played \(when) · \(Self.playTime(playTime)) in total")
     }
 
+    /// "2 hours ago", or "Never" (the Profiles list).
+    static func lastPlayed(_ date: Date?) -> String {
+        date.map { $0.formatted(.relative(presentation: .named).locale(.app)) } ?? String(localized: "Never")
+    }
+
     /// "2 hr, 14 min", "less than a minute"
     static func playTime(_ seconds: Double) -> String {
         seconds < 60 ? String(localized: "less than a minute")
@@ -257,6 +266,14 @@ enum SeedData {
             profile.lastPlayedAt = Date.now.addingTimeInterval(-2 * 3600)
             profile.playTime = 8040
             model.context.insert(profile)
+            try? model.context.save()
+        }
+        if model.profiles.count == 1 {
+            let practice = Profile(name: "Practice", gameVersion: "0.4.5")
+            practice.installedAt = Date(timeIntervalSince1970: 1_794_500_000)
+            practice.lastPlayedAt = Date.now.addingTimeInterval(-5 * 86400)
+            practice.playTime = 1260
+            model.context.insert(practice)
             try? model.context.save()
         }
         if let profile = model.currentProfile {
