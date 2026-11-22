@@ -151,6 +151,26 @@
         }
       }
     },
+    "%lld filters from RetroArch's collection are in the Filter menu.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld filtres de la collection de RetroArch sont dans le menu Filtre."
+          }
+        }
+      }
+    },
+    "%lld filters from RetroArch's collection, tried with Super Metroid, such as %@. About 100 KB.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld filtres de la collection de RetroArch, essayés avec Super Metroid, comme %@. Environ 100 Ko."
+          }
+        }
+      }
+    },
     "%lld, from %lld to %lld": {
       "localizations": {
         "fr": {
@@ -177,6 +197,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "1 restant"
+          }
+        }
+      }
+    },
+    "A file didn't match its checksum, so nothing was added: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un fichier ne correspond pas à sa somme de contrôle, donc rien n’a été ajouté : %@"
           }
         }
       }
@@ -831,6 +861,16 @@
         }
       }
     },
+    "Download them from RetroArch's shader collection on GitHub": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les télécharger depuis la collection de shaders de RetroArch sur GitHub"
+          }
+        }
+      }
+    },
     "Downloading SuperMetroidRecomp %@": {
       "localizations": {
         "fr": {
@@ -877,6 +917,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dupliquer"
+          }
+        }
+      }
+    },
+    "Each filter's license is at the top of its files": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La licence de chaque filtre est en tête de ses fichiers"
           }
         }
       }
@@ -1027,6 +1077,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "De %lld à %lld"
+          }
+        }
+      }
+    },
+    "From RetroArch": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De RetroArch"
           }
         }
       }
@@ -2021,6 +2081,16 @@
         }
       }
     },
+    "Profiles using one go back to no filter. You can download them again later.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les profils qui en utilisent un reviennent à aucun filtre. Vous pourrez les télécharger de nouveau plus tard."
+          }
+        }
+      }
+    },
     "Profiles with their saves, downloads and logs. Moving copies them, checks the copy, then deletes the old folder.": {
       "localizations": {
         "fr": {
@@ -2117,6 +2187,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Supprimer %@ et vos choix pour ce paquet"
+          }
+        }
+      }
+    },
+    "Remove the RetroArch filters?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer les filtres de RetroArch ?"
           }
         }
       }
@@ -2317,6 +2397,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Restaurer…"
+          }
+        }
+      }
+    },
+    "RetroArch Filters": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filtres de RetroArch"
           }
         }
       }
@@ -3411,6 +3501,16 @@
         }
       }
     },
+    "Unable to reach GitHub. Check your internet connection and try again.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de joindre GitHub. Vérifiez votre connexion Internet et réessayez."
+          }
+        }
+      }
+    },
     "Unable to read this file. It may be damaged.": {
       "localizations": {
         "fr": {
@@ -3447,6 +3547,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Impossible d’enregistrer les réglages d’affichage : %@"
+          }
+        }
+      }
+    },
+    "Unable to save the filters: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d’enregistrer les filtres : %@"
           }
         }
       }

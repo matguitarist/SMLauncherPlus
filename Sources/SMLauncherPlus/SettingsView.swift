@@ -186,6 +186,12 @@ struct AboutSection: View {
                 Spacer()
                 Link("snesrecomp Framework", destination: Credits.framework)
             }
+            if model.hasRetroArchFilters {
+                LabeledContent("RetroArch Filters") {
+                    Link(destination: Credits.retroArchShaders) { Text(verbatim: "libretro/glsl-shaders") }
+                        .help("Each filter's license is at the top of its files")
+                }
+            }
         } header: {
             Text("About")
         } footer: {

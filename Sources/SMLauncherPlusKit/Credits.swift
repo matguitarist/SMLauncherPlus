@@ -12,4 +12,6 @@ public enum Credits {
     public static let licenseName = "PolyForm Noncommercial 1.0.0"
     /// The recompilation framework the game is built on.
     public static let framework = URL(string: "https://github.com/mstan/snesrecomp")!
+    /// RetroArch's GLSL filters, downloaded on request (S-014); each file carries its own license.
+    public static let retroArchShaders = URL(string: "https://github.com/libretro/glsl-shaders")!
 }

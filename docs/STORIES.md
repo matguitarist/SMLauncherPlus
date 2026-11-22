@@ -153,30 +153,28 @@ Status: done
 ## M3 Mods (0.2.0)
 
 ### S-014 Get more filters from RetroArch's shader collection
-As the player, I download RetroArch's GLSL filters (CRT-Royale, xBR, Lottes, ...) and pick one in
-Settings › Display, like the launcher's own.
-Proposed 2026-11-22, waits on the owner's choice below.
-Findings:
+As the player, I download a short list of RetroArch's GLSL filters and pick one in Settings › Display,
+like the launcher's own.
+Decided 2026-11-22: a short list, each tried in the game first. Findings:
 - The game's filter loader (snesrecomp `runner/src/desktop/glsl_shader.c`) is Snes9x's RetroArch
-  `.glslp` loader: passes, scale types, LUT textures, Orig/Prev/PassPrev, aliases, `#pragma parameter`
-  and `#include`. Presets from github.com/libretro/glsl-shaders should mostly load as they are.
-- That repo is public (about 56 MB, 623 presets); each shader carries its own license (mostly GPL,
-  some public domain or MIT). Download it on request into the data folder; never bundle it.
-- Tried 2026-11-22 in the real game (0.4.11): CRT-Geom, CRT-Lottes, CRT-Easymode, CRT-Aperture,
-  zfast-CRT, LCD3x and HQ4x load and draw one scanline and mask per SNES pixel, with the enhanced
-  renderer on and off alike in the intro. The upscaled picture (768×672) seems limited to Mode 7
-  scenes; not yet checked there.
-- The Mac's OpenGL refuses `#version 130` and later: 191 of 623 presets (CRT-Royale, xBR-lv2,
-  ScaleFX…) fail to compile, and the game then shows the plain picture, no crash. A static check of
-  `#version` leaves 430 presets (handheld 123, crt 64, presets 46, borders 30…).
-- Remaining choice for the owner: offer the whole compatible list grouped by folder, or a short
-  curated list (the CRT and handheld ones above).
+  `.glslp` loader. The Mac's OpenGL refuses `#version 130` and later, and some presets use keys or
+  syntax it doesn't take: CRT-Royale, CRT-Hyllian, CRT-Pi, CRT-Consumer, CRT-Guest-Dr-Venom, xBR-lv2,
+  ScaleFX, NTSC S-Video and LCD-Grid-v2 fail to compile (the game then shows the plain picture).
+- Tried on the owner's save state with the enhanced renderer on: filters get the 256×224 picture and
+  draw per SNES pixel. Mode 7 scenes not checked.
+- The list: CRT-Lottes, CRT-Geom, CRT-Easymode Halation, CRT-Mattias, zfast-CRT, LCD3x, HQ4x and
+  xBRZ Freescale. The other 12 that compile look like one of these, or darker.
+- `tools/gen-retroarch-filters.py` pins github.com/libretro/glsl-shaders to one commit and writes
+  every file each filter needs with its SHA-256 (22 files, about 100 KB). Add a filter only after
+  trying it in the game.
 Acceptance:
-- [self] Every listed preset compiles and renders through OpenGL (Tests/Support/render_pass.c);
-  one that doesn't is left out of the list.
-- [snap] Settings › Display lists the downloaded filters under their folder, with Get More Filters….
-Status: proposed
-
+- [unit] The catalog lists each preset with checksums; a wrong file doesn't count as downloaded.
+- [unit] Installed RetroArch filters come after the launcher's in the Filter menu; uninstall removes them.
+- [self] Download fetches and checks every file from GitHub; the filters reach the profile; Remove takes
+  them out of every profile, and a profile using one goes back to none.
+- [snap] Settings › Display: RetroArch Filters with Download, and while it downloads.
+- Each filter loads in the game from `assets/shaders/retroarch/` (checked 2026-11-22).
+Status: done
 ### S-015 Play with an MSU-1 soundtrack
 As the player, I choose my Super Metroid MSU-1 pack's folder and hear its soundtrack in the game,
 with the original music wherever the pack has no track.

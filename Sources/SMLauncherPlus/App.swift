@@ -188,6 +188,10 @@ final class AppModel {
     var backingUp = false
     var backupMessage: String?
     var backupError: String?
+    /// S-014: the RetroArch filters' download (0…1 while it runs), its error, and a count that reloads Display.
+    var retroArchProgress: Double?
+    var retroArchError: String?
+    var retroArchChanges = 0
 
     /// S-021: what the last .snesmod install or removal did, shown at the top of the Mods page.
     var modMessage: ModMessage?
@@ -287,6 +291,9 @@ final class AppModel {
         do {
             let written = try ShaderPreset.installBundled(from: source, game: game)
             if !written.isEmpty { log.post(.info, "Added filters to \(game.path): \(written.joined(separator: ", "))", source: "Display") }
+            // S-014: the RetroArch filters, when the player downloaded them.
+            let retroArch = try RetroArchFilter.install(from: DataFolder.retroArchFilters, game: game)
+            if !retroArch.isEmpty { log.post(.info, "Added \(retroArch.count) RetroArch filter files to \(game.path)", source: "Display") }
         } catch {
             log.post(.error, "Unable to add the filters to \(game.path): \(error.localizedDescription)", source: "Display")
         }

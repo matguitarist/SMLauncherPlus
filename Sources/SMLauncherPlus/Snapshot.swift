@@ -234,6 +234,16 @@ enum Snapshot {
                     try? FileManager.default.removeItem(at: previous)
                     model.latestUpdate = saved
                 }
+                // S-014: Display while the RetroArch filters download.
+                model.retroArchProgress = 0.4
+                model.settingsTab = .display
+                for mode in ["light", "dark"] {
+                    NSApp.appearance = NSAppearance(named: mode == "light" ? .aqua : .darkAqua)
+                    try? await Task.sleep(for: .seconds(0.8))
+                    let settings = NSApp.windows.first { $0.isVisible && $0 !== main && !$0.isSheet }
+                    capture(to: "\(dir)/settings-display-downloading-\(mode).png", window: settings)
+                }
+                model.retroArchProgress = nil
             }
             print("SNAPSHOT done \(dir)")
             // An open sheet refuses terminate, and the run would wait forever.

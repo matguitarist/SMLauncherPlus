@@ -122,11 +122,30 @@ public struct ShaderPreset: Equatable, Hashable, Sendable, Identifiable {
             ["scanlines": 0, "crt": 1, "crt-soft": 2, "sharp": 3, "lcd-grid": 4, "warm-composite": 5][look] ?? 6
         }
         func strengthOrder(_ strength: String) -> Int { ["light": 0, "": 1, "strong": 2][strength] ?? 3 }
-        return files.filter { $0.lowercased().hasSuffix(".glslp") && !$0.hasPrefix(".") }
+        let own = files.filter { $0.lowercased().hasSuffix(".glslp") && !$0.hasPrefix(".") }
             .map(ShaderPreset.init(file:))
             .sorted {
                 (lookOrder($0.look), $0.look, strengthOrder($0.strength)) < (lookOrder($1.look), $1.look, strengthOrder($1.strength))
             }
+        // S-014: the RetroArch filters the player downloaded, in the catalog's order, after the others.
+        let retroArch = RetroArchFilter.all.filter {
+            FileManager.default.fileExists(atPath: game.appending(path: $0.shaderPath).path)
+        }.map { ShaderPreset(retroArch: $0) }
+        return own + retroArch
+    }
+
+    /// A RetroArch filter: its look is "retroarch:<id>", with no strengths.
+    public init(retroArch filter: RetroArchFilter) {
+        path = filter.shaderPath
+        look = Self.retroArchPrefix + filter.id
+        strength = ""
+    }
+
+    public static let retroArchPrefix = "retroarch:"
+
+    /// The RetroArch filter this preset is, if any.
+    public var retroArch: RetroArchFilter? {
+        look.hasPrefix(Self.retroArchPrefix) ? RetroArchFilter.named(String(look.dropFirst(Self.retroArchPrefix.count))) : nil
     }
 }
 

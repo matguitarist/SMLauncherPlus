@@ -132,6 +132,7 @@ enum SelfTest {
                     check("Update backs up the saves first", SaveBackup.list(in: DataFolder.backups(for: profile.uuid))
                         .contains { $0.name.hasSuffix("(\(String(localized: "before update to \(latest)")))") })
                     try? FileManager.default.removeItem(at: ProfileUpdate.previousFolder(of: profile.folder))
+                    await Self.checkRetroArchFilters(model: model, profile: profile)
                 }
                 if model.rom != nil, ProcessInfo.processInfo.environment["SM_ROM_PATH"] != nil {
                     await Self.checkPlay(model)
@@ -623,6 +624,22 @@ enum SelfTest {
         check("the deleted profile and its files are gone", !fm.fileExists(atPath: folder.path) && !model.profiles.contains { $0.uuid == id })
         if let keptFolder { try? fm.removeItem(at: keptFolder) }
         model.profileMessage = nil
+    }
+
+    /// S-014: the real download from GitHub, the files in the profile, the Filter menu, and Remove.
+    private static func checkRetroArchFilters(model: AppModel, profile: Profile) async {
+        await model.downloadRetroArchFilters()
+        check("Download fetches every RetroArch filter file and checks it", model.hasRetroArchFilters, model.retroArchError ?? "")
+        let looks = ShaderPreset.list(game: profile.gameFolder).compactMap(\.retroArch)
+        check("the RetroArch filters are added to the profile, after the launcher's", looks == RetroArchFilter.all,
+              looks.map(\.id).joined(separator: ", "))
+        var settings = DisplaySettings.read(game: profile.gameFolder)
+        settings.shader = RetroArchFilter.all[0].shaderPath
+        try? settings.write(game: profile.gameFolder)
+        model.removeRetroArchFilters()
+        check("Remove takes them out of every profile, and a profile using one goes back to none",
+              !model.hasRetroArchFilters && ShaderPreset.list(game: profile.gameFolder).allSatisfy { $0.retroArch == nil }
+              && DisplaySettings.read(game: profile.gameFolder).shader.isEmpty)
     }
 
     /// S-033: Back Up Saves, then Restore, which backs up the current saves first.

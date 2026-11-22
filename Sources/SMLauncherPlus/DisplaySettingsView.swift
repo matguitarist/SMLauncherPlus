@@ -13,7 +13,7 @@ struct DisplaySettingsView: View {
     var body: some View {
         if let profile = model.currentProfile {
             form(profile)
-                .task(id: LoadKey(profile: profile.uuid, playing: model.isPlaying)) { load(profile) }
+                .task(id: LoadKey(profile: profile.uuid, playing: model.isPlaying, filters: model.retroArchChanges)) { load(profile) }
                 .onChange(of: settings) { old, new in
                     guard loadedFor == profile.uuid, old != new else { return }
                     save(profile)
@@ -53,8 +53,16 @@ struct DisplaySettingsView: View {
             .disabled(settings.widescreen == .off)
             Picker("Filter", selection: filterLook) {
                 Text("None").tag("")
-                ForEach(looks, id: \.self) { look in
+                ForEach(looks.filter { !$0.hasPrefix(ShaderPreset.retroArchPrefix) }, id: \.self) { look in
                     Text(Self.title(look: look)).tag(look)
+                }
+                let retroArch = looks.filter { $0.hasPrefix(ShaderPreset.retroArchPrefix) }
+                if !retroArch.isEmpty {
+                    Section("From RetroArch") {
+                        ForEach(retroArch, id: \.self) { look in
+                            Text(Self.title(look: look)).tag(look)
+                        }
+                    }
                 }
                 if isCustomShader {
                     Text("Other (\((settings.shader as NSString).lastPathComponent))").tag(customLook)
@@ -69,6 +77,7 @@ struct DisplaySettingsView: View {
                 }
                 .pickerStyle(.segmented)
             }
+            RetroArchFiltersRow()
         } header: {
             Text("Picture")
         } footer: {
@@ -137,7 +146,13 @@ struct DisplaySettingsView: View {
         case "sharp": String(localized: "Sharp")
         case "lcd-grid": String(localized: "LCD Grid")
         case "warm-composite": String(localized: "Warm Composite")
-        default: look.replacingOccurrences(of: "-", with: " ").capitalized
+        default:
+            if look.hasPrefix(ShaderPreset.retroArchPrefix),
+               let filter = RetroArchFilter.named(String(look.dropFirst(ShaderPreset.retroArchPrefix.count))) {
+                filter.name
+            } else {
+                look.replacingOccurrences(of: "-", with: " ").capitalized
+            }
         }
     }
 
@@ -176,4 +191,5 @@ struct DisplaySettingsView: View {
 struct LoadKey: Equatable {
     var profile: UUID
     var playing: Bool
+    var filters = 0
 }
