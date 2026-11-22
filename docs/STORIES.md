@@ -162,11 +162,15 @@ Findings:
   and `#include`. Presets from github.com/libretro/glsl-shaders should mostly load as they are.
 - That repo is public (about 56 MB, 623 presets); each shader carries its own license (mostly GPL,
   some public domain or MIT). Download it on request into the data folder; never bundle it.
-- The catch: with the enhanced renderer on (`NewRenderer = 1`, the default) the game hands a filter
-  the picture already upscaled (768×672 at scale 3), while RetroArch filters expect 256×224. CRT and
-  scanline filters then draw per upscaled texel and lose their effect, the same cause as the LCD Grid
-  fix (FIXLOG 2026-11-22). Owner's choice: turn the enhanced renderer off while a RetroArch filter is
-  on (losing what it adds), or only offer filters that check well upscaled.
+- Tried 2026-11-22 in the real game (0.4.11): CRT-Geom, CRT-Lottes, CRT-Easymode, CRT-Aperture,
+  zfast-CRT, LCD3x and HQ4x load and draw one scanline and mask per SNES pixel, with the enhanced
+  renderer on and off alike in the intro. The upscaled picture (768×672) seems limited to Mode 7
+  scenes; not yet checked there.
+- The Mac's OpenGL refuses `#version 130` and later: 191 of 623 presets (CRT-Royale, xBR-lv2,
+  ScaleFX…) fail to compile, and the game then shows the plain picture, no crash. A static check of
+  `#version` leaves 430 presets (handheld 123, crt 64, presets 46, borders 30…).
+- Remaining choice for the owner: offer the whole compatible list grouped by folder, or a short
+  curated list (the CRT and handheld ones above).
 Acceptance:
 - [self] Every listed preset compiles and renders through OpenGL (Tests/Support/render_pass.c);
   one that doesn't is left out of the list.
