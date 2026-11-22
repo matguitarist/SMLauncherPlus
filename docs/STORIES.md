@@ -281,7 +281,23 @@ Acceptance:
 - [live] A pack replacing Samus's Power Suit palette and one HUD icon shows in game, and turning the
   feature off restores the original.
 - [unit] PNGs that break the size or color limits are refused with the reason.
-Status: todo
+Progress 2026-11-22 (owner's choice: a private local fork at `~/Developer/SuperMetroidRecomp`, branch
+`feat/graphics-packs` in the game and its snesrecomp submodule, not pushed; built here from the
+player's ROM unpacked to a private temp folder, deleted after):
+- Done: the fork builds on macOS arm64 and passes the game's 33 tests plus the new `sm_graphics_pack`.
+- Done: replacement by content at the PPU (snesrecomp `gfx_replace.c`). After each DMA, every complete
+  tile and palette line is hashed and swapped for the pack's, so no ROM bytes are read or written and a
+  pack holds only hashes and its own art. Format: `docs/GRAPHICS_PACKS.md` in the fork.
+- Done [live]: a test pack (pink Power Suit, a heart for the HUD's 9) shows in game on the
+  `eye_room_playtest` fixture; with the feature off the frame's CRC matches stock (`b2e3e25e`).
+- Done [unit]: non-indexed PNGs, sizes not in multiples of 8, colors past 3 (2bpp) or 15 (4bpp), cells
+  outside the sheet and bad lines are refused with the reason.
+- Learned: Samus's Power Suit palette has four variants (the visor color cycles), and fades and flashes
+  are computed, so a pack lists each variant it changes. S-041's templates should group them.
+- Left: the launcher installing the fork's build as its own profile, and tracking mstan's tags. Waits on
+  the owner: where the fork's build comes from (built on this Mac, or published, which is the open
+  question of shipping a build generated from the ROM).
+Status: in progress
 
 ### S-041 Make editing templates from my ROM
 As a pack author, SM Launcher Plus exports the original graphics from my own ROM as PNG templates on my Mac.
