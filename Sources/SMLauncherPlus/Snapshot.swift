@@ -9,7 +9,8 @@ import SwiftUI
 /// settings-<tab>-light.png and settings-<tab>-dark.png for every Settings tab, then quits.
 /// Each PNG gets a <page>-<mode>-layout.json with the grid probes (tools/check-layout.swift).
 /// APP_SNAPSHOT_PAGES=play,log limits the pages. Add "settings" to include Settings, and
-/// "install-progress", "install-error", "install-setup-error", "install-ready" for the install page (S-002, S-003), and
+/// "install-progress", "install-error", "install-setup-error", "install-ready" for the install page (S-002, S-003),
+/// "install-updating" (S-031), and
 /// "play-running", "play-rom-missing" for the Play page (S-004), "play-failed", "log-sheet" (S-005), and
 /// "welcome", "welcome-checking", "welcome-error" (yellow), "welcome-wrong" (red), "welcome-ready" for the welcome page's states (S-001).
 /// Add APP_ACCENT=<id> to see the pages in another accent.
@@ -84,8 +85,11 @@ enum Snapshot {
             ready.version = "0.4.6"
             ready.step = .setUp
             ready.finishedName = "Super Metroid"
+            var updating = InstallState(updating: model.currentProfile?.uuid)
+            updating.version = "0.4.8"
+            updating.step = .setUp
             for (name, state) in [("install-progress", downloading), ("install-error", offline),
-                                  ("install-setup-error", setUpFailed), ("install-ready", ready)]
+                                  ("install-setup-error", setUpFailed), ("install-ready", ready), ("install-updating", updating)]
             where only?.contains(name) ?? true {
                 model.sidebar = .play
                 model.install = state
@@ -179,6 +183,23 @@ enum Snapshot {
                         let settings = NSApp.windows.first { $0.isVisible && $0 !== main && !$0.isSheet }
                         capture(to: "\(dir)/settings-\(tab.rawValue)-\(mode).png", window: settings)
                     }
+                }
+                // S-031: Updates with a newer release and a kept build for Roll Back.
+                if let profile = model.currentProfile {
+                    let saved = model.latestUpdate
+                    let previous = ProfileUpdate.previousFolder(of: profile.folder)
+                    try? FileManager.default.createDirectory(at: previous, withIntermediateDirectories: true)
+                    try? Data("0.4.5\n".utf8).write(to: previous.appending(path: "VERSION"))
+                    model.latestUpdate = SeedData.latestUpdate()
+                    model.settingsTab = .updates
+                    for mode in ["light", "dark"] {
+                        NSApp.appearance = NSAppearance(named: mode == "light" ? .aqua : .darkAqua)
+                        try? await Task.sleep(for: .seconds(0.8))
+                        let settings = NSApp.windows.first { $0.isVisible && $0 !== main && !$0.isSheet }
+                        capture(to: "\(dir)/settings-updates-available-\(mode).png", window: settings)
+                    }
+                    try? FileManager.default.removeItem(at: previous)
+                    model.latestUpdate = saved
                 }
             }
             print("SNAPSHOT done \(dir)")

@@ -45,6 +45,13 @@ struct SMLauncherPlusApp: App {
                 Button("Stop") { model.sidebar = .play; model.confirmStop = true }
                     .keyboardShortcut(".")
                     .disabled(!model.isPlaying)
+                Divider()
+                Button("Update SuperMetroidRecomp") {
+                    model.sidebar = .play
+                    model.startInstall(updating: model.currentProfile)
+                }
+                .keyboardShortcut("u", modifiers: [.command, .shift])
+                .disabled(!model.canUpdate)
             }
             CommandGroup(replacing: .appInfo) {
                 Button("About SM Launcher Plus") { AboutCredits.show(gameVersion: model.currentProfile?.gameVersion) }
@@ -114,6 +121,11 @@ final class AppModel {
     var selection: UUID?
     /// The welcome page is open over an installed profile, to choose another ROM (⌘O).
     var forceWelcome = false
+
+    /// Every profile, newest first.
+    var profiles: [Profile] {
+        (try? context.fetch(FetchDescriptor<Profile>(sortBy: [SortDescriptor(\.installedAt, order: .reverse)]))) ?? []
+    }
 
     /// The selected profile, or the most recently installed one.
     var currentProfile: Profile? {

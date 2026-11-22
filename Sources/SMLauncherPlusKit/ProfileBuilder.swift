@@ -24,11 +24,14 @@ public enum ProfileBuilder {
         public var installedAt: Date
         /// The ROM the profile was set up with.
         public var romSHA256: String
+        /// The version kept in `previous/` by the last update, for Roll Back (S-031).
+        public var previousVersion: String?
 
-        public init(version: String, installedAt: Date = .now, romSHA256: String) {
+        public init(version: String, installedAt: Date = .now, romSHA256: String, previousVersion: String? = nil) {
             self.version = version
             self.installedAt = installedAt
             self.romSHA256 = romSHA256
+            self.previousVersion = previousVersion
         }
 
         public static func read(from profile: URL) -> Info? {
@@ -51,19 +54,33 @@ public enum ProfileBuilder {
     @discardableResult
     public static func build(zip: URL, profile: URL, info: Info) throws(Failure) -> URL {
         let fm = FileManager.default
-        guard let entries = Zip.list(zip) else { throw .unreadableZip }
-        let root = try commonRoot(of: entries)
-
         let staging = profile.deletingLastPathComponent().appending(path: profile.lastPathComponent + ".partial", directoryHint: .isDirectory)
         try? fm.removeItem(at: staging)
+        var finished = false
+        defer { if !finished { try? fm.removeItem(at: staging) } }
+        _ = try unpack(zip, into: staging)
+        do {
+            try info.write(to: staging)
+            if fm.fileExists(atPath: profile.path) { try fm.removeItem(at: profile) }
+            try fm.moveItem(at: staging, to: profile)
+        } catch {
+            throw .copyFailed("\(error)")
+        }
+        finished = true
+        return profile.appending(path: "game", directoryHint: .isDirectory)
+    }
+
+    /// Unpacks `zip` into `staging/game/` (created, and left to the caller to remove on failure),
+    /// checks it holds the game, and returns that folder.
+    static func unpack(_ zip: URL, into staging: URL) throws(Failure) -> URL {
+        let fm = FileManager.default
+        guard let entries = Zip.list(zip) else { throw .unreadableZip }
+        let root = try commonRoot(of: entries)
         do {
             try fm.createDirectory(at: staging, withIntermediateDirectories: true)
         } catch {
             throw .copyFailed("\(error)")
         }
-        var finished = false
-        defer { if !finished { try? fm.removeItem(at: staging) } }
-
         let unpacked = staging.appending(path: "unpacked", directoryHint: .isDirectory)
         guard unzip(zip, to: unpacked) else { throw .unreadableZip }
         try checkLinks(in: unpacked)
@@ -75,15 +92,7 @@ public enum ProfileBuilder {
         let binary = game.appending(path: executable)
         guard fm.isExecutableFile(atPath: binary.path) else { throw .missingExecutable }
         clearQuarantine(in: game)
-        do {
-            try info.write(to: staging)
-            if fm.fileExists(atPath: profile.path) { try fm.removeItem(at: profile) }
-            try fm.moveItem(at: staging, to: profile)
-        } catch {
-            throw .copyFailed("\(error)")
-        }
-        finished = true
-        return profile.appending(path: "game", directoryHint: .isDirectory)
+        return game
     }
 
     /// The one folder every entry sits in ("supermetroid-0.4.6-macos-arm64/"), or "" when there isn't one.

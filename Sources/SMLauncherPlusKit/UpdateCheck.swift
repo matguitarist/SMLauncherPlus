@@ -90,7 +90,8 @@ public enum UpdateCheck {
     public static func fetch(session: URLSession = .shared, now: Date = .now) async throws(GameRelease.Failure) -> Latest {
         let release = try await GameRelease.latest(session: session)
         let notes = (try? await GameRelease.recentNotes(session: session)) ?? []
-        return Latest(release: release, notes: notes, checkedAt: now)
+        // Whole seconds: the saved file keeps no fractions, so the answer in memory matches the one read back.
+        return Latest(release: release, notes: notes, checkedAt: Date(timeIntervalSince1970: now.timeIntervalSince1970.rounded(.down)))
     }
 
     public static func read(from file: URL) -> Latest? {

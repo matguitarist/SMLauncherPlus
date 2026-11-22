@@ -111,6 +111,26 @@ enum SelfTest {
                 await Self.waitForInstall(model)
                 check("a verified download is reused",
                       model.log.entries.contains { $0.message.hasPrefix("Using the downloaded") })
+                // S-031: the real release installed over a profile that says it's older keeps its save.
+                if let profile = model.currentProfile {
+                    let latest = profile.gameVersion
+                    let save = profile.gameFolder.appending(path: "saves/selftest.srm")
+                    try? FileManager.default.createDirectory(at: save.deletingLastPathComponent(), withIntermediateDirectories: true)
+                    try? Data("samus".utf8).write(to: save)
+                    profile.gameVersion = "0.0.1"
+                    await model.checkForGameUpdate(force: true)
+                    check("an older profile can be updated", model.canUpdate, "latest \(model.latestUpdate?.version ?? "none")")
+                    model.update(profile)
+                    check("Update shows the install page for this profile", model.install?.updating == profile.uuid)
+                    await Self.waitForInstall(model)
+                    check("Update finishes on the latest version, in the same profile, with the save",
+                          model.install == nil && profile.gameVersion == latest
+                          && (try? String(contentsOf: save, encoding: .utf8)) == "samus"
+                          && FileManager.default.isExecutableFile(atPath: profile.executable.path),
+                          model.install?.failure ?? profile.gameVersion)
+                    check("the build from before the update is kept for Roll Back", model.previousVersion(of: profile) == latest)
+                    try? FileManager.default.removeItem(at: ProfileUpdate.previousFolder(of: profile.folder))
+                }
                 if model.rom != nil, ProcessInfo.processInfo.environment["SM_ROM_PATH"] != nil {
                     await Self.checkPlay(model)
                 } else {
@@ -154,6 +174,7 @@ enum SelfTest {
                   links == [Credits.project, Credits.license, Credits.framework], "\(links)")
 
             await checkUpdateBanner(model: model)
+            await checkUpdateAndRollBack(model: model)
             await checkDataFolderMove(model: model)
             await checkModInstall(model: model)
             await checkModResources()
@@ -492,6 +513,69 @@ enum SelfTest {
         }
         model.context.delete(profile)
         try? model.context.save()
+    }
+
+    /// S-031: an update keeps the player's files and the old build; Roll Back brings that build back
+    /// with the saves made since. Made-up release zips, no network.
+    private static func checkUpdateAndRollBack(model: AppModel) async {
+        let fm = FileManager.default
+        let work = URL(fileURLWithPath: "/tmp/SMLauncherPlus-self-update-\(UUID().uuidString)", isDirectory: true)
+        defer { try? fm.removeItem(at: work) }
+        func release(_ version: String) -> URL? {
+            let top = work.appending(path: "src-\(version)/supermetroid-\(version)-macos-arm64", directoryHint: .isDirectory)
+            try? fm.createDirectory(at: top.appending(path: "mods/preloaded/packages/super-metroid.combat/\(version)"), withIntermediateDirectories: true)
+            try? Data("\(version)\n".utf8).write(to: top.appending(path: "VERSION"))
+            try? Data("[General]\nScale = 2\n".utf8).write(to: top.appending(path: "config.ini"))
+            try? Data("combat".utf8).write(to: top.appending(path: "mods/preloaded/packages/super-metroid.combat/\(version)/manifest.toml"))
+            try? Data("#!/bin/sh\n".utf8).write(to: top.appending(path: ProfileBuilder.executable))
+            try? fm.setAttributes([.posixPermissions: 0o755], ofItemAtPath: top.appending(path: ProfileBuilder.executable).path)
+            let zip = work.appending(path: "\(version).zip")
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/zip")
+            process.currentDirectoryURL = top.deletingLastPathComponent()
+            process.arguments = ["-q", "-r", "-y", zip.path, top.lastPathComponent]
+            try? process.run()
+            process.waitUntilExit()
+            return process.terminationStatus == 0 ? zip : nil
+        }
+        guard let old = release("0.4.6"), let new = release("0.4.7") else { return check("made-up releases are zipped", false) }
+        let profile = Profile(name: "Updating", gameVersion: "0.4.6")
+        profile.installedMods = ["fan.hud/1.0.0"]
+        model.context.insert(profile)
+        try? model.context.save()
+        defer { try? fm.removeItem(at: profile.folder); model.context.delete(profile); try? model.context.save() }
+        do {
+            try ProfileBuilder.build(zip: old, profile: profile.folder, info: .init(version: "0.4.6", romSHA256: SupportedROM.sha256))
+        } catch {
+            return check("a made-up 0.4.6 profile is built", false, "\(error)")
+        }
+        let game = profile.gameFolder
+        for (path, text) in ["saves/save.srm": "samus", "config.ini": "[General]\nScale = 4\n",
+                             "mods/preloaded/state.toml": "format_version = 1\n",
+                             "mods/preloaded/packages/fan.hud/1.0.0/manifest.toml": "hud"] {
+            try? fm.createDirectory(at: game.appending(path: path).deletingLastPathComponent(), withIntermediateDirectories: true)
+            try? Data(text.utf8).write(to: game.appending(path: path))
+        }
+        check("a profile that was never updated has nothing to roll back to", model.previousVersion(of: profile) == nil)
+        let keeping = Set(profile.installedMods.compactMap { $0.split(separator: "/").first.map(String.init) })
+        let updated = try? ProfileUpdate.update(zip: new, profile: profile.folder, info: .init(version: "0.4.7", romSHA256: SupportedROM.sha256),
+                                                keepingPackages: keeping)
+        profile.gameVersion = updated?.version ?? profile.gameVersion
+        func text(_ path: String) -> String? { try? String(contentsOf: game.appending(path: path), encoding: .utf8) }
+        check("Update keeps the saves, config.ini values, mod choices and the player's packages",
+              text("VERSION") == "0.4.7\n" && text("saves/save.srm") == "samus"
+              && IniFile(text: text("config.ini") ?? "").value("Scale", in: "General") == "4"
+              && text("mods/preloaded/state.toml") == "format_version = 1\n"
+              && text("mods/preloaded/packages/fan.hud/1.0.0/manifest.toml") == "hud"
+              && !fm.fileExists(atPath: game.appending(path: "mods/preloaded/packages/super-metroid.combat/0.4.6").path),
+              "\(files(in: game))")
+        check("the old build is kept for Roll Back", model.previousVersion(of: profile) == "0.4.6")
+        try? Data("samus in 0.4.7".utf8).write(to: game.appending(path: "saves/save.srm"))
+        await model.rollBack(profile)
+        check("Roll Back returns to the previous version with the newer save",
+              profile.gameVersion == "0.4.6" && text("VERSION") == "0.4.6\n" && text("saves/save.srm") == "samus in 0.4.7"
+              && model.previousVersion(of: profile) == nil, model.updateCheckMessage ?? "")
+        model.updateCheckMessage = nil
     }
 
     /// S-022: a required file keeps its feature off until it's chosen and checked; a shared file is chosen once.

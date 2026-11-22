@@ -25,6 +25,19 @@ extension AppModel {
         }
     }
 
+    /// Update can start: the current profile has a newer release, the game isn't running, nothing installs.
+    var canUpdate: Bool {
+        guard let profile = currentProfile, availableUpdate(for: profile) != nil else { return false }
+        return !isPlaying && install == nil
+    }
+
+    /// Update from the banner, What's New, Settings or the Game menu (S-031).
+    func update(_ profile: Profile) {
+        sidebar = .play
+        showWhatsNew = false
+        startInstall(updating: profile)
+    }
+
     /// The newer release for `profile`, or nil when it has the latest one (or nothing was checked yet).
     func availableUpdate(for profile: Profile) -> UpdateCheck.Latest? {
         guard let latestUpdate, UpdateCheck.isNewer(latestUpdate.version, than: profile.gameVersion) else { return nil }
@@ -32,7 +45,7 @@ extension AppModel {
     }
 }
 
-/// "SuperMetroidRecomp 0.4.7 is available" with What's New, on the Play page.
+/// "SuperMetroidRecomp 0.4.7 is available" with What's New and Update, on the Play page.
 struct UpdateBanner: View {
     @Environment(AppModel.self) private var model
     let latest: UpdateCheck.Latest
@@ -43,19 +56,27 @@ struct UpdateBanner: View {
         HStack(spacing: Space.lg) {
             Label(String(localized: "SuperMetroidRecomp \(latest.version) is available"), systemImage: "arrow.down.circle.fill")
                 .foregroundStyle(Palette.accentText)
+                .fixedSize()
                 .gridProbe("update-message", area: "update-banner")
             Spacer(minLength: Space.lg)
             Button("What's New") { model.showWhatsNew = true }
                 .help(String(localized: "Read what changed since \(profile.gameVersion)"))
+            Button("Update") { model.update(profile) }
+                .buttonStyle(.borderedProminent)
+                .disabled(model.isPlaying || model.install != nil)
+                .help(model.isPlaying ? String(localized: "Quit the game to update")
+                                      : String(localized: "Install \(latest.version) in this profile. Your saves, settings and mods stay. (⇧⌘U)"))
         }
         .padding(.horizontal, Space.lg)
         .padding(.vertical, Space.md)
-        .frame(width: 480)
+        .frame(minWidth: 480)
+        .fixedSize()
         .cardBackground(Radius.banner)
         .gridArea("update-banner", inset: Space.md)
         .accessibilityElement(children: .contain)
         .sheet(isPresented: $model.showWhatsNew) {
-            WhatsNewSheet(notes: latest.notes(since: profile.gameVersion), latest: latest.version, installed: profile.gameVersion)
+            WhatsNewSheet(notes: latest.notes(since: profile.gameVersion), latest: latest.version, installed: profile.gameVersion,
+                          update: model.isPlaying ? nil : { model.update(profile) })
         }
     }
 }
@@ -66,6 +87,8 @@ struct WhatsNewSheet: View {
     let notes: [UpdateCheck.Notes]
     let latest: String
     let installed: String
+    /// Update Now, or nil while the game runs.
+    var update: (() -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -97,8 +120,15 @@ struct WhatsNewSheet: View {
                     Link("View on GitHub", destination: page)
                 }
                 Spacer()
-                Button("Done") { dismiss() }
-                    .keyboardShortcut(.defaultAction)
+                if let update {
+                    Button("Later") { dismiss() }
+                        .keyboardShortcut(.cancelAction)
+                    Button("Update Now") { update() }
+                        .keyboardShortcut(.defaultAction)
+                } else {
+                    Button("Done") { dismiss() }
+                        .keyboardShortcut(.defaultAction)
+                }
             }
             .padding(Space.xl)
         }

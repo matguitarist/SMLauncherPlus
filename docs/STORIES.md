@@ -191,7 +191,7 @@ Screens: update-banner
 Acceptance:
 - [unit] Checks GitHub at most once a day; compares semantic versions.
 - [snap] Banner "SuperMetroidRecomp 0.4.7 is available" with What's New and Update.
-Status: done (Update joins the banner with S-031)
+Status: done
 
 ### S-031 Update a profile in one click
 As the player, Update installs the new build into the same profile and keeps my saves, settings,
@@ -202,7 +202,8 @@ Acceptance:
 - [unit] `saves/`, `config.ini` (merged with new keys), `mods/preloaded/state.toml`, installed
   packages and `logs/` survive; the old build is kept until the new one starts once.
 - [self] Roll Back returns to the previous version.
-Status: todo
+Status: done (Update on the Play page banner, What's New, Settings › Updates and Game › Update (⇧⌘U);
+the old build stays in `previous/` until the next update or Roll Back in Settings › Updates)
 
 ### S-032 Manage profiles
 As the player, I rename, duplicate, show in Finder and delete profiles (optionally keeping saves).

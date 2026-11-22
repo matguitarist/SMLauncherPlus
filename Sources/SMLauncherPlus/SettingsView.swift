@@ -254,21 +254,47 @@ struct UpdateSettings: View {
     }
 }
 
-/// Settings › Updates: SuperMetroidRecomp's releases (S-030), checked once a day.
+/// Settings › Updates: SuperMetroidRecomp's releases (S-030), checked once a day; Update and Roll Back (S-031).
 struct GameUpdateSection: View {
     @Environment(AppModel.self) private var model
+    @State private var confirmRollBack = false
 
     var body: some View {
+        let profile = model.currentProfile
+        let update = profile.flatMap { model.availableUpdate(for: $0) }
         Section {
             LabeledContent {
                 HStack(spacing: Space.sm) {
-                    if model.checkingForUpdates { ProgressView().controlSize(.small) }
-                    Button("Check Now") { Task { await model.checkForGameUpdate(force: true) } }
-                        .disabled(model.checkingForUpdates || model.currentProfile == nil)
+                    if model.checkingForUpdates || model.install?.updating != nil { ProgressView().controlSize(.small) }
+                    if let profile, update != nil, model.install?.updating == nil {
+                        Button("Update") { model.update(profile) }
+                            .buttonStyle(.borderedProminent)
+                            .disabled(!model.canUpdate)
+                            .help(model.isPlaying ? String(localized: "Quit the game to update")
+                                                  : String(localized: "Your saves, settings and mods stay. (⇧⌘U)"))
+                    } else {
+                        Button("Check Now") { Task { await model.checkForGameUpdate(force: true) } }
+                            .disabled(model.checkingForUpdates || profile == nil || model.install != nil)
+                    }
                 }
             } label: {
                 Text(Credits.gameName)
-                Text(status)
+                Text(status(profile: profile, update: update))
+            }
+            if let profile, let previous = model.previousVersion(of: profile) {
+                LabeledContent {
+                    Button("Roll Back…") { confirmRollBack = true }
+                        .disabled(model.isPlaying || model.install != nil)
+                } label: {
+                    Text("Version \(previous) is kept")
+                    Text("Go back to it if \(profile.gameVersion) gives you trouble. Your saves come along.")
+                }
+                .confirmationDialog("Go back to \(previous)?", isPresented: $confirmRollBack) {
+                    Button("Roll Back") { Task { await model.rollBack(profile) } }
+                    Button("Cancel", role: .cancel) {}
+                } message: {
+                    Text("Your saves, settings and mods come along. \(profile.gameVersion) is removed; Update installs it again.")
+                }
             }
             if let message = model.updateCheckMessage {
                 Text(message)
@@ -277,14 +303,19 @@ struct GameUpdateSection: View {
         } header: {
             Text("Game")
         } footer: {
-            Text("SM Launcher Plus looks for a new version of the game on GitHub once a day and says so on the Play page.")
+            Text("SM Launcher Plus looks for a new version of the game on GitHub once a day. Updating keeps your saves, settings and mods.")
         }
     }
 
-    private var status: String {
-        guard let latest = model.latestUpdate else { return String(localized: "Not checked yet.") }
+    private func status(profile: Profile?, update: UpdateCheck.Latest?) -> String {
+        if let updating = model.install, updating.updating != nil {
+            return updating.version.map { String(localized: "Updating to \($0)…") } ?? String(localized: "Updating…")
+        }
+        guard let profile else { return String(localized: "Not installed yet.") }
+        guard let latest = model.latestUpdate else { return String(localized: "You have \(profile.gameVersion). Not checked yet.") }
+        if let update { return String(localized: "Version \(update.version) is available. You have \(profile.gameVersion).") }
         let when = latest.checkedAt.formatted(.relative(presentation: .named).locale(.app))
-        return String(localized: "Latest version \(latest.version), checked \(when).")
+        return String(localized: "You have the latest version, \(profile.gameVersion). Checked \(when).")
     }
 }
 

@@ -100,6 +100,8 @@ struct InstallState: Equatable {
     var failure: String?
     /// Set when the profile is ready; the page shows it for a moment, then Play.
     var finishedName: String?
+    /// S-031: the profile being updated, instead of a new one.
+    var updating: UUID?
 
     func title(of step: Step) -> String {
         switch step {
@@ -107,13 +109,16 @@ struct InstallState: Equatable {
             if let version { reused ? String(localized: "Using the downloaded \(version)") : String(localized: "Downloading SuperMetroidRecomp \(version)") }
             else { String(localized: "Finding the latest SuperMetroidRecomp") }
         case .check: String(localized: "Checking the download")
-        case .setUp: String(localized: "Setting up the game")
+        case .setUp: updating == nil ? String(localized: "Setting up the game")
+                                     : String(localized: "Moving your saves, settings and mods over")
         }
     }
 
     var title: String {
-        if let finishedName { return String(localized: "\(finishedName) Is Ready") }
-        return String(localized: "Installing Super Metroid")
+        if let finishedName {
+            return updating == nil ? String(localized: "\(finishedName) Is Ready") : String(localized: "\(finishedName) Is Up to Date")
+        }
+        return updating == nil ? String(localized: "Installing Super Metroid") : String(localized: "Updating Super Metroid")
     }
 }
 
@@ -146,12 +151,13 @@ extension ProfileBuilder.Failure {
 }
 
 extension AppModel {
-    /// Reads the latest release, downloads and checks it (S-002), then sets it up as a new profile (S-003).
-    func startInstall() {
-        guard let rom, installTask == nil else { return }
-        let romSHA256 = rom.sha256
-        install = InstallState()
-        log.post(.info, "Looking for the latest SuperMetroidRecomp", source: "Install")
+    /// Reads the latest release, downloads and checks it (S-002), then sets it up as a new profile (S-003),
+    /// or installs it into `updating` keeping its saves, settings and mods (S-031).
+    func startInstall(updating target: Profile? = nil) {
+        guard installTask == nil, !isPlaying else { return }
+        guard let romSHA256 = rom?.sha256 ?? target.flatMap({ ProfileBuilder.Info.read(from: $0.folder)?.romSHA256 }) else { return }
+        install = InstallState(updating: target?.uuid)
+        log.post(.info, target.map { "Updating \($0.name) from \($0.gameVersion)" } ?? "Looking for the latest SuperMetroidRecomp", source: "Install")
         let session = Self.installSession
         installTask = Task {
             defer { installTask = nil }
@@ -171,6 +177,10 @@ extension AppModel {
                 try Task.checkCancellation()
                 log.post(.info, "\(release.zipName) matches its checksum: \(zip.path)", source: "Install")
                 install?.step = .setUp
+                if let target {
+                    try await update(target, to: release, from: zip, romSHA256: romSHA256)
+                    return
+                }
                 let uuid = UUID()
                 let folder = DataFolder.profiles.appending(path: uuid.uuidString, directoryHint: .isDirectory)
                 let info = ProfileBuilder.Info(version: release.version, romSHA256: romSHA256)
@@ -205,6 +215,59 @@ extension AppModel {
                 log.post(.error, "Install failed: \(error)", source: "Install")
                 install?.failure = String(localized: "Unable to install: \(error.localizedDescription)")
             }
+        }
+    }
+
+    /// S-031: installs a verified zip into `profile`, keeping its saves, settings, mod choices, packages
+    /// and logs; the old build stays in previous/ for Roll Back.
+    private func update(_ profile: Profile, to release: GameRelease, from zip: URL, romSHA256: String) async throws {
+        guard !isPlaying else { throw CancellationError() }
+        let folder = profile.folder
+        let old = profile.gameVersion
+        let keeping = Set(profile.installedMods.compactMap { $0.split(separator: "/").first.map(String.init) })
+        let info = ProfileBuilder.Info(version: release.version, romSHA256: romSHA256)
+        _ = try await Task.detached(priority: .userInitiated) {
+            try ProfileUpdate.update(zip: zip, profile: folder, info: info, keepingPackages: keeping)
+        }.value
+        installFilters(in: profile.gameFolder)
+        profile.gameVersion = release.version
+        try? context.save()
+        updateCheckMessage = nil
+        log.post(.info, "Updated \(profile.name) from \(old) to \(release.version); \(old) is kept for Roll Back", source: "Install")
+        selection = profile.uuid
+        install?.finishedName = profile.name
+        try? await Task.sleep(for: .seconds(1))
+        install = nil
+        sidebar = .play
+    }
+
+    /// The version Roll Back would bring back, when the last update kept one.
+    func previousVersion(of profile: Profile) -> String? {
+        guard FileManager.default.fileExists(atPath: ProfileUpdate.previousFolder(of: profile.folder).path) else { return nil }
+        return ProfileBuilder.Info.read(from: profile.folder)?.previousVersion ?? ProfileUpdate.version(of: ProfileUpdate.previousFolder(of: profile.folder))
+    }
+
+    /// S-031: brings back the build from before the last update, with the saves made since.
+    func rollBack(_ profile: Profile) async {
+        guard !isPlaying, install == nil else { return }
+        let folder = profile.folder
+        let newer = profile.gameVersion
+        let keeping = Set(profile.installedMods.compactMap { $0.split(separator: "/").first.map(String.init) })
+        let result = await Task.detached(priority: .userInitiated) { () -> Result<ProfileBuilder.Info?, ProfileBuilder.Failure> in
+            Result { () throws(ProfileBuilder.Failure) in try ProfileUpdate.rollBack(profile: folder, keepingPackages: keeping) }
+        }.value
+        switch result {
+        case .success(let info?):
+            profile.gameVersion = info.version
+            try? context.save()
+            installFilters(in: profile.gameFolder)
+            updateCheckMessage = String(localized: "\(profile.name) is back on \(info.version), with your saves.")
+            log.post(.info, "Rolled \(profile.name) back from \(newer) to \(info.version)", source: "Install")
+        case .success(nil):
+            updateCheckMessage = String(localized: "There is no earlier version to go back to.")
+        case .failure(let failure):
+            log.post(.error, "Roll Back failed: \(failure)", source: "Install")
+            updateCheckMessage = String(localized: "Unable to go back to the earlier version. \(failure.reason)")
         }
     }
 

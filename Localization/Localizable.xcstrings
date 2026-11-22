@@ -21,6 +21,16 @@
         }
       }
     },
+    "%@ Is Up to Date": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ est à jour"
+          }
+        }
+      }
+    },
     "%@ found": {
       "localizations": {
         "fr": {
@@ -67,6 +77,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ contient plusieurs fichiers qui pourraient convenir. Choisissez un .zip ou un .7z qui n’en contient qu’un."
+          }
+        }
+      }
+    },
+    "%@ is back on %@, with your saves.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ est revenu à la version %2$@, avec vos sauvegardes."
           }
         }
       }
@@ -991,6 +1011,26 @@
         }
       }
     },
+    "Go back to %@?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revenir à la version %@ ?"
+          }
+        }
+      }
+    },
+    "Go back to it if %@ gives you trouble. Your saves come along.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revenez-y si la version %@ vous pose problème. Vos sauvegardes suivent."
+          }
+        }
+      }
+    },
     "Go to Play": {
       "localizations": {
         "fr": {
@@ -1027,6 +1067,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Réception"
+          }
+        }
+      }
+    },
+    "Install %@ in this profile. Your saves, settings and mods stay. (⇧⌘U)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installer la version %@ dans ce profil. Vos sauvegardes, réglages et mods sont conservés. (⇧⌘U)"
           }
         }
       }
@@ -1237,6 +1287,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Joué %@ · %@ au total"
+          }
+        }
+      }
+    },
+    "Later": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus tard"
           }
         }
       }
@@ -1481,6 +1541,16 @@
         }
       }
     },
+    "Moving your saves, settings and mods over": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transfert de vos sauvegardes, réglages et mods"
+          }
+        }
+      }
+    },
     "Never played": {
       "localizations": {
         "fr": {
@@ -1557,6 +1627,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Non installé"
+          }
+        }
+      }
+    },
+    "Not installed yet.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas encore installé."
           }
         }
       }
@@ -1767,6 +1847,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Quittez le jeu pour déplacer le dossier de données."
+          }
+        }
+      }
+    },
+    "Quit the game to update": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quittez le jeu pour mettre à jour"
           }
         }
       }
@@ -2021,6 +2111,26 @@
         }
       }
     },
+    "Roll Back": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revenir en arrière"
+          }
+        }
+      }
+    },
+    "Roll Back…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revenir en arrière…"
+          }
+        }
+      }
+    },
     "Run": {
       "localizations": {
         "fr": {
@@ -2067,6 +2177,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "SM Launcher Plus cherche une nouvelle version du jeu sur GitHub une fois par jour et l’indique dans la page Jouer."
+          }
+        }
+      }
+    },
+    "SM Launcher Plus looks for a new version of the game on GitHub once a day. Updating keeps your saves, settings and mods.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SM Launcher Plus cherche une nouvelle version du jeu sur GitHub une fois par jour. La mise à jour conserve vos sauvegardes, réglages et mods."
           }
         }
       }
@@ -2581,6 +2701,16 @@
         }
       }
     },
+    "There is no earlier version to go back to.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il n’y a pas de version précédente où revenir."
+          }
+        }
+      }
+    },
     "This ROM has been patched. Use an unmodified copy; mods are added in SM Launcher Plus.": {
       "localizations": {
         "fr": {
@@ -2781,6 +2911,16 @@
         }
       }
     },
+    "Unable to go back to the earlier version. %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de revenir à la version précédente. %@"
+          }
+        }
+      }
+    },
     "Unable to install the package: %@": {
       "localizations": {
         "fr": {
@@ -2941,6 +3081,36 @@
         }
       }
     },
+    "Update": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mettre à jour"
+          }
+        }
+      }
+    },
+    "Update Now": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mettre à jour maintenant"
+          }
+        }
+      }
+    },
+    "Update SuperMetroidRecomp": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mettre à jour SuperMetroidRecomp"
+          }
+        }
+      }
+    },
     "Updates": {
       "localizations": {
         "fr": {
@@ -2957,6 +3127,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Les mises à jour sont désactivées dans cette version."
+          }
+        }
+      }
+    },
+    "Updating Super Metroid": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mise à jour de Super Metroid"
+          }
+        }
+      }
+    },
+    "Updating to %@…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mise à jour vers la version %@…"
+          }
+        }
+      }
+    },
+    "Updating…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mise à jour…"
           }
         }
       }
@@ -2987,6 +3187,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Version %@"
+          }
+        }
+      }
+    },
+    "Version %@ is available. You have %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La version %1$@ est disponible. Vous avez la version %2$@."
+          }
+        }
+      }
+    },
+    "Version %@ is kept": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La version %@ est conservée"
           }
         }
       }
@@ -3111,6 +3331,26 @@
         }
       }
     },
+    "You have %@. Not checked yet.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous avez la version %@. Pas encore vérifiée."
+          }
+        }
+      }
+    },
+    "You have the latest version, %@. Checked %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous avez la dernière version, %1$@. Vérifiée %2$@."
+          }
+        }
+      }
+    },
     "Your Packages": {
       "localizations": {
         "fr": {
@@ -3147,6 +3387,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Votre ROM reste où elle est et rien n’est envoyé en ligne. Le jeu la lit à chaque démarrage : gardez-la dans un dossier que vous ne videz pas."
+          }
+        }
+      }
+    },
+    "Your saves, settings and mods come along. %@ is removed; Update installs it again.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vos sauvegardes, réglages et mods suivent. La version %@ est supprimée ; Mettre à jour la réinstalle."
+          }
+        }
+      }
+    },
+    "Your saves, settings and mods stay. (⇧⌘U)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vos sauvegardes, réglages et mods sont conservés. (⇧⌘U)"
           }
         }
       }

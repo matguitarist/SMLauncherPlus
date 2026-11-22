@@ -83,7 +83,11 @@ struct InstallPage: View {
                 if state.step == .setUp {
                     Button("Show Log") { model.sidebar = .log }
                 }
-                Button("Try Again") { model.install = nil; model.startInstall() }
+                Button("Try Again") {
+                    let target = state.updating.flatMap { id in model.profiles.first { $0.uuid == id } }
+                    model.install = nil
+                    model.startInstall(updating: target)
+                }
                     .buttonStyle(.borderedProminent)
                     .keyboardShortcut(.defaultAction)
             }
