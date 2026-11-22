@@ -173,6 +173,25 @@ Acceptance:
 - [snap] Settings › Display lists the downloaded filters under their folder, with Get More Filters….
 Status: proposed
 
+### S-015 Play with an MSU-1 soundtrack
+As the player, I choose my Super Metroid MSU-1 pack's folder and hear its soundtrack in the game,
+with the original music wherever the pack has no track.
+Waits on the game: SuperMetroidRecomp has no MSU-1 driver yet (`src/main.c` sets
+`.msu1_supported = 0`); requested in mstan/SuperMetroidRecomp#19, which the author kept on
+2026-11-07 as an enhancement with no date. Checked 2026-11-22: a patched MSU-1 ROM is refused
+("mods: plan rejected"), and a .snesmod can't carry the driver (packages are data only).
+What the game already has: snesrecomp's MSU-1 engine, which finds `<name>-<N>.pcm` and
+`<name>.msu` in a folder, and the config keys `Msu1Enabled` and `Msu1Dir`.
+When it lands, follow how the release exposes it:
+- a mod feature with a `[[resource]]` folder: the Mods page already asks for it (S-022);
+- `Msu1Enabled`/`Msu1Dir` in config.ini: a Music section in Settings › Sound that checks the
+  folder (track count, the `.msu` file) and writes both keys, like the other settings.
+Acceptance:
+- [unit] A folder is checked: its pack name, track count, and whether a `.msu` file is there.
+- [self] With the owner's pack, the game logs "[MSU-1] pack base auto-detected" with its tracks.
+- The pack is read where it is, never copied (like the ROM).
+Status: waiting on the game
+
 ### S-020 See and switch mod features
 As the player, the Mods page lists the game's packages and their features (HUD, map, controls,
 balance, bug fixes…), and I turn each on or off and set its options.
