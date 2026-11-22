@@ -65,6 +65,13 @@ struct SMLauncherPlusApp: App {
                     .keyboardShortcut("r", modifiers: [.command, .option])
                     .disabled(off)
                 Divider()
+                Button("Back Up Saves") { if let profile { model.startBackup(profile) } }
+                    .keyboardShortcut("b")
+                    .disabled(off || model.backingUp || model.backupsFor != nil)
+                Button("Saves…") { model.backupsFor = profile }
+                    .keyboardShortcut("b", modifiers: [.command, .shift])
+                    .disabled(off || model.backupsFor != nil)
+                Divider()
                 Button("Delete…") { model.deleteTarget = profile }
                     .keyboardShortcut(.delete)
                     .disabled(off || profile.map(model.isBusy) == true)
@@ -176,6 +183,11 @@ final class AppModel {
     var deleteTarget: Profile?
     var duplicating = false
     var profileMessage: ProfileMessage?
+    /// S-033: the profile whose Saves sheet is open, a backup or restore in progress, and what it did.
+    var backupsFor: Profile?
+    var backingUp = false
+    var backupMessage: String?
+    var backupError: String?
 
     /// S-021: what the last .snesmod install or removal did, shown at the top of the Mods page.
     var modMessage: ModMessage?

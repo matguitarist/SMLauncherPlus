@@ -208,6 +208,9 @@ extension AppModel {
             } catch let failure as GameRelease.Failure {
                 log.post(.error, "\(failure.message) (\(failure))", source: "Install")
                 install?.failure = failure.message
+            } catch let failure as UpdateFailure {
+                log.post(.error, "Update stopped: \(failure)", source: "Install")
+                install?.failure = failure.message
             } catch let failure as ProfileBuilder.Failure {
                 log.post(.error, "Setting up failed: \(failure)", source: "Install")
                 install?.failure = String(localized: "SM Launcher Plus couldn't set up the game. \(failure.reason)")
@@ -222,6 +225,11 @@ extension AppModel {
     /// and logs; the old build stays in previous/ for Roll Back.
     private func update(_ profile: Profile, to release: GameRelease, from zip: URL, romSHA256: String) async throws {
         guard !isPlaying else { throw CancellationError() }
+        // S-033: a backup of the saves first; no backup, no update.
+        if ProfileFiles.hasSaves(game: profile.gameFolder),
+           await backUpSaves(profile, label: String(localized: "before update to \(release.version)")) == nil {
+            throw UpdateFailure.backup(backupError ?? "")
+        }
         let folder = profile.folder
         let old = profile.gameVersion
         let keeping = Set(profile.installedMods.compactMap { $0.split(separator: "/").first.map(String.init) })
@@ -289,6 +297,17 @@ extension AppModel {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [OfflineProtocol.self]
         return URLSession(configuration: configuration)
+    }
+}
+
+/// Why an update stopped before touching the profile (S-033).
+enum UpdateFailure: Error {
+    case backup(String)
+
+    var message: String {
+        switch self {
+        case .backup(let reason): String(localized: "The saves couldn't be backed up, so nothing was updated. \(reason)")
+        }
     }
 }
 

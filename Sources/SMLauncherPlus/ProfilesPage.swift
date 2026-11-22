@@ -72,6 +72,9 @@ extension AppModel {
             do {
                 try? fm.removeItem(at: kept)
                 try ProfileFiles.keepSaves(game: profile.gameFolder, in: kept)
+                // Its backups go with the kept saves (S-033).
+                let backups = DataFolder.backups(for: profile.uuid)
+                if fm.fileExists(atPath: backups.path) { try? fm.moveItem(at: backups, to: kept.appending(path: "Backups", directoryHint: .isDirectory)) }
                 profileMessage = .kept(name: name, folder: kept)
             } catch {
                 log.post(.error, "Unable to keep the saves of \(name): \(error.localizedDescription)", source: "Profiles")
@@ -81,6 +84,7 @@ extension AppModel {
         }
         try? fm.removeItem(at: profile.folder)
         try? fm.removeItem(at: GameRunner.logFolder(for: profile))
+        try? fm.removeItem(at: DataFolder.backups(for: profile.uuid))
         if lastGameFailure?.profile == profile.uuid { lastGameFailure = nil }
         log.post(.info, keepSaves ? "Deleted \(name), saves kept" : "Deleted \(name) and its saves", source: "Profiles")
         let wasSelected = currentProfile?.uuid == profile.uuid
@@ -182,6 +186,10 @@ struct ProfileActions: View {
             .disabled(busy || model.duplicating)
         Button("Show in Finder") { model.reveal(profile) }
         Divider()
+        Button("Back Up Saves") { model.startBackup(profile) }
+            .disabled(model.backingUp)
+        Button("Saves…") { model.backupsFor = profile }
+        Divider()
         Button("Delete…", role: .destructive) { model.deleteTarget = profile }
             .disabled(busy)
     }
@@ -193,7 +201,11 @@ struct ProfileDialogs: ViewModifier {
     @State private var newName = ""
 
     func body(content: Content) -> some View {
-        content
+        @Bindable var model = model
+        return content
+            .sheet(item: $model.backupsFor, onDismiss: { model.backupMessage = nil; model.backupError = nil }) { profile in
+                SavesSheet(profile: profile)
+            }
             .alert("Rename Profile", isPresented: Binding(get: { model.renameTarget != nil }, set: { if !$0 { model.renameTarget = nil } })) {
                 TextField("Name", text: $newName)
                 Button("Rename") { if let profile = model.renameTarget { model.rename(profile, to: newName) } }

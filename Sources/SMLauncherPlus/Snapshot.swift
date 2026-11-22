@@ -158,6 +158,28 @@ enum Snapshot {
                 }
                 model.modMessage = nil
             }
+            // S-033: the Saves sheet with a backup and an automatic one before an update.
+            if only?.contains("saves") ?? (only == nil), let profile = model.currentProfile {
+                let saves = SaveBackup.saves(game: profile.gameFolder)
+                try? FileManager.default.createDirectory(at: saves, withIntermediateDirectories: true)
+                try? Data(repeating: 1, count: 8192).write(to: saves.appending(path: "save.srm"))
+                let folder = DataFolder.backups(for: profile.uuid)
+                if SaveBackup.list(in: folder).isEmpty {
+                    let date = Date.now.addingTimeInterval(-86400)
+                    _ = try? SaveBackup.backup(saves: saves, into: folder, profileName: profile.name, label: String(localized: "before update to \("0.4.11")"), date: date)
+                    _ = try? SaveBackup.backup(saves: saves, into: folder, profileName: profile.name)
+                }
+                model.sidebar = .play
+                model.backupsFor = profile
+                model.backupMessage = String(localized: "Backed up as \(SaveBackup.list(in: folder).first?.name ?? "").")
+                for mode in ["light", "dark"] {
+                    NSApp.appearance = NSAppearance(named: mode == "light" ? .aqua : .darkAqua)
+                    try? await Task.sleep(for: .seconds(1.2))
+                    capture(to: "\(dir)/saves-\(mode).png", window: NSApp.windows.first { $0.isSheet && $0.isVisible })
+                }
+                model.backupsFor = nil
+                try? await Task.sleep(for: .seconds(0.5))
+            }
             // S-032: the Profiles page after Delete, Keep Saves.
             if only?.contains("profiles-kept") ?? (only == nil) {
                 model.sidebar = .profiles

@@ -311,12 +311,52 @@
         }
       }
     },
+    "Back Up Now": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sauvegarder maintenant"
+          }
+        }
+      }
+    },
+    "Back Up Saves": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sauvegarder les parties"
+          }
+        }
+      }
+    },
     "Back to Play": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Retour à Jouer"
+          }
+        }
+      }
+    },
+    "Back up this profile's saves to keep a copy you can restore. Updates make one first, too.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sauvegardez les parties de ce profil pour garder une copie à restaurer. Les mises à jour en font une aussi avant de commencer."
+          }
+        }
+      }
+    },
+    "Backed up as %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sauvegardé sous « %@ »."
           }
         }
       }
@@ -1601,6 +1641,16 @@
         }
       }
     },
+    "Move to Trash": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Placer dans la corbeille"
+          }
+        }
+      }
+    },
     "Move…": {
       "localizations": {
         "fr": {
@@ -1667,6 +1717,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aucune activité"
+          }
+        }
+      }
+    },
+    "No Backups": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune copie"
           }
         }
       }
@@ -2001,6 +2061,16 @@
         }
       }
     },
+    "Quit the game to restore saves": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quittez le jeu pour restaurer les parties"
+          }
+        }
+      }
+    },
     "Quit the game to update": {
       "localizations": {
         "fr": {
@@ -2111,6 +2181,16 @@
         }
       }
     },
+    "Replace this profile's saves with the selected backup": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remplacer les parties de ce profil par la copie choisie"
+          }
+        }
+      }
+    },
     "Report a Problem": {
       "localizations": {
         "fr": {
@@ -2151,6 +2231,16 @@
         }
       }
     },
+    "Restore": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurer"
+          }
+        }
+      }
+    },
     "Restore Default Key": {
       "localizations": {
         "fr": {
@@ -2167,6 +2257,66 @@
           "stringUnit": {
             "state": "translated",
             "value": "Rétablir les valeurs par défaut"
+          }
+        }
+      }
+    },
+    "Restore from File…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurer depuis un fichier…"
+          }
+        }
+      }
+    },
+    "Restore saves from a zip, such as a backup from another Mac": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurer des parties depuis un zip, comme une copie venue d’un autre Mac"
+          }
+        }
+      }
+    },
+    "Restore these saves?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurer ces parties ?"
+          }
+        }
+      }
+    },
+    "Restored %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "« %@ » restauré."
+          }
+        }
+      }
+    },
+    "Restored %@. The saves from before are in the list, marked “before restore”.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "« %@ » restauré. Les parties d’avant sont dans la liste, marquées « avant restauration »."
+          }
+        }
+      }
+    },
+    "Restore…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurer…"
           }
         }
       }
@@ -2397,6 +2547,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Enregistrer le journal, les fichiers de reprise et de plantage dans un zip sur votre bureau, sans votre ROM"
+          }
+        }
+      }
+    },
+    "Saves of %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parties de « %@ »"
+          }
+        }
+      }
+    },
+    "Saves…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parties…"
           }
         }
       }
@@ -2721,6 +2891,16 @@
         }
       }
     },
+    "The current saves of %@ are replaced. They're backed up first, so you can go back.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les parties actuelles de « %@ » sont remplacées. Une copie est faite d’abord, pour pouvoir revenir en arrière."
+          }
+        }
+      }
+    },
     "The disk with the data folder isn't connected. Connect it, then reopen SM Launcher Plus.": {
       "localizations": {
         "fr": {
@@ -2887,6 +3067,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "La nouvelle langue s’applique après un redémarrage."
+          }
+        }
+      }
+    },
+    "The saves couldn't be backed up, so nothing was updated. %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les parties n’ont pas pu être sauvegardées, donc rien n’a été mis à jour. %@"
           }
         }
       }
@@ -3061,6 +3251,16 @@
         }
       }
     },
+    "This profile has no saves yet. Play and save once, then back up.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce profil n’a pas encore de partie. Jouez et sauvegardez une fois, puis faites une copie."
+          }
+        }
+      }
+    },
     "This release has no notes.": {
       "localizations": {
         "fr": {
@@ -3077,6 +3277,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cette version du jeu n’a aucun mod."
+          }
+        }
+      }
+    },
+    "This zip has no Super Metroid saves in it.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce zip ne contient aucune partie de Super Metroid."
           }
         }
       }
@@ -3117,6 +3327,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Impossible de dupliquer « %1$@ ». %2$@"
+          }
+        }
+      }
+    },
+    "Unable to finish: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de terminer : %@"
           }
         }
       }
@@ -3637,6 +3857,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vos sauvegardes, réglages et mods sont conservés. (⇧⌘U)"
+          }
+        }
+      }
+    },
+    "Zip this profile's saves (⌘B)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zipper les parties de ce profil (⌘B)"
+          }
+        }
+      }
+    },
+    "before restore": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "avant restauration"
+          }
+        }
+      }
+    },
+    "before update to %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "avant la mise à jour %@"
           }
         }
       }

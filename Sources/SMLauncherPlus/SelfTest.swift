@@ -129,6 +129,8 @@ enum SelfTest {
                           && FileManager.default.isExecutableFile(atPath: profile.executable.path),
                           model.install?.failure ?? profile.gameVersion)
                     check("the build from before the update is kept for Roll Back", model.previousVersion(of: profile) == latest)
+                    check("Update backs up the saves first", SaveBackup.list(in: DataFolder.backups(for: profile.uuid))
+                        .contains { $0.name.hasSuffix("(\(String(localized: "before update to \(latest)")))") })
                     try? FileManager.default.removeItem(at: ProfileUpdate.previousFolder(of: profile.folder))
                 }
                 if model.rom != nil, ProcessInfo.processInfo.environment["SM_ROM_PATH"] != nil {
@@ -176,6 +178,7 @@ enum SelfTest {
             await checkUpdateBanner(model: model)
             await checkUpdateAndRollBack(model: model)
             await checkManageProfiles(model: model)
+            await checkSaveBackups(model: model)
             await checkDataFolderMove(model: model)
             await checkModInstall(model: model)
             await checkModResources()
@@ -620,6 +623,33 @@ enum SelfTest {
         check("the deleted profile and its files are gone", !fm.fileExists(atPath: folder.path) && !model.profiles.contains { $0.uuid == id })
         if let keptFolder { try? fm.removeItem(at: keptFolder) }
         model.profileMessage = nil
+    }
+
+    /// S-033: Back Up Saves, then Restore, which backs up the current saves first.
+    private static func checkSaveBackups(model: AppModel) async {
+        let fm = FileManager.default
+        let profile = Profile(name: "Backed", gameVersion: "0.4.11")
+        model.context.insert(profile)
+        try? model.context.save()
+        let saves = SaveBackup.saves(game: profile.gameFolder)
+        try? fm.createDirectory(at: saves, withIntermediateDirectories: true)
+        let backups = DataFolder.backups(for: profile.uuid)
+        let none = await model.backUpSaves(profile)
+        check("a profile with no saves says so", none == nil && model.backupError == SaveBackup.Failure.noSaves.message, model.backupError ?? "")
+        try? Data("samus".utf8).write(to: saves.appending(path: "save.srm"))
+        let zip = await model.backUpSaves(profile)
+        check("Back Up Saves zips the saves into Backups/<id>/", zip.map { fm.fileExists(atPath: $0.path) && $0.deletingLastPathComponent() == backups } == true,
+              model.backupError ?? "")
+        try? Data("samus later".utf8).write(to: saves.appending(path: "save.srm"))
+        if let zip { await model.restoreSaves(profile, from: zip) }
+        check("Restore puts the backup back", (try? String(contentsOf: saves.appending(path: "save.srm"), encoding: .utf8)) == "samus",
+              model.backupError ?? "")
+        check("Restore backs up the saves it replaces", SaveBackup.list(in: backups).count == 2
+              && SaveBackup.list(in: backups).contains { $0.name.hasSuffix("(\(String(localized: "before restore")))") })
+        model.delete(profile, keepSaves: false)
+        check("deleting a profile deletes its backups", !fm.fileExists(atPath: backups.path))
+        model.backupMessage = nil
+        model.backupError = nil
     }
 
     /// S-022: a required file keeps its feature off until it's chosen and checked; a shared file is chosen once.

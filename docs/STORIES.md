@@ -254,7 +254,13 @@ keybinds.ini, sm-video.ini and state.toml to Kept Saves/<name – date>/)
 ### S-033 Back up and restore saves
 As the player, I back up `save.srm` and restore it, and a backup is made before each update.
 Screens: saves
-Status: todo
+Acceptance:
+- [unit] A backup is a dated zip of `saves/`; a second one the same minute gets " 2"; a profile with no saves says so.
+- [unit] Restore swaps the saves in only when the zip unpacked whole; a zip without saves changes nothing.
+- [self] Back Up Saves, then Restore, which backs up the saves it replaces first ("before restore").
+- [self] Update backs up the saves first ("before update to X"); if that fails, nothing is updated.
+- Deleting a profile deletes its backups, or moves them into Kept Saves with the saves.
+Status: done
 
 ## M5 Graphics and UI packs (0.3.0)
 
