@@ -1,4 +1,5 @@
 import AppKit
+import ProcessKit
 import SMLauncherPlusKit
 import SwiftData
 
@@ -10,7 +11,7 @@ final class GameRunner {
     let startedAt = Date.now
     /// The game's own output for this run, in `Logs/<profile>/`.
     let log: URL
-    private let process: Process
+    private let process: Shell.RunningCommand
     private let rom: GameLaunch.ROMFile
     /// Mod files unpacked from a .zip or .7z for this run (S-022), put back when it ends.
     private let modFiles: ModFiles.Run
@@ -63,39 +64,34 @@ final class GameRunner {
         gameFolder = profile.gameFolder
         crashFilesBefore = GameReport.crashFiles(in: profile.gameFolder)
 
-        process = Process()
-        process.executableURL = profile.executable
-        // The game keeps saves, keybinds and replays beside itself.
-        process.currentDirectoryURL = profile.gameFolder
-        process.arguments = GameLaunch.arguments(rom: rom.url, config: Self.config(for: profile), extra: extraArguments)
-        var environment = ProcessInfo.processInfo.environment
-        environment.merge(extra) { _, new in new }
-        process.environment = environment
-        if let handle = try? FileHandle(forWritingTo: log) {
-            process.standardOutput = handle
-            process.standardError = handle
-        }
+        // The game keeps saves, keybinds and replays beside itself; its output and errors go to the log.
+        let options = Shell.Options(directory: profile.gameFolder, environment: extra, stdout: .file(log), stderr: .merged)
         let rom = rom, modFiles = modFiles
-        process.terminationHandler = { finished in
-            let status = finished.terminationStatus
-            // The temporary ROM copy goes the moment the game quits, and so do unpacked mod files.
-            rom.discard()
-            modFiles.restore()
-            Task { @MainActor in onExit(status) }
-        }
-        do { try process.run() } catch {
+        do {
+            process = try Shell.start(profile.executable.path,
+                                      GameLaunch.arguments(rom: rom.url, config: Self.config(for: profile), extra: extraArguments),
+                                      options: options) { output in
+                // A signal is reported by its number, as before (15 when stopped), not as 128 + the signal.
+                let status = output.signal ?? output.status
+                // The temporary ROM copy goes the moment the game quits, and so do unpacked mod files.
+                rom.discard()
+                modFiles.restore()
+                Task { @MainActor in onExit(status) }
+            }
+        } catch {
             rom.discard()
             modFiles.restore()
             throw .couldNotStart(error.localizedDescription)
         }
-        pid = process.processIdentifier
+        pid = process.pid
     }
 
     var isRunning: Bool { process.isRunning }
 
+    /// Stops the game and anything it started: SIGTERM, then SIGKILL if it hasn't quit after a few seconds.
     func stop() {
         stoppedByUser = true
-        process.terminate()
+        process.stop()
     }
 
     /// Keeps the newest `keep` logs, so with the new one there are at most keep + 1.

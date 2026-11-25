@@ -126,8 +126,8 @@ extension GameRelease.Failure {
     /// DownloadKit's errors in the launcher's words: no connection, GitHub's status, a damaged file.
     init(_ error: any Error) {
         switch error {
-        case DownloadError.http(let status, _): self = .github(status)
-        case DownloadError.rateLimited: self = .github(429)
+        // A refusal or rate limit keeps the status GitHub sent (403 or 429), so the message matches it.
+        case let error as DownloadError where error.status != nil: self = .github(error.status ?? 0)
         case DownloadError.checksumMismatch: self = .damaged
         case DownloadError.badResponse, DownloadError.invalidChecksum, DownloadError.rangesNotSupported: self = .badResponse
         default: self = .offline

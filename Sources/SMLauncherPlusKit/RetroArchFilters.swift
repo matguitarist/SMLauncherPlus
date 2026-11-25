@@ -67,10 +67,9 @@ public struct RetroArchFilter: Equatable, Hashable, Sendable, Identifiable {
             if isValid(file, in: cache) { continue }
             do {
                 try await Download.file(url(of: file), to: cache.appending(path: file.path), sha256: file.sha256, options: options)
-            } catch DownloadError.http(let status, _) {
-                throw .github(status)
-            } catch DownloadError.rateLimited {
-                throw .github(429)
+            } catch let error as DownloadError where error.status != nil {
+                // An error or a rate limit, with the status GitHub sent (403 or 429 for a limit).
+                throw .github(error.status ?? 0)
             } catch DownloadError.badResponse {
                 throw .github(0)
             } catch DownloadError.checksumMismatch {

@@ -9,15 +9,15 @@ let package = Package(
         // The Log page's viewer, shared by my Mac apps.
         .package(url: "https://github.com/matguitarist/LogKit", from: "0.6.0"),
         // Runs zip, the game's --help and the tests' tools, with output read safely, shared by my Mac apps.
-        .package(url: "https://github.com/matguitarist/ProcessKit", from: "0.1.1"),
+        .package(url: "https://github.com/matguitarist/ProcessKit", from: "0.2.1"),
         // Save backups, the release zip, and ROMs and mod files read out of a .zip or .7z, shared by my Mac apps.
-        .package(url: "https://github.com/matguitarist/ArchiveKit", from: "0.1.1"),
+        .package(url: "https://github.com/matguitarist/ArchiveKit", from: "0.2.0"),
         // The game's releases, its zip and the RetroArch filters, checked against their SHA-256, shared by my apps.
-        .package(url: "https://github.com/matguitarist/DownloadKit", from: "0.1.0"),
+        .package(url: "https://github.com/matguitarist/DownloadKit", from: "0.2.0"),
         // Moving the data folder to another disk without losing a file, shared by my Mac apps.
-        .package(url: "https://github.com/matguitarist/FileKit", from: "0.1.0"),
+        .package(url: "https://github.com/matguitarist/FileKit", from: "0.2.0"),
         // The self-test's lines and exit code, the snapshots and the /tmp guard, shared by my Mac apps.
-        .package(url: "https://github.com/matguitarist/AppTestKit", from: "0.1.0"),
+        .package(url: "https://github.com/matguitarist/AppTestKit", from: "0.2.0"),
     ],
     targets: [
         // Rules and data logic with no SwiftUI, so tests run without the app.
