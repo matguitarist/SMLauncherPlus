@@ -1,4 +1,5 @@
 import Foundation
+import ProcessKit
 import Testing
 
 /// S-010: the launcher's filters render through real OpenGL the way the game draws them. With the
@@ -12,28 +13,18 @@ import Testing
     static let renderer: URL? = {
         let source = repo.appending(path: "Tests/Support/render_pass.c")
         let binary = FileManager.default.temporaryDirectory.appending(path: "render_pass-\(UUID().uuidString)")
-        let clang = Process()
-        clang.executableURL = URL(fileURLWithPath: "/usr/bin/clang")
-        clang.arguments = ["-O1", "-o", binary.path, source.path, "-framework", "OpenGL"]
-        guard (try? clang.run()) != nil else { return nil }
-        clang.waitUntilExit()
-        return clang.terminationStatus == 0 ? binary : nil
+        let clang = try? Shell.runSync("/usr/bin/clang", ["-O1", "-o", binary.path, source.path, "-framework", "OpenGL"])
+        return clang?.succeeded == true ? binary : nil
     }()
 
     struct Render { var row: [Int]; var column: [Int] }
 
     static func render(_ pass: String, input: (Int, Int), output: (Int, Int), pattern: String = "flat", row: Int? = nil) throws -> Render {
         let renderer = try #require(renderer, "render_pass.c doesn't build")
-        let process = Process()
-        process.executableURL = renderer
-        process.arguments = [passes.appending(path: "\(pass)-pass.glsl").path, "\(input.0)", "\(input.1)", "\(output.0)", "\(output.1)", pattern] + (row.map { ["\($0)"] } ?? [])
-        let pipe = Pipe()
-        process.standardOutput = pipe
-        try process.run()
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        process.waitUntilExit()
-        #expect(process.terminationStatus == 0, "render_pass exited \(process.terminationStatus) for \(pass)")
-        var lines = String(decoding: data, as: UTF8.self).split(separator: "\n").map { $0.split(separator: " ").dropFirst().compactMap { Int($0) } }
+        let run = try Shell.runSync(renderer.path, [passes.appending(path: "\(pass)-pass.glsl").path, "\(input.0)", "\(input.1)",
+                                                    "\(output.0)", "\(output.1)", pattern] + (row.map { ["\($0)"] } ?? []))
+        #expect(run.succeeded, "render_pass exited \(run.status) for \(pass)")
+        var lines = run.text.split(separator: "\n").map { $0.split(separator: " ").dropFirst().compactMap { Int($0) } }
         while lines.count < 2 { lines.append([]) }
         return Render(row: lines[0], column: lines[1])
     }

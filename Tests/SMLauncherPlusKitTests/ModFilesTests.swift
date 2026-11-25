@@ -1,4 +1,5 @@
 import Foundation
+import ProcessKit
 import Testing
 @testable import SMLauncherPlusKit
 
@@ -13,15 +14,7 @@ struct ModFilesTests {
 
     @discardableResult
     func run(_ tool: String, _ arguments: [String], in folder: URL) throws -> Int32 {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: tool)
-        process.arguments = arguments
-        process.currentDirectoryURL = folder
-        process.standardOutput = FileHandle.nullDevice
-        process.standardError = FileHandle.nullDevice
-        try process.run()
-        process.waitUntilExit()
-        return process.terminationStatus
+        try Shell.runSync(tool, arguments, in: folder).status
     }
 
     /// A folder with `files`, packed as .zip (zip), .7z (bsdtar) or .7z (7-Zip).

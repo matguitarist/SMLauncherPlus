@@ -1,4 +1,5 @@
 import Foundation
+import ProcessKit
 import LogKit
 import Testing
 @testable import SMLauncherPlusKit
@@ -51,14 +52,7 @@ import Testing
         let out = game.appending(path: "out", directoryHint: .isDirectory)
         try FileManager.default.createDirectory(at: out, withIntermediateDirectories: true)
         let zip = try GameReport.makeZip(files: GameReport.files(game: game, sessionLog: session, pid: 8519), about: "SM Launcher Plus 0.1.0", in: out)
-        let list = Process()
-        list.executableURL = URL(fileURLWithPath: "/usr/bin/zipinfo")
-        list.arguments = ["-1", zip.path]
-        let pipe = Pipe()
-        list.standardOutput = pipe
-        try list.run()
-        list.waitUntilExit()
-        let inZip = String(decoding: pipe.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self).split(separator: "\n").map(String.init)
+        let inZip = try Shell.runSync("/usr/bin/zipinfo", ["-1", zip.path]).check().lines
         #expect(inZip.contains("about.txt") && inZip.contains("last_run_report.json") && inZip.count == 9)
         #expect(!inZip.contains { $0.hasSuffix(".sfc") })
         #expect(throws: GameReport.Failure.nothingToReport) { try GameReport.makeZip(files: [], about: "", in: out) }

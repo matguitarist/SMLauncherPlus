@@ -1,5 +1,6 @@
 import CryptoKit
 import Foundation
+import ProcessKit
 import Testing
 @testable import SMLauncherPlusKit
 
@@ -38,12 +39,7 @@ import Testing
         defer { try? FileManager.default.removeItem(at: folder) }
         try Self.bytes.write(to: folder.appending(path: "sm.sfc"))
         let zip = folder.appending(path: "sm.zip")
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/zip")
-        process.currentDirectoryURL = folder
-        process.arguments = ["-q", zip.path, "sm.sfc"]
-        try process.run()
-        process.waitUntilExit()
+        try Shell.runSync("/usr/bin/zip", ["-q", zip.path, "sm.sfc"], in: folder).check()
         let root = folder.appending(path: "tmp", directoryHint: .isDirectory)
         let rom = ROMCheck.ROM(url: zip, kind: .zip, member: "sm.sfc", headered: false, sha256: Self.hash)
 

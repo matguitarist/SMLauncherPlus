@@ -1,4 +1,5 @@
 import Foundation
+import ProcessKit
 import Testing
 @testable import SMLauncherPlusKit
 
@@ -30,12 +31,7 @@ import Testing
             try FileManager.default.createSymbolicLink(atPath: base.appending(path: path).path, withDestinationPath: target)
         }
         let zip = folder.appending(path: "release.zip")
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/zip")
-        process.currentDirectoryURL = source
-        process.arguments = ["-q", "-r", "-y", zip.path, top]
-        try process.run()
-        process.waitUntilExit()
+        try Shell.runSync("/usr/bin/zip", ["-q", "-r", "-y", zip.path, top], in: source).check()
         try FileManager.default.removeItem(at: source)
         return zip
     }

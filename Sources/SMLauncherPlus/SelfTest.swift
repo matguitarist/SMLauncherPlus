@@ -1,5 +1,6 @@
 import AppKit
 import LogKit
+import ProcessKit
 import SwiftData
 import SMLauncherPlusKit
 
@@ -103,7 +104,7 @@ enum SelfTest {
                           Set(ShaderPreset.list(game: profile.gameFolder).map(\.look))
                             .isSuperset(of: ["scanlines", "crt", "sharp", "crt-soft", "lcd-grid", "warm-composite"]),
                           "\(ShaderPreset.list(game: profile.gameFolder).map(\.path))")
-                    let help = Self.runHeadless(profile.executable, ["--help"])
+                    let help = await Self.runHeadless(profile.executable, ["--help"])
                     check("the game runs right after unpacking (--help)", help.status == 0 && help.output.contains("usage:"),
                           "exit \(help.status): \(help.output.prefix(200))")
                 }
@@ -335,14 +336,7 @@ enum SelfTest {
     }
 
     private static func zipNames(_ zip: URL) -> [String] {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/zipinfo")
-        process.arguments = ["-1", zip.path]
-        let pipe = Pipe()
-        process.standardOutput = pipe
-        try? process.run()
-        process.waitUntilExit()
-        return String(decoding: pipe.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self).split(separator: "\n").map(String.init)
+        (try? Shell.runSync("/usr/bin/zipinfo", ["-1", zip.path]))?.lines ?? []
     }
 
     /// True once a dumped frame shows game state 1 (title screen) at $0998.
@@ -358,24 +352,18 @@ enum SelfTest {
     }
 
     /// Runs the game with SDL's dummy video and audio, for at most 20 seconds.
-    private static func runHeadless(_ executable: URL, _ arguments: [String]) -> (status: Int32, output: String) {
-        let process = Process()
-        process.executableURL = executable
-        process.arguments = arguments
-        process.currentDirectoryURL = executable.deletingLastPathComponent()
-        var environment = ProcessInfo.processInfo.environment
-        environment["SDL_VIDEODRIVER"] = "dummy"
-        environment["SDL_AUDIODRIVER"] = "dummy"
-        process.environment = environment
-        let pipe = Pipe()
-        process.standardOutput = pipe
-        process.standardError = pipe
-        do { try process.run() } catch { return (-1, "\(error)") }
-        let deadline = Date.now.addingTimeInterval(20)
-        while process.isRunning, Date.now < deadline { Thread.sleep(forTimeInterval: 0.1) }
-        if process.isRunning { process.terminate(); return (-2, "timed out") }
-        let output = String(decoding: pipe.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
-        return (process.terminationStatus, output)
+    private static func runHeadless(_ executable: URL, _ arguments: [String]) async -> (status: Int32, output: String) {
+        let options = Shell.Options(directory: executable.deletingLastPathComponent(),
+                                    environment: ["SDL_VIDEODRIVER": "dummy", "SDL_AUDIODRIVER": "dummy"],
+                                    stderr: .merged, timeout: .seconds(20))
+        do {
+            let output = try await Shell.run(executable.path, arguments, options: options)
+            return (output.status, output.text)
+        } catch ShellError.timedOut {
+            return (-2, "timed out")
+        } catch {
+            return (-1, "\(error)")
+        }
     }
 
     /// Waits until the install task finishes (up to two minutes, for a real download).
@@ -453,12 +441,7 @@ enum SelfTest {
             """.write(to: source.appending(path: "manifest.toml"), atomically: true, encoding: .utf8)
             try? Data(repeating: 1, count: 50_000).write(to: source.appending(path: "art/clock.bin"))
             let archive = work.appending(path: "\(name).snesmod")
-            let zip = Process()
-            zip.executableURL = URL(fileURLWithPath: "/usr/bin/zip")
-            zip.arguments = ["-q", "-r", "-X", archive.path, "."]
-            zip.currentDirectoryURL = source
-            try? zip.run()
-            zip.waitUntilExit()
+            _ = try? Shell.runSync("/usr/bin/zip", ["-q", "-r", "-X", archive.path, "."], in: source)
             return archive
         }
         await model.installMod(pack("hud", game: ModCatalog.gameID), in: profile, mods: mods)
@@ -535,13 +518,8 @@ enum SelfTest {
             try? Data("#!/bin/sh\n".utf8).write(to: top.appending(path: ProfileBuilder.executable))
             try? fm.setAttributes([.posixPermissions: 0o755], ofItemAtPath: top.appending(path: ProfileBuilder.executable).path)
             let zip = work.appending(path: "\(version).zip")
-            let process = Process()
-            process.executableURL = URL(fileURLWithPath: "/usr/bin/zip")
-            process.currentDirectoryURL = top.deletingLastPathComponent()
-            process.arguments = ["-q", "-r", "-y", zip.path, top.lastPathComponent]
-            try? process.run()
-            process.waitUntilExit()
-            return process.terminationStatus == 0 ? zip : nil
+            let zipped = try? Shell.runSync("/usr/bin/zip", ["-q", "-r", "-y", zip.path, top.lastPathComponent], in: top.deletingLastPathComponent())
+            return zipped?.succeeded == true ? zip : nil
         }
         guard let old = release("0.4.6"), let new = release("0.4.7") else { return check("made-up releases are zipped", false) }
         let profile = Profile(name: "Updating", gameVersion: "0.4.6")

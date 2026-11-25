@@ -1,5 +1,6 @@
 import Foundation
 import LogKit
+import ProcessKit
 
 /// Why the game stopped, and the bug report the game's README asks for (S-005).
 /// README, "Reporting a gameplay problem": the session log, every matching `logs/sm-replay-*` file,
@@ -68,15 +69,13 @@ public enum GameReport {
             try fm.createDirectory(at: staging, withIntermediateDirectories: true)
             try Data(about.utf8).write(to: staging.appending(path: "about.txt"))
         } catch { throw .zipFailed }
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/zip")
         // -j: the files side by side, without the player's folder names. -q quiet.
-        process.arguments = ["-q", "-j", zip.path, staging.appending(path: "about.txt").path] + files.map(\.path)
-        process.standardOutput = FileHandle.nullDevice
-        process.standardError = FileHandle.nullDevice
-        do { try process.run() } catch { throw .zipFailed }
-        process.waitUntilExit()
-        guard process.terminationStatus == 0 else {
+        let output: Shell.Output
+        do {
+            output = try Shell.runSync("/usr/bin/zip", ["-q", "-j", zip.path, staging.appending(path: "about.txt").path] + files.map(\.path),
+                                       options: Shell.Options(stdout: .discard, stderr: .discard))
+        } catch { throw .zipFailed }
+        guard output.succeeded else {
             try? fm.removeItem(at: zip)
             throw .zipFailed
         }

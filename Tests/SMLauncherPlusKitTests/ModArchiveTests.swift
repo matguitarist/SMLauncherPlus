@@ -1,4 +1,5 @@
 import Foundation
+import ProcessKit
 import Testing
 @testable import SMLauncherPlusKit
 
@@ -115,11 +116,7 @@ struct ModArchiveTests {
         try Data(repeating: 7, count: 100_000).write(to: source.appending(path: "data/big.bin"))
         try Data().write(to: source.appending(path: "data/empty.txt"))
         let archive = base.appending(path: "pack.snesmod")
-        let zip = Process()
-        zip.executableURL = URL(fileURLWithPath: "/usr/bin/zip")
-        zip.arguments = ["-q", "-r", "-X", archive.path, "."]
-        zip.currentDirectoryURL = source
-        try zip.run(); zip.waitUntilExit()
+        try Shell.runSync("/usr/bin/zip", ["-q", "-r", "-X", archive.path, "."], in: source).check()
         try ModArchive.install(archive, into: root)
         let folder = root.appending(path: "packages/example.better-hud/1.2.0/data")
         #expect(try Data(contentsOf: folder.appending(path: "big.bin")) == Data(repeating: 7, count: 100_000))

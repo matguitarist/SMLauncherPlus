@@ -1,5 +1,6 @@
 import CryptoKit
 import Foundation
+import ProcessKit
 import Testing
 @testable import SMLauncherPlusKit
 
@@ -96,12 +97,7 @@ import Testing
     }
 
     static func sevenZip(_ folder: URL, _ files: [String], as name: String) throws -> URL {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/tar")
-        process.currentDirectoryURL = folder
-        process.arguments = ["--format", "7zip", "-cf", name] + files
-        try process.run()
-        process.waitUntilExit()
+        try Shell.runSync("/usr/bin/tar", ["--format", "7zip", "-cf", name] + files, in: folder).check()
         return folder.appending(path: name)
     }
 
@@ -119,12 +115,7 @@ import Testing
     }
 
     static func zip(_ folder: URL, _ files: [String], as name: String) throws -> URL {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/zip")
-        process.currentDirectoryURL = folder
-        process.arguments = ["-q", name] + files
-        try process.run()
-        process.waitUntilExit()
+        try Shell.runSync("/usr/bin/zip", ["-q", name] + files, in: folder).check()
         return folder.appending(path: name)
     }
 }
