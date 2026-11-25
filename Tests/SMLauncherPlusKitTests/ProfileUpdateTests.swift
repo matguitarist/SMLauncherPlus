@@ -32,7 +32,7 @@ import Testing
     """
 
     /// A profile on 0.4.6 that the player has used: saves, logs, settings, a mod package of theirs.
-    static func playedProfile(in folder: URL) throws -> URL {
+    static func playedProfile(in folder: URL) async throws -> URL {
         let zip = try Helper.makeZip(in: folder, files: [
             "VERSION": "0.4.6\n",
             "config.ini": oldConfig,
@@ -40,7 +40,7 @@ import Testing
             "mods/preloaded/packages/super-metroid.combat/1.0.0/manifest.toml": "old combat",
         ])
         let profile = folder.appending(path: "Profiles/ABC", directoryHint: .isDirectory)
-        let game = try ProfileBuilder.build(zip: zip, profile: profile, info: .init(version: "0.4.6", romSHA256: "rom"))
+        let game = try await ProfileBuilder.build(zip: zip, profile: profile, info: .init(version: "0.4.6", romSHA256: "rom"))
         try FileManager.default.removeItem(at: zip)
         let fm = FileManager.default
         let files: [String: String] = [
@@ -72,12 +72,12 @@ import Testing
 
     static func read(_ url: URL) -> String? { try? String(contentsOf: url, encoding: .utf8) }
 
-    @Test func updateKeepsWhatThePlayerMadeAndTakesTheRest() throws {
+    @Test func updateKeepsWhatThePlayerMadeAndTakesTheRest() async throws {
         let folder = try Helper.tempFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
-        let profile = try Self.playedProfile(in: folder)
+        let profile = try await Self.playedProfile(in: folder)
         let zip = try Self.newRelease(in: folder)
-        let info = try ProfileUpdate.update(zip: zip, profile: profile, info: .init(version: "0.4.7", installedAt: Date(timeIntervalSince1970: 1_800_000_000), romSHA256: "rom"),
+        let info = try await ProfileUpdate.update(zip: zip, profile: profile, info: .init(version: "0.4.7", installedAt: Date(timeIntervalSince1970: 1_800_000_000), romSHA256: "rom"),
                                             keepingPackages: ["fan.hud"])
         let game = profile.appending(path: "game")
         let fm = FileManager.default
@@ -110,11 +110,11 @@ import Testing
         #expect(try fm.contentsOfDirectory(atPath: profile.path).sorted() == ["game", "previous", "profile.json"])
     }
 
-    @Test func rollBackBringsThePreviousBuildWithTheNewSaves() throws {
+    @Test func rollBackBringsThePreviousBuildWithTheNewSaves() async throws {
         let folder = try Helper.tempFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
-        let profile = try Self.playedProfile(in: folder)
-        try ProfileUpdate.update(zip: try Self.newRelease(in: folder), profile: profile,
+        let profile = try await Self.playedProfile(in: folder)
+        try await ProfileUpdate.update(zip: try Self.newRelease(in: folder), profile: profile,
                                  info: .init(version: "0.4.7", romSHA256: "rom"), keepingPackages: ["fan.hud"])
         let game = profile.appending(path: "game")
         try Data("samus after 0.4.7".utf8).write(to: game.appending(path: "saves/save.srm"))
@@ -129,13 +129,13 @@ import Testing
         #expect(try ProfileUpdate.rollBack(profile: profile, keepingPackages: []) == nil)
     }
 
-    @Test func aBrokenReleaseLeavesTheProfileAsItWas() throws {
+    @Test func aBrokenReleaseLeavesTheProfileAsItWas() async throws {
         let folder = try Helper.tempFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
-        let profile = try Self.playedProfile(in: folder)
+        let profile = try await Self.playedProfile(in: folder)
         let broken = try Helper.makeZip(in: folder, files: ["README.md": "no game"], executable: false)
-        #expect(throws: ProfileBuilder.Failure.missingExecutable) {
-            try ProfileUpdate.update(zip: broken, profile: profile, info: .init(version: "0.4.7", romSHA256: "rom"), keepingPackages: [])
+        await #expect(throws: ProfileBuilder.Failure.missingExecutable) {
+            try await ProfileUpdate.update(zip: broken, profile: profile, info: .init(version: "0.4.7", romSHA256: "rom"), keepingPackages: [])
         }
         #expect(Self.read(profile.appending(path: "game/VERSION")) == "0.4.6\n")
         #expect(Self.read(profile.appending(path: "game/saves/save.srm")) == "samus")

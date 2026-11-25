@@ -37,8 +37,8 @@ extension AppModel {
         backupError = nil
         backupMessage = nil
         let saves = SaveBackup.saves(game: profile.gameFolder), folder = DataFolder.backups(for: profile.uuid), name = profile.name
-        let result = await Task.detached(priority: .userInitiated) { () -> Result<URL, SaveBackup.Failure> in
-            Result { () throws(SaveBackup.Failure) in try SaveBackup.backup(saves: saves, into: folder, profileName: name, label: label) }
+        let result = await Task.detached(priority: .userInitiated) { () async -> Result<URL, SaveBackup.Failure> in
+            do throws(SaveBackup.Failure) { return .success(try await SaveBackup.backup(saves: saves, into: folder, profileName: name, label: label)) } catch { return .failure(error) }
         }.value
         switch result {
         case .success(let zip):
@@ -63,8 +63,8 @@ extension AppModel {
         defer { backingUp = false }
         let scoped = zip.startAccessingSecurityScopedResource()
         defer { if scoped { zip.stopAccessingSecurityScopedResource() } }
-        let result = await Task.detached(priority: .userInitiated) { () -> Result<Void, SaveBackup.Failure> in
-            Result { () throws(SaveBackup.Failure) in try SaveBackup.restore(zip, into: saves) }
+        let result = await Task.detached(priority: .userInitiated) { () async -> Result<Void, SaveBackup.Failure> in
+            do throws(SaveBackup.Failure) { return .success(try await SaveBackup.restore(zip, into: saves)) } catch { return .failure(error) }
         }.value
         switch result {
         case .success:

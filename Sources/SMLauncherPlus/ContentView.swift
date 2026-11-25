@@ -164,7 +164,7 @@ struct ProfileSummary: View {
                 }
             }
         } else {
-            Button("Play", systemImage: "play.fill") { model.play() }
+            Button("Play", systemImage: "play.fill") { Task { await model.play() } }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.extraLarge)
                 .keyboardShortcut(.defaultAction)

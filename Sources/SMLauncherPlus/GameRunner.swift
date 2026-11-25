@@ -47,11 +47,11 @@ final class GameRunner {
 
     /// Launches the game. `extraArguments` and `environment` let the self-test run it headless.
     init(profile: Profile, rom source: ROMCheck.ROM, extraArguments: [String] = [], environment extra: [String: String] = [:],
-         onExit: @escaping @MainActor (Int32) -> Void) throws(StartError) {
+         onExit: @escaping @MainActor (Int32) -> Void) async throws(StartError) {
         let fm = FileManager.default
         guard fm.isExecutableFile(atPath: profile.executable.path) else { throw .gameMissing }
-        do { rom = try GameLaunch.prepareROM(source, root: DataFolder.runROM) } catch { throw .rom(error) }
-        modFiles = ModFiles.prepare(root: ModCatalog.root(game: profile.gameFolder), runRoot: DataFolder.runROM)
+        do { rom = try await GameLaunch.prepareROM(source, root: DataFolder.runROM) } catch { throw .rom(error) }
+        modFiles = await ModFiles.prepare(root: ModCatalog.root(game: profile.gameFolder), runRoot: DataFolder.runROM)
 
         let logs = Self.logFolder(for: profile)
         try? fm.createDirectory(at: logs, withIntermediateDirectories: true)
@@ -115,11 +115,14 @@ extension RomSource {
 }
 
 extension AppModel {
-    var isPlaying: Bool { playStartedAt != nil }
+    /// True from Play until the game has quit, including while the ROM and mod files are read out of their archives.
+    var isPlaying: Bool { playStartedAt != nil || startingGame }
 
     /// Play (Return, ⌘R): starts the current profile with the player's ROM.
-    func play(extraArguments: [String] = [], environment: [String: String] = [:]) {
-        guard game == nil, install == nil, let profile = currentProfile else { return }
+    func play(extraArguments: [String] = [], environment: [String: String] = [:]) async {
+        guard game == nil, !startingGame, install == nil, let profile = currentProfile else { return }
+        startingGame = true
+        defer { startingGame = false }
         playFailure = nil
         lastGameFailure = nil
         guard let source = rom else {
@@ -128,7 +131,7 @@ extension AppModel {
         }
         log.post(.info, "Starting \(profile.name) (\(profile.gameVersion)) from \(profile.gameFolder.path)", source: "Play")
         do {
-            game = try GameRunner(profile: profile, rom: source.rom, extraArguments: extraArguments, environment: environment) { [weak self] status in
+            game = try await GameRunner(profile: profile, rom: source.rom, extraArguments: extraArguments, environment: environment) { [weak self] status in
                 self?.gameEnded(status: status)
             }
         } catch {

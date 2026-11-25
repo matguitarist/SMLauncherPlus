@@ -166,8 +166,8 @@ enum Snapshot {
                 let folder = DataFolder.backups(for: profile.uuid)
                 if SaveBackup.list(in: folder).isEmpty {
                     let date = Date.now.addingTimeInterval(-86400)
-                    _ = try? SaveBackup.backup(saves: saves, into: folder, profileName: profile.name, label: String(localized: "before update to \("0.4.11")"), date: date)
-                    _ = try? SaveBackup.backup(saves: saves, into: folder, profileName: profile.name)
+                    _ = try? await SaveBackup.backup(saves: saves, into: folder, profileName: profile.name, label: String(localized: "before update to \("0.4.11")"), date: date)
+                    _ = try? await SaveBackup.backup(saves: saves, into: folder, profileName: profile.name)
                 }
                 model.sidebar = .play
                 model.backupsFor = profile

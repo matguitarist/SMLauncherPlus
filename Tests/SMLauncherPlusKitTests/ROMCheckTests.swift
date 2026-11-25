@@ -25,14 +25,14 @@ import Testing
         #expect(throws: problem, sourceLocation: sourceLocation) { try ROMCheck.identify(data) }
     }
 
-    @Test func theSupportedROMIsAccepted() throws {
+    @Test func theSupportedROMIsAccepted() async throws {
         let rom = Self.fakeROM()
         let result = try ROMCheck.identify(rom, supported: Self.sha(rom))
         #expect(result.headered == false)
         #expect(result.sha256 == Self.sha(rom))
     }
 
-    @Test func aCopierHeaderIsSkipped() throws {
+    @Test func aCopierHeaderIsSkipped() async throws {
         let rom = Self.fakeROM()
         let result = try ROMCheck.identify(Data(repeating: 0xAA, count: 512) + rom, supported: Self.sha(rom))
         #expect(result.headered)
@@ -49,28 +49,28 @@ import Testing
         Self.expect(Data(repeating: 0, count: SupportedROM.size + 100), toFailWith: .wrongSize)
     }
 
-    @Test func otherFileTypesAreRefused() throws {
+    @Test func otherFileTypesAreRefused() async throws {
         let folder = try Self.tempFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
         let text = folder.appending(path: "notes.txt")
         try Data("hello".utf8).write(to: text)
-        #expect(throws: ROMCheck.Problem.notROM) { try ROMCheck.check(text) }
+        await #expect(throws: ROMCheck.Problem.notROM) { try await ROMCheck.check(text) }
     }
 
-    @Test func aZipIsReadWithoutUnpacking() throws {
+    @Test func aZipIsReadWithoutUnpacking() async throws {
         let folder = try Self.tempFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
         try Self.fakeROM(title: "ZELDA").write(to: folder.appending(path: "Zelda [!].sfc"))
         let zip = try Self.zip(folder, ["Zelda [!].sfc"], as: "one.zip")
         try FileManager.default.removeItem(at: folder.appending(path: "Zelda [!].sfc"))
         // The ROM inside is read: its header names the game.
-        #expect(throws: ROMCheck.Problem.otherGame("ZELDA")) { try ROMCheck.check(zip) }
+        await #expect(throws: ROMCheck.Problem.otherGame("ZELDA")) { try await ROMCheck.check(zip) }
         // And nothing was unpacked next to the zip.
         let left = try FileManager.default.contentsOfDirectory(atPath: folder.path)
         #expect(left == ["one.zip"])
     }
 
-    @Test func aZipMustHoldExactlyOneROM() throws {
+    @Test func aZipMustHoldExactlyOneROM() async throws {
         let folder = try Self.tempFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
         try Data("x".utf8).write(to: folder.appending(path: "readme.txt"))
@@ -78,22 +78,22 @@ import Testing
         try Self.fakeROM().write(to: folder.appending(path: "b.smc"))
         let none = try Self.zip(folder, ["readme.txt"], as: "none.zip")
         let two = try Self.zip(folder, ["a.sfc", "b.smc"], as: "two.zip")
-        #expect(throws: ROMCheck.Problem.zipWithoutROM) { try ROMCheck.check(none) }
-        #expect(throws: ROMCheck.Problem.zipWithSeveralROMs) { try ROMCheck.check(two) }
+        await #expect(throws: ROMCheck.Problem.zipWithoutROM) { try await ROMCheck.check(none) }
+        await #expect(throws: ROMCheck.Problem.zipWithSeveralROMs) { try await ROMCheck.check(two) }
     }
 
-    @Test func a7zIsReadLikeAZip() throws {
+    @Test func a7zIsReadLikeAZip() async throws {
         let folder = try Self.tempFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
         try Self.fakeROM(title: "ZELDA").write(to: folder.appending(path: "Zelda [!].sfc"))
         try Data("x".utf8).write(to: folder.appending(path: "readme.txt"))
         let one = try Self.sevenZip(folder, ["Zelda [!].sfc"], as: "one.7z")
         let none = try Self.sevenZip(folder, ["readme.txt"], as: "none.7z")
-        #expect(throws: ROMCheck.Problem.otherGame("ZELDA")) { try ROMCheck.check(one) }
-        #expect(throws: ROMCheck.Problem.zipWithoutROM) { try ROMCheck.check(none) }
+        await #expect(throws: ROMCheck.Problem.otherGame("ZELDA")) { try await ROMCheck.check(one) }
+        await #expect(throws: ROMCheck.Problem.zipWithoutROM) { try await ROMCheck.check(none) }
         let broken = folder.appending(path: "broken.7z")
         try Data("7z not really".utf8).write(to: broken)
-        #expect(throws: ROMCheck.Problem.unreadable) { try ROMCheck.check(broken) }
+        await #expect(throws: ROMCheck.Problem.unreadable) { try await ROMCheck.check(broken) }
     }
 
     static func sevenZip(_ folder: URL, _ files: [String], as name: String) throws -> URL {
@@ -102,9 +102,9 @@ import Testing
     }
 
     @Test(.enabled(if: ProcessInfo.processInfo.environment["SM_ROM_PATH"] != nil))
-    func thePlayersOwnROMIsAccepted() throws {
+    func thePlayersOwnROMIsAccepted() async throws {
         let url = URL(fileURLWithPath: ProcessInfo.processInfo.environment["SM_ROM_PATH"]!)
-        let rom = try ROMCheck.check(url)
+        let rom = try await ROMCheck.check(url)
         #expect(rom.sha256 == SupportedROM.sha256)
     }
 

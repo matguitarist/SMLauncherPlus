@@ -70,7 +70,7 @@ final class ModsModel {
     /// Checks the chosen file off the main thread (an 8 MB ROM is hashed).
     func checkResource(_ resource: ModResource, in feature: ModFeature) async {
         let path = path(of: resource, in: feature)
-        let status = await Task.detached(priority: .userInitiated) { resource.status(of: path) }.value
+        let status = await Task.detached(priority: .userInitiated) { await resource.status(of: path) }.value
         resourceStatus[statusKey(resource, path)] = status
     }
 

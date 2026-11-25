@@ -1,3 +1,4 @@
+import ArchiveKit
 import Foundation
 
 /// Unpacks a verified SuperMetroidRecomp zip into a profile (S-003):
@@ -52,13 +53,13 @@ public enum ProfileBuilder {
     /// Unpacks `zip` into `profile/game/` and writes `profile/profile.json`.
     /// `profile` is replaced only once the new game folder is complete.
     @discardableResult
-    public static func build(zip: URL, profile: URL, info: Info) throws(Failure) -> URL {
+    public static func build(zip: URL, profile: URL, info: Info) async throws(Failure) -> URL {
         let fm = FileManager.default
         let staging = profile.deletingLastPathComponent().appending(path: profile.lastPathComponent + ".partial", directoryHint: .isDirectory)
         try? fm.removeItem(at: staging)
         var finished = false
         defer { if !finished { try? fm.removeItem(at: staging) } }
-        _ = try unpack(zip, into: staging)
+        _ = try await unpack(zip, into: staging)
         do {
             try info.write(to: staging)
             if fm.fileExists(atPath: profile.path) { try fm.removeItem(at: profile) }
@@ -72,9 +73,10 @@ public enum ProfileBuilder {
 
     /// Unpacks `zip` into `staging/game/` (created, and left to the caller to remove on failure),
     /// checks it holds the game, and returns that folder.
-    static func unpack(_ zip: URL, into staging: URL) throws(Failure) -> URL {
+    static func unpack(_ zip: URL, into staging: URL) async throws(Failure) -> URL {
         let fm = FileManager.default
-        guard let entries = Zip.list(zip) else { throw .unreadableZip }
+        let entries: [String]
+        do { entries = try Zip.names(zip) } catch { throw .unreadableZip }
         let root = try commonRoot(of: entries)
         do {
             try fm.createDirectory(at: staging, withIntermediateDirectories: true)
@@ -82,8 +84,14 @@ public enum ProfileBuilder {
             throw .copyFailed("\(error)")
         }
         let unpacked = staging.appending(path: "unpacked", directoryHint: .isDirectory)
-        guard unzip(zip, to: unpacked) else { throw .unreadableZip }
-        try checkLinks(in: unpacked)
+        // ArchiveKit keeps the executable bit and links, and refuses a link that points out of the folder.
+        do {
+            try await Zip.unpack(zip, into: unpacked)
+        } catch ArchiveError.unsafeEntry(let name) {
+            throw .unsafePath(name)
+        } catch {
+            throw .unreadableZip
+        }
         let top = root.isEmpty ? unpacked : unpacked.appending(path: root, directoryHint: .isDirectory)
         let game = staging.appending(path: "game", directoryHint: .isDirectory)
         do { try fm.moveItem(at: top, to: game) } catch { throw .copyFailed("\(error)") }
@@ -108,30 +116,6 @@ public enum ProfileBuilder {
         let firsts = Set(entries.map { $0.split(separator: "/", maxSplits: 1).first.map(String.init) ?? $0 })
         guard firsts.count == 1, let only = firsts.first, entries.allSatisfy({ $0.hasPrefix(only + "/") }) else { return "" }
         return only + "/"
-    }
-
-    /// A symbolic link in the zip may only point inside the game folder.
-    static func checkLinks(in folder: URL) throws(Failure) {
-        let base = folder.resolvingSymlinksInPath().path + "/"
-        guard let walker = FileManager.default.enumerator(atPath: folder.path) else { return }
-        // Relative paths, as they are in the zip.
-        for case let path as String in walker {
-            let url = folder.appending(path: path)
-            guard (try? url.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink) == true else { continue }
-            if !url.resolvingSymlinksInPath().path.hasPrefix(base) { throw .unsafePath(path) }
-        }
-    }
-
-    /// /usr/bin/ditto keeps the executable bit and links, and adds no quarantine flag.
-    private static func unzip(_ zip: URL, to folder: URL) -> Bool {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/ditto")
-        process.arguments = ["-x", "-k", zip.path, folder.path]
-        process.standardOutput = FileHandle.nullDevice
-        process.standardError = FileHandle.nullDevice
-        do { try process.run() } catch { return false }
-        process.waitUntilExit()
-        return process.terminationStatus == 0
     }
 
     /// Removes com.apple.quarantine from every file, so macOS never asks before the game opens.

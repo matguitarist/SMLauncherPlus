@@ -75,27 +75,27 @@ struct ModResourceTests {
         #expect(bare.withDefaults().filePatterns == "*" && bare.withDefaults().extensions.isEmpty)
     }
 
-    @Test func checksTheFileLikeTheGame() throws {
+    @Test func checksTheFileLikeTheGame() async throws {
         let body = Data((0..<65536).map { UInt8($0 % 251) })
         var resource = ModResource()
         resource.normalizedSHA256 = hash(body)
-        #expect(resource.status(of: "") == .notChosen)
-        #expect(resource.status(of: "/nonexistent/x.gba") == .notFound)
+        #expect(await resource.status(of: "") == .notChosen)
+        #expect(await resource.status(of: "/nonexistent/x.gba") == .notFound)
         let good = try makeFile(body)
         defer { try? fm.removeItem(at: good) }
-        #expect(resource.status(of: good.path) == .verified)
+        #expect(await resource.status(of: good.path) == .verified)
         // A 512-byte copier header is left out of the hash.
         let headered = try makeFile(Data(count: 512) + body)
         defer { try? fm.removeItem(at: headered) }
-        #expect(resource.status(of: headered.path) == .verified)
+        #expect(await resource.status(of: headered.path) == .verified)
         let other = try makeFile(Data(body.reversed()))
         defer { try? fm.removeItem(at: other) }
-        #expect(resource.status(of: other.path) == .wrongFile)
+        #expect(await resource.status(of: other.path) == .wrongFile)
         resource.size = 1000
-        #expect(resource.status(of: good.path) == .wrongSize)
+        #expect(await resource.status(of: good.path) == .wrongSize)
         var any = ModResource()
         any.required = true
-        #expect(any.status(of: good.path) == .chosen)
+        #expect(await any.status(of: good.path) == .chosen)
         #expect(!ModResource.Status.notChosen.isUsable(required: true))
         #expect(ModResource.Status.notChosen.isUsable(required: false))
         #expect(!ModResource.Status.wrongFile.isUsable(required: false))
@@ -131,11 +131,11 @@ struct ModResourceTests {
     }
 
     /// The owner's Zero Mission ROM, read in place. SM_GBA_ROM=<path to the .gba> runs it.
-    @Test func theRealZeroMissionROMIsVerified() throws {
+    @Test func theRealZeroMissionROMIsVerified() async throws {
         guard let path = ProcessInfo.processInfo.environment["SM_GBA_ROM"] else { return }
         var resource = ModResource()
         resource.size = 8_388_608
         resource.normalizedSHA256 = "fc94f65380b65b870a30b9b04b39cca1dc63d6e46a4a373d3904adc0912ebc37"
-        #expect(resource.status(of: path) == .verified)
+        #expect(await resource.status(of: path) == .verified)
     }
 }

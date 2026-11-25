@@ -185,7 +185,7 @@ extension AppModel {
                 let folder = DataFolder.profiles.appending(path: uuid.uuidString, directoryHint: .isDirectory)
                 let info = ProfileBuilder.Info(version: release.version, romSHA256: romSHA256)
                 let game = try await Task.detached(priority: .userInitiated) {
-                    try ProfileBuilder.build(zip: zip, profile: folder, info: info)
+                    try await ProfileBuilder.build(zip: zip, profile: folder, info: info)
                 }.value
                 try Task.checkCancellation()
                 installFilters(in: game)
@@ -235,7 +235,7 @@ extension AppModel {
         let keeping = Set(profile.installedMods.compactMap { $0.split(separator: "/").first.map(String.init) })
         let info = ProfileBuilder.Info(version: release.version, romSHA256: romSHA256)
         _ = try await Task.detached(priority: .userInitiated) {
-            try ProfileUpdate.update(zip: zip, profile: folder, info: info, keepingPackages: keeping)
+            try await ProfileUpdate.update(zip: zip, profile: folder, info: info, keepingPackages: keeping)
         }.value
         installFilters(in: profile.gameFolder)
         profile.gameVersion = release.version

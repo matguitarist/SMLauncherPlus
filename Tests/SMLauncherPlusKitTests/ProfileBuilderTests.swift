@@ -36,13 +36,13 @@ import Testing
         return zip
     }
 
-    @Test func theZipUnpacksIntoTheProfilesGameFolder() throws {
+    @Test func theZipUnpacksIntoTheProfilesGameFolder() async throws {
         let folder = try Self.tempFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
         let zip = try Self.makeZip(in: folder, files: ["config.ini": "[General]\n", "libs/libpng16.16.dylib": "png"])
         let profile = folder.appending(path: "Profiles/ABC", directoryHint: .isDirectory)
         let info = ProfileBuilder.Info(version: "0.4.6", installedAt: Date(timeIntervalSince1970: 1_800_000_000), romSHA256: SupportedROM.sha256)
-        let game = try ProfileBuilder.build(zip: zip, profile: profile, info: info)
+        let game = try await ProfileBuilder.build(zip: zip, profile: profile, info: info)
 
         #expect(game == profile.appending(path: "game", directoryHint: .isDirectory))
         #expect(FileManager.default.isExecutableFile(atPath: game.appending(path: "SuperMetroidSNESRecomp").path))
@@ -53,7 +53,7 @@ import Testing
         #expect(try FileManager.default.contentsOfDirectory(atPath: folder.appending(path: "Profiles").path) == ["ABC"])
     }
 
-    @Test func pathsThatEscapeTheFolderAreRefused() throws {
+    @Test func pathsThatEscapeTheFolderAreRefused() async throws {
         #expect(throws: ProfileBuilder.Failure.unsafePath("a/../../evil")) { try ProfileBuilder.commonRoot(of: ["a/", "a/../../evil"]) }
         #expect(throws: ProfileBuilder.Failure.unsafePath("/etc/passwd")) { try ProfileBuilder.commonRoot(of: ["/etc/passwd"]) }
         #expect(throws: ProfileBuilder.Failure.unsafePath("..\\evil")) { try ProfileBuilder.commonRoot(of: ["..\\evil"]) }
@@ -61,33 +61,33 @@ import Testing
         #expect(try ProfileBuilder.commonRoot(of: ["game", "libs/a.dylib"]) == "")
     }
 
-    @Test func aLinkPointingOutsideIsRefusedAndNothingIsKept() throws {
+    @Test func aLinkPointingOutsideIsRefusedAndNothingIsKept() async throws {
         let folder = try Self.tempFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
         let zip = try Self.makeZip(in: folder, files: ["config.ini": ""], links: ["escape": "/etc"])
         let profile = folder.appending(path: "Profiles/ABC", directoryHint: .isDirectory)
-        #expect(throws: ProfileBuilder.Failure.unsafePath("supermetroid-0.4.6-macos-arm64/escape")) {
-            try ProfileBuilder.build(zip: zip, profile: profile, info: .init(version: "0.4.6", romSHA256: ""))
+        await #expect(throws: ProfileBuilder.Failure.unsafePath("supermetroid-0.4.6-macos-arm64/escape")) {
+            try await ProfileBuilder.build(zip: zip, profile: profile, info: .init(version: "0.4.6", romSHA256: ""))
         }
         #expect(!FileManager.default.fileExists(atPath: folder.appending(path: "Profiles/ABC").path))
         #expect(!FileManager.default.fileExists(atPath: folder.appending(path: "Profiles/ABC.partial").path))
     }
 
-    @Test func aZipWithoutTheGameIsRefused() throws {
+    @Test func aZipWithoutTheGameIsRefused() async throws {
         let folder = try Self.tempFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
         let zip = try Self.makeZip(in: folder, files: ["README.md": "hi"], executable: false)
-        #expect(throws: ProfileBuilder.Failure.missingExecutable) {
-            try ProfileBuilder.build(zip: zip, profile: folder.appending(path: "P"), info: .init(version: "1", romSHA256: ""))
+        await #expect(throws: ProfileBuilder.Failure.missingExecutable) {
+            try await ProfileBuilder.build(zip: zip, profile: folder.appending(path: "P"), info: .init(version: "1", romSHA256: ""))
         }
         let notZip = folder.appending(path: "not.zip")
         try Data("nope".utf8).write(to: notZip)
-        #expect(throws: ProfileBuilder.Failure.unreadableZip) {
-            try ProfileBuilder.build(zip: notZip, profile: folder.appending(path: "P"), info: .init(version: "1", romSHA256: ""))
+        await #expect(throws: ProfileBuilder.Failure.unreadableZip) {
+            try await ProfileBuilder.build(zip: notZip, profile: folder.appending(path: "P"), info: .init(version: "1", romSHA256: ""))
         }
     }
 
-    @Test func aQuarantineFlagIsCleared() throws {
+    @Test func aQuarantineFlagIsCleared() async throws {
         let folder = try Self.tempFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
         let file = folder.appending(path: "game")

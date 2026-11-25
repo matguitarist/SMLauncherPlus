@@ -17,6 +17,11 @@ struct ModFilesTests {
         try Shell.runSync(tool, arguments, in: folder).status
     }
 
+    func status(_ resource: ModResource, _ archive: URL?) async -> ModResource.Status? {
+        guard let archive else { return nil }
+        return await resource.status(of: archive.path)
+    }
+
     /// A folder with `files`, packed as .zip (zip), .7z (bsdtar) or .7z (7-Zip).
     func pack(_ files: [String: Data], as kind: String, in work: URL) throws -> URL? {
         let source = work.appending(path: "src-\(UUID().uuidString)", directoryHint: .isDirectory)
@@ -47,25 +52,25 @@ struct ModFilesTests {
     }
 
     @Test(arguments: ["zip", "7z", "7zz"])
-    func aFileInsideAnArchiveIsCheckedLikeTheFileItself(kind: String) throws {
+    func aFileInsideAnArchiveIsCheckedLikeTheFileItself(kind: String) async throws {
         let work = try makeWork()
         defer { try? fm.removeItem(at: work) }
         let body = Data((0..<70_000).map { UInt8($0 % 253) })
         let resource = resource(for: body)
         guard let good = try pack(["Metroid [Zero] (USA).gba": body, "readme.txt": Data("hi".utf8)], as: kind, in: work) else { return }
         #expect(resource.isArchive(good.path))
-        #expect(resource.status(of: good.path) == .verified)
-        #expect(try pack(["Metroid (USA).gba": Data(body.reversed())], as: kind, in: work).map { resource.status(of: $0.path) } == .wrongFile)
-        #expect(try pack(["readme.txt": Data("hi".utf8)], as: kind, in: work).map { resource.status(of: $0.path) } == .noFileInArchive)
-        #expect(try pack(["a.gba": body, "b/c.gba": body], as: kind, in: work).map { resource.status(of: $0.path) } == .severalFilesInArchive)
+        #expect(await resource.status(of: good.path) == .verified)
+        #expect(await status(resource, try pack(["Metroid (USA).gba": Data(body.reversed())], as: kind, in: work)) == .wrongFile)
+        #expect(await status(resource, try pack(["readme.txt": Data("hi".utf8)], as: kind, in: work)) == .noFileInArchive)
+        #expect(await status(resource, try pack(["a.gba": body, "b/c.gba": body], as: kind, in: work)) == .severalFilesInArchive)
     }
 
-    @Test func aZipMadeByFinderIgnoresItsExtras() throws {
+    @Test func aZipMadeByFinderIgnoresItsExtras() async throws {
         let work = try makeWork()
         defer { try? fm.removeItem(at: work) }
         let body = Data(repeating: 3, count: 1000)
         let archive = try #require(try pack(["zm.gba": body, "__MACOSX/._zm.gba": Data([0])], as: "zip", in: work))
-        #expect(resource(for: body).status(of: archive.path) == .verified)
+        #expect(await resource(for: body).status(of: archive.path) == .verified)
     }
 
     @Test func anArchiveTheResourceAsksForIsNotUnpacked() {
@@ -99,7 +104,7 @@ struct ModFilesTests {
         return root
     }
 
-    @Test func aRunGetsAPrivateCopyAndStateTomlGetsTheArchiveBack() throws {
+    @Test func aRunGetsAPrivateCopyAndStateTomlGetsTheArchiveBack() async throws {
         let work = try makeWork()
         defer { try? fm.removeItem(at: work) }
         let body = Data(repeating: 5, count: 4096)
@@ -108,7 +113,7 @@ struct ModFilesTests {
         let runRoot = work.appending(path: "RunROM", directoryHint: .isDirectory)
         try fm.createDirectory(at: runRoot, withIntermediateDirectories: true)
 
-        let run = ModFiles.prepare(root: root, runRoot: runRoot)
+        let run = await ModFiles.prepare(root: root, runRoot: runRoot)
         let folder = try #require(run.folder)
         let during = ModState.read(from: root).sharedResources["metroid.zero-mission-us"] ?? ""
         #expect(during.hasPrefix(folder.path) && during.hasSuffix("/Metroid - Zero Mission (USA).gba"))
@@ -125,38 +130,38 @@ struct ModFilesTests {
         #expect(!fm.fileExists(atPath: folder.path))
     }
 
-    @Test func aCrashIsPutRightAtTheNextLaunch() throws {
+    @Test func aCrashIsPutRightAtTheNextLaunch() async throws {
         let work = try makeWork()
         defer { try? fm.removeItem(at: work) }
         let archive = try #require(try pack(["zm.gba": Data(repeating: 5, count: 64)], as: "zip", in: work))
         let root = try makeGame(in: work, path: archive.path)
         let runRoot = work.appending(path: "RunROM", directoryHint: .isDirectory)
-        let folder = try #require(ModFiles.prepare(root: root, runRoot: runRoot).folder)
+        let folder = try #require(await ModFiles.prepare(root: root, runRoot: runRoot).folder)
         ModFiles.restoreLeftovers(in: runRoot)
         #expect(ModState.read(from: root).sharedResources["metroid.zero-mission-us"] == archive.path)
         #expect(!fm.fileExists(atPath: folder.path))
     }
 
-    @Test func aPlainFileOrATurnedOffFeatureNeedsNoCopy() throws {
+    @Test func aPlainFileOrATurnedOffFeatureNeedsNoCopy() async throws {
         let work = try makeWork()
         defer { try? fm.removeItem(at: work) }
         let root = try makeGame(in: work, path: "/ROMs/zm.gba")
-        #expect(ModFiles.prepare(root: root, runRoot: work.appending(path: "RunROM")).folder == nil)
+        #expect(await ModFiles.prepare(root: root, runRoot: work.appending(path: "RunROM")).folder == nil)
         let archive = try #require(try pack(["zm.gba": Data([1])], as: "zip", in: work))
         let off = try makeGame(in: work, path: archive.path)
         var state = ModState.read(from: off)
         state.features["super-metroid.map-hud/pause-map"]?.enabled = false
         try state.write(to: off)
-        #expect(ModFiles.prepare(root: off, runRoot: work.appending(path: "RunROM")).folder == nil)
+        #expect(await ModFiles.prepare(root: off, runRoot: work.appending(path: "RunROM")).folder == nil)
     }
 
     /// The owner's Zero Mission zip, read in place. SM_GBA_ZIP=<path> runs it.
-    @Test func theRealZeroMissionZipIsVerified() throws {
+    @Test func theRealZeroMissionZipIsVerified() async throws {
         guard let path = ProcessInfo.processInfo.environment["SM_GBA_ZIP"] else { return }
         var resource = ModResource()
         resource.filePatterns = "*.gba"
         resource.size = 8_388_608
         resource.normalizedSHA256 = "fc94f65380b65b870a30b9b04b39cca1dc63d6e46a4a373d3904adc0912ebc37"
-        #expect(resource.status(of: path) == .verified)
+        #expect(await resource.status(of: path) == .verified)
     }
 }

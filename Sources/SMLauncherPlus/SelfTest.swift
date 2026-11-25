@@ -1,4 +1,5 @@
 import AppKit
+import ArchiveKit
 import LogKit
 import ProcessKit
 import SwiftData
@@ -255,7 +256,7 @@ enum SelfTest {
             print("SKIP the Zero Mission map art: set SM_GBA_ZIP to your zipped Metroid: Zero Mission (USA) ROM")
         }
         let before = profile.playTime
-        model.play(extraArguments: ["--framedump", frames.path], environment: ["SDL_VIDEODRIVER": "dummy", "SDL_AUDIODRIVER": "dummy"])
+        await model.play(extraArguments: ["--framedump", frames.path], environment: ["SDL_VIDEODRIVER": "dummy", "SDL_AUDIODRIVER": "dummy"])
         check("Play starts the game", model.isPlaying, model.playFailure?.message ?? "")
         guard let game = model.game else { return }
         if gbaZip != nil, pauseMap != nil {
@@ -314,7 +315,7 @@ enum SelfTest {
         check("a report takes the run's replay files and its run report",
               reported.contains { $0.hasSuffix(".replay") } && reported.contains { $0.hasSuffix(".replay.sav") }
                 && reported.contains("last_run_report.json"), "\(reported)")
-        model.play(extraArguments: ["--no-such-option"], environment: ["SDL_VIDEODRIVER": "dummy", "SDL_AUDIODRIVER": "dummy"])
+        await model.play(extraArguments: ["--no-such-option"], environment: ["SDL_VIDEODRIVER": "dummy", "SDL_AUDIODRIVER": "dummy"])
         let failDeadline = Date.now.addingTimeInterval(15)
         while model.isPlaying, Date.now < failDeadline { try? await Task.sleep(for: .milliseconds(100)) }
         check("a game that quits with an error shows the banner", model.lastGameFailure?.status == 2,
@@ -330,13 +331,13 @@ enum SelfTest {
         } else {
             check("Report a Problem saves a zip", false, model.reportError ?? "")
         }
-        model.play(extraArguments: ["--help"], environment: ["SDL_VIDEODRIVER": "dummy", "SDL_AUDIODRIVER": "dummy"])
+        await model.play(extraArguments: ["--help"], environment: ["SDL_VIDEODRIVER": "dummy", "SDL_AUDIODRIVER": "dummy"])
         check("Play clears the banner", model.lastGameFailure == nil)
         while model.isPlaying { try? await Task.sleep(for: .milliseconds(100)) }
     }
 
     private static func zipNames(_ zip: URL) -> [String] {
-        (try? Shell.runSync("/usr/bin/zipinfo", ["-1", zip.path]))?.lines ?? []
+        (try? Zip.names(zip)) ?? []
     }
 
     /// True once a dumped frame shows game state 1 (title screen) at $0998.
@@ -528,7 +529,7 @@ enum SelfTest {
         try? model.context.save()
         defer { try? fm.removeItem(at: profile.folder); model.context.delete(profile); try? model.context.save() }
         do {
-            try ProfileBuilder.build(zip: old, profile: profile.folder, info: .init(version: "0.4.6", romSHA256: SupportedROM.sha256))
+            try await ProfileBuilder.build(zip: old, profile: profile.folder, info: .init(version: "0.4.6", romSHA256: SupportedROM.sha256))
         } catch {
             return check("a made-up 0.4.6 profile is built", false, "\(error)")
         }
@@ -541,7 +542,7 @@ enum SelfTest {
         }
         check("a profile that was never updated has nothing to roll back to", model.previousVersion(of: profile) == nil)
         let keeping = Set(profile.installedMods.compactMap { $0.split(separator: "/").first.map(String.init) })
-        let updated = try? ProfileUpdate.update(zip: new, profile: profile.folder, info: .init(version: "0.4.7", romSHA256: SupportedROM.sha256),
+        let updated = try? await ProfileUpdate.update(zip: new, profile: profile.folder, info: .init(version: "0.4.7", romSHA256: SupportedROM.sha256),
                                                 keepingPackages: keeping)
         profile.gameVersion = updated?.version ?? profile.gameVersion
         func text(_ path: String) -> String? { try? String(contentsOf: game.appending(path: path), encoding: .utf8) }

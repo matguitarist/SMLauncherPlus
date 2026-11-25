@@ -1,3 +1,4 @@
+import ArchiveKit
 import CryptoKit
 import Foundation
 
@@ -81,8 +82,8 @@ public struct ModResource: Identifiable, Equatable, Sendable {
     }
 
     /// The one file in `archive` this resource can use: matching its patterns, Finder's extras left out.
-    public func member(in archive: URL) -> Result<String, Status> {
-        guard let entries = Archive.list(archive) else { return .failure(.notFound) }
+    public func member(in archive: URL) async -> Result<String, Status> {
+        guard let entries = try? await AnyArchive.names(archive) else { return .failure(.notFound) }
         let matches = entries.filter { name in
             let base = (name as NSString).lastPathComponent
             guard !name.hasSuffix("/"), !name.hasPrefix("__MACOSX/"), !base.hasPrefix("._"), !base.isEmpty else { return false }
@@ -97,7 +98,7 @@ public struct ModResource: Identifiable, Equatable, Sendable {
 
     /// validate_resource_file: the path exists, its size and its SHA-256 match. In a .zip or .7z,
     /// the same checks on the one matching file inside.
-    public func status(of path: String) -> Status {
+    public func status(of path: String) async -> Status {
         guard !path.isEmpty else { return .notChosen }
         var isDirectory: ObjCBool = false
         guard FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory), isDirectory.boolValue == isFolder else { return .notFound }
@@ -105,11 +106,11 @@ public struct ModResource: Identifiable, Equatable, Sendable {
         if isArchive(path) {
             let archive = URL(fileURLWithPath: path)
             let member: String
-            switch self.member(in: archive) {
+            switch await self.member(in: archive) {
             case .success(let name): member = name
             case .failure(let status): return status
             }
-            guard let data = Archive.read(member, in: archive, limit: Self.maxBytes) else { return size != 0 ? .wrongSize : .notFound }
+            guard let data = try? await AnyArchive.read(member, from: archive, limit: Self.maxBytes) else { return size != 0 ? .wrongSize : .notFound }
             if size != 0, data.count != size { return .wrongSize }
             guard !normalizedSHA256.isEmpty else { return .chosen }
             return Self.normalizedSHA256(of: data) == normalizedSHA256 ? .verified : .wrongFile

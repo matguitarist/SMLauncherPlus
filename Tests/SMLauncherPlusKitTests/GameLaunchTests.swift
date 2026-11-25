@@ -21,20 +21,20 @@ import Testing
         #expect(args == ["--rom", "/ROMs/Super Metroid.sfc", "--no-launcher", "--config", "/Data/Profiles/A/game/config.ini"])
     }
 
-    @Test func aPlainROMIsPassedInPlace() throws {
+    @Test func aPlainROMIsPassedInPlace() async throws {
         let folder = try Self.tempFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
         let file = folder.appending(path: "sm.sfc")
         try Self.bytes.write(to: file)
         let rom = ROMCheck.ROM(url: file, kind: .file, member: "", headered: false, sha256: Self.hash)
-        let prepared = try GameLaunch.prepareROM(rom, root: folder.appending(path: "tmp"))
+        let prepared = try await GameLaunch.prepareROM(rom, root: folder.appending(path: "tmp"))
         #expect(prepared.url == file)
         #expect(prepared.temporaryFolder == nil)
         prepared.discard()
         #expect(FileManager.default.fileExists(atPath: file.path))
     }
 
-    @Test func aZippedROMIsUnpackedPrivatelyAndDiscarded() throws {
+    @Test func aZippedROMIsUnpackedPrivatelyAndDiscarded() async throws {
         let folder = try Self.tempFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
         try Self.bytes.write(to: folder.appending(path: "sm.sfc"))
@@ -43,7 +43,7 @@ import Testing
         let root = folder.appending(path: "tmp", directoryHint: .isDirectory)
         let rom = ROMCheck.ROM(url: zip, kind: .zip, member: "sm.sfc", headered: false, sha256: Self.hash)
 
-        let prepared = try GameLaunch.prepareROM(rom, root: root)
+        let prepared = try await GameLaunch.prepareROM(rom, root: root)
         let temp = try #require(prepared.temporaryFolder)
         #expect(try Data(contentsOf: prepared.url) == Self.bytes)
         let mode = try FileManager.default.attributesOfItem(atPath: temp.path)[.posixPermissions] as? Int
@@ -52,44 +52,44 @@ import Testing
         #expect(!FileManager.default.fileExists(atPath: temp.path))
     }
 
-    @Test func a7zROMIsUnpackedPrivatelyAndDiscarded() throws {
+    @Test func a7zROMIsUnpackedPrivatelyAndDiscarded() async throws {
         let folder = try Self.tempFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
         try Self.bytes.write(to: folder.appending(path: "sm.sfc"))
         let archive = try ROMCheckTests.sevenZip(folder, ["sm.sfc"], as: "sm.7z")
         let rom = ROMCheck.ROM(url: archive, kind: .sevenZip, member: "sm.sfc", headered: false, sha256: Self.hash)
-        let prepared = try GameLaunch.prepareROM(rom, root: folder.appending(path: "tmp", directoryHint: .isDirectory))
+        let prepared = try await GameLaunch.prepareROM(rom, root: folder.appending(path: "tmp", directoryHint: .isDirectory))
         let temp = try #require(prepared.temporaryFolder)
         #expect(try Data(contentsOf: prepared.url) == Self.bytes)
         prepared.discard()
         #expect(!FileManager.default.fileExists(atPath: temp.path))
     }
 
-    @Test func aHeaderedROMIsPassedWithoutItsHeader() throws {
+    @Test func aHeaderedROMIsPassedWithoutItsHeader() async throws {
         let folder = try Self.tempFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
         let file = folder.appending(path: "sm.smc")
         try (Data(repeating: 0xAA, count: 512) + Self.bytes).write(to: file)
         let rom = ROMCheck.ROM(url: file, kind: .file, member: "", headered: true, sha256: Self.hash)
-        let prepared = try GameLaunch.prepareROM(rom, root: folder.appending(path: "tmp"))
+        let prepared = try await GameLaunch.prepareROM(rom, root: folder.appending(path: "tmp"))
         defer { prepared.discard() }
         #expect(prepared.temporaryFolder != nil)
         #expect(try Data(contentsOf: prepared.url) == Self.bytes)
     }
 
-    @Test func aMovedOrChangedROMIsTold() throws {
+    @Test func aMovedOrChangedROMIsTold() async throws {
         let folder = try Self.tempFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
         let gone = ROMCheck.ROM(url: folder.appending(path: "gone.zip"), kind: .zip, member: "sm.sfc", headered: false, sha256: Self.hash)
-        #expect(throws: GameLaunch.ROMProblem.missing) { try GameLaunch.prepareROM(gone, root: folder) }
+        await #expect(throws: GameLaunch.ROMProblem.missing) { try await GameLaunch.prepareROM(gone, root: folder) }
         let file = folder.appending(path: "sm.smc")
         try (Data(repeating: 0, count: 512) + Self.bytes.dropLast() + Data([1])).write(to: file)
         let changed = ROMCheck.ROM(url: file, kind: .file, member: "", headered: true, sha256: Self.hash)
-        #expect(throws: GameLaunch.ROMProblem.changed) { try GameLaunch.prepareROM(changed, root: folder.appending(path: "tmp")) }
+        await #expect(throws: GameLaunch.ROMProblem.changed) { try await GameLaunch.prepareROM(changed, root: folder.appending(path: "tmp")) }
         #expect((try? FileManager.default.contentsOfDirectory(atPath: folder.appending(path: "tmp").path)) ?? [] == [])
     }
 
-    @Test func leftoverCopiesAreRemovedAtLaunch() throws {
+    @Test func leftoverCopiesAreRemovedAtLaunch() async throws {
         let folder = try Self.tempFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
         try FileManager.default.createDirectory(at: folder.appending(path: "rom-OLD"), withIntermediateDirectories: true)

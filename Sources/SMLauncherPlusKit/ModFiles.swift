@@ -1,45 +1,5 @@
+import ArchiveKit
 import Foundation
-
-/// Reads .zip and .7z files with the system's /usr/bin/tar (libarchive): no third-party code,
-/// nothing written to disk.
-enum Archive {
-    static func list(_ archive: URL) -> [String]? {
-        guard let output = run(["-tf", archive.path], limit: 1 << 20) else { return nil }
-        return String(decoding: output, as: UTF8.self).split(separator: "\n").map(String.init)
-    }
-
-    /// One member's bytes, or nil when it can't be read or is larger than `limit`.
-    static func read(_ member: String, in archive: URL, limit: Int) -> Data? {
-        // tar treats * ? [ ] \ in names as patterns; escape them so the exact member is read.
-        var literal = ""
-        for c in member {
-            if "*?[]\\".contains(c) { literal.append("\\") }
-            literal.append(c)
-        }
-        guard let data = run(["-xOf", archive.path, "--", literal], limit: limit + 1), data.count <= limit else { return nil }
-        return data
-    }
-
-    private static func run(_ arguments: [String], limit: Int) -> Data? {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/tar")
-        process.arguments = arguments
-        let output = Pipe()
-        process.standardOutput = output
-        process.standardError = FileHandle.nullDevice
-        do { try process.run() } catch { return nil }
-        var data = Data()
-        let handle = output.fileHandleForReading
-        while true {
-            let chunk = handle.availableData
-            if chunk.isEmpty { break }
-            data.append(chunk)
-            if data.count > limit { process.terminate(); break }
-        }
-        process.waitUntilExit()
-        return process.terminationStatus == 0 && data.count <= limit ? data : nil
-    }
-}
 
 /// The files mods ask for, around one run of the game (S-022). The game reads only a plain file, so a
 /// file chosen inside a .zip or .7z is unpacked into a private folder (mode 700) for the run and
@@ -61,7 +21,7 @@ public enum ModFiles {
 
     /// Unpacks the files that turned-on features use from a .zip or .7z into a "mods-" folder under
     /// `runRoot` and points state.toml at them. Nothing to unpack leaves everything as it is.
-    public static func prepare(root: URL, runRoot: URL) -> Run {
+    public static func prepare(root: URL, runRoot: URL) async -> Run {
         let fm = FileManager.default
         let catalog = ModCatalog.packages(in: root)
         var state = ModState.read(from: root)
@@ -77,8 +37,8 @@ public enum ModFiles {
                     continue
                 }
                 let archive = URL(fileURLWithPath: path)
-                guard case .success(let member) = resource.member(in: archive),
-                      let data = Archive.read(member, in: archive, limit: ModResource.maxBytes) else { continue }
+                guard case .success(let member) = await resource.member(in: archive),
+                      let data = try? await AnyArchive.read(member, from: archive, limit: ModResource.maxBytes) else { continue }
                 let file = folder.appending(path: "\(unpacked.count + 1)", directoryHint: .isDirectory)
                     .appending(path: (member as NSString).lastPathComponent)
                 do {

@@ -34,18 +34,13 @@ public enum GameLaunch {
     }
 
     /// Prepares the ROM for one run. `sha256` is the hash it had when it was checked.
-    public static func prepareROM(_ rom: ROMCheck.ROM, root: URL) throws(ROMProblem) -> ROMFile {
+    public static func prepareROM(_ rom: ROMCheck.ROM, root: URL) async throws(ROMProblem) -> ROMFile {
         let fm = FileManager.default
         guard fm.fileExists(atPath: rom.url.path) else { throw .missing }
         if rom.kind == .file, !rom.headered {
             return ROMFile(url: rom.url, temporaryFolder: nil)
         }
-        let data: Data?
-        switch rom.kind {
-        case .file: data = try? Data(contentsOf: rom.url)
-        case .zip, .sevenZip: data = ROMCheck.read(rom.member, in: rom.url, kind: rom.kind)
-        }
-        guard var bytes = data else { throw .missing }
+        guard var bytes = try? await ROMCheck.read(rom.member, in: rom.url, kind: rom.kind) else { throw .missing }
         if rom.headered, bytes.count % 1024 == 512 { bytes = bytes.dropFirst(512) }
         let hash = SHA256.hash(data: bytes).map { String(format: "%02x", $0) }.joined()
         guard hash == rom.sha256 else { throw .changed }

@@ -1,3 +1,4 @@
+import ArchiveKit
 import CryptoKit
 import Foundation
 
@@ -57,7 +58,7 @@ public enum ROMCheck {
     static let maxBytes = 8 * 1024 * 1024 + 512
 
     /// Checks a .sfc, .smc, .zip or .7z file.
-    public static func check(_ url: URL) throws(Problem) -> ROM {
+    public static func check(_ url: URL) async throws(Problem) -> ROM {
         let ext = url.pathExtension.lowercased()
         if romExtensions.contains(ext) {
             guard let size = fileSize(url) else { throw .unreadable }
@@ -67,22 +68,23 @@ public enum ROMCheck {
             return ROM(url: url, kind: .file, member: "", headered: headered, sha256: hash)
         }
         guard let kind: Kind = ext == "zip" ? .zip : ext == "7z" ? .sevenZip : nil else { throw .notROM }
-        guard let entries = kind == .zip ? Zip.list(url) : Archive.list(url) else { throw .unreadable }
+        let entries: [String]
+        do { entries = kind == .zip ? try Zip.names(url) : try await AnyArchive.names(url) } catch { throw .unreadable }
         let roms = entries.filter { romExtensions.contains(($0 as NSString).pathExtension.lowercased()) && !$0.hasPrefix("__MACOSX/") }
         guard !roms.isEmpty else { throw .zipWithoutROM }
         guard roms.count == 1 else { throw .zipWithSeveralROMs }
-        guard let data = read(roms[0], in: url, kind: kind) else { throw .unreadable }
-        guard data.count <= maxBytes else { throw .wrongSize }
+        let data: Data
+        do { data = try await read(roms[0], in: url, kind: kind) } catch ArchiveError.tooLarge { throw .wrongSize } catch { throw .unreadable }
         let (headered, hash) = try identify(data)
         return ROM(url: url, kind: kind, member: roms[0], headered: headered, sha256: hash)
     }
 
-    /// One member of a .zip (unzip) or .7z (bsdtar), read into memory; nil for a plain file.
-    static func read(_ member: String, in url: URL, kind: Kind) -> Data? {
+    /// One member of a .zip or .7z, read into memory (ArchiveKit's `tooLarge` past `maxBytes`); the file itself for a plain one.
+    static func read(_ member: String, in url: URL, kind: Kind) async throws -> Data {
         switch kind {
-        case .file: nil
-        case .zip: Zip.read(member, in: url, limit: maxBytes)
-        case .sevenZip: Archive.read(member, in: url, limit: maxBytes)
+        case .file: try Data(contentsOf: url)
+        case .zip: try await Zip.read(member, from: url, limit: maxBytes)
+        case .sevenZip: try await AnyArchive.read(member, from: url, limit: maxBytes)
         }
     }
 
@@ -133,40 +135,4 @@ public enum ROMCheck {
 extension SupportedROM {
     /// The title in the ROM's internal header.
     static let title = "Super Metroid"
-}
-
-/// Reads zips with the system's /usr/bin/unzip and zipinfo: no third-party code, nothing written to disk.
-enum Zip {
-    static func list(_ zip: URL) -> [String]? {
-        guard let output = run("/usr/bin/zipinfo", ["-1", zip.path], limit: 1 << 20) else { return nil }
-        return String(decoding: output, as: UTF8.self).split(separator: "\n").map(String.init)
-    }
-
-    /// One member's bytes, at most `limit` + 1 of them (so a caller can tell it's too large).
-    static func read(_ member: String, in zip: URL, limit: Int) -> Data? {
-        // unzip treats [ ] * ? in names as patterns; escape them so the exact member is read.
-        let literal = member.replacingOccurrences(of: "[", with: "[[]")
-            .replacingOccurrences(of: "*", with: "[*]").replacingOccurrences(of: "?", with: "[?]")
-        guard let data = run("/usr/bin/unzip", ["-p", zip.path, literal], limit: limit + 1), !data.isEmpty else { return nil }
-        return data
-    }
-
-    private static func run(_ tool: String, _ arguments: [String], limit: Int) -> Data? {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: tool)
-        process.arguments = arguments
-        let pipe = Pipe()
-        process.standardOutput = pipe
-        process.standardError = FileHandle.nullDevice
-        do { try process.run() } catch { return nil }
-        var data = Data()
-        let reader = pipe.fileHandleForReading
-        while data.count <= limit, let chunk = try? reader.read(upToCount: 1 << 20), !chunk.isEmpty {
-            data.append(chunk)
-        }
-        if data.count > limit { process.terminate() }
-        process.waitUntilExit()
-        guard data.count > limit || process.terminationStatus == 0 else { return nil }
-        return data
-    }
 }

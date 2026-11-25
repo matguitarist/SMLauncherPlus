@@ -39,7 +39,7 @@ struct SMLauncherPlusApp: App {
                     .disabled(model.isCheckingROM)
             }
             CommandMenu("Game") {
-                Button("Play") { model.sidebar = .play; model.play() }
+                Button("Play") { model.sidebar = .play; Task { await model.play() } }
                     .keyboardShortcut("r")
                     .disabled(model.isPlaying || model.install != nil || model.currentProfile == nil)
                 Button("Stop") { model.sidebar = .play; model.confirmStop = true }
@@ -161,6 +161,8 @@ final class AppModel {
     var game: GameRunner? { didSet { playStartedAt = game?.startedAt } }
     /// When the running game started; the Play page shows Playing… and the timer while it's set.
     var playStartedAt: Date?
+    /// Play was pressed and the game is being prepared (its ROM or mod files read out of a .zip or .7z).
+    var startingGame = false
     /// Why Play didn't start, shown under the button.
     var playFailure: GameRunner.StartError?
     var confirmStop = false
@@ -224,10 +226,10 @@ final class AppModel {
     /// Only a bookmark to the file is saved; the ROM itself is never copied.
     func choose(_ url: URL) async {
         welcome = .checking(url.lastPathComponent)
-        let result = await Task.detached(priority: .userInitiated) { () -> Result<ROMCheck.ROM, ROMCheck.Problem> in
+        let result = await Task.detached(priority: .userInitiated) { () async -> Result<ROMCheck.ROM, ROMCheck.Problem> in
             let scoped = url.startAccessingSecurityScopedResource()
             defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-            return Result { () throws(ROMCheck.Problem) in try ROMCheck.check(url) }
+            do throws(ROMCheck.Problem) { return .success(try await ROMCheck.check(url)) } catch { return .failure(error) }
         }.value
         switch result {
         case .success(let found):

@@ -26,13 +26,13 @@ public enum ProfileUpdate {
     /// On failure the profile is as it was.
     @discardableResult
     public static func update(zip: URL, profile: URL, info: ProfileBuilder.Info,
-                              keepingPackages: Set<String>) throws(ProfileBuilder.Failure) -> ProfileBuilder.Info {
+                              keepingPackages: Set<String>) async throws(ProfileBuilder.Failure) -> ProfileBuilder.Info {
         let fm = FileManager.default
         let game = profile.appending(path: "game", directoryHint: .isDirectory)
         let staging = profile.appending(path: "update.partial", directoryHint: .isDirectory)
         try? fm.removeItem(at: staging)
         defer { try? fm.removeItem(at: staging) }
-        let fresh = try ProfileBuilder.unpack(zip, into: staging)
+        let fresh = try await ProfileBuilder.unpack(zip, into: staging)
         var info = info
         info.previousVersion = ProfileBuilder.Info.read(from: profile)?.version ?? version(of: game)
         do {
