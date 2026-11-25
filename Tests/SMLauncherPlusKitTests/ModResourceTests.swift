@@ -1,4 +1,4 @@
-import CryptoKit
+import DownloadKit
 import Foundation
 import Testing
 @testable import SMLauncherPlusKit
@@ -60,7 +60,7 @@ struct ModResourceTests {
         return url
     }
 
-    func hash(_ data: Data) -> String { SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined() }
+    func hash(_ data: Data) -> String { SHA256Hex.of(data) }
 
     @Test func readsResourcesWithTheGamesDefaults() throws {
         let package = try #require(ModCatalog.parseManifest(Self.manifest(hash: String(repeating: "a", count: 64), size: 64)))

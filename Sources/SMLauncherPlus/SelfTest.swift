@@ -82,7 +82,7 @@ enum SelfTest {
                 model.cancelInstall()
                 await Self.waitForInstall(model)
                 check("Cancel stops the download and removes its partial file",
-                      model.install == nil && !Self.files(in: DataFolder.downloads).contains { $0.hasSuffix(".partial") })
+                      model.install == nil && !Self.files(in: DataFolder.downloads).contains { $0.hasSuffix(".part") })
                 model.startInstall()
                 await Self.waitForInstall(model)
                 let zips = Self.files(in: DataFolder.downloads).filter { $0.hasSuffix("-macos-\(GameRelease.architecture).zip") }

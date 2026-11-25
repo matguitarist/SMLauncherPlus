@@ -1,5 +1,5 @@
 import ArchiveKit
-import CryptoKit
+import DownloadKit
 import Foundation
 
 /// A file a feature asks the player for (S-022), from a `[[resource]]` in manifest.toml, like the
@@ -131,7 +131,7 @@ public struct ModResource: Identifiable, Equatable, Sendable {
 
     static func normalizedSHA256(of data: Data) -> String {
         let body = data.count % 32768 == 512 ? data.dropFirst(512) : data[...]
-        return SHA256.hash(data: body).map { String(format: "%02x", $0) }.joined()
+        return SHA256Hex.of(body)
     }
 }
 

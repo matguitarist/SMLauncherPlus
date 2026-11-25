@@ -1,3 +1,4 @@
+import DownloadKit
 import SMLauncherPlusKit
 import SwiftData
 import SwiftUI
@@ -40,7 +41,7 @@ extension AppModel {
 
     /// The newer release for `profile`, or nil when it has the latest one (or nothing was checked yet).
     func availableUpdate(for profile: Profile) -> UpdateCheck.Latest? {
-        guard let latestUpdate, UpdateCheck.isNewer(latestUpdate.version, than: profile.gameVersion) else { return nil }
+        guard let latestUpdate, ReleaseVersion.isNewer(latestUpdate.version, than: profile.gameVersion) else { return nil }
         return latestUpdate
     }
 }

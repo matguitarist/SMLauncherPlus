@@ -1,4 +1,4 @@
-import CryptoKit
+import DownloadKit
 import Foundation
 
 /// How the launcher starts SuperMetroidRecomp (S-004).
@@ -42,7 +42,7 @@ public enum GameLaunch {
         }
         guard var bytes = try? await ROMCheck.read(rom.member, in: rom.url, kind: rom.kind) else { throw .missing }
         if rom.headered, bytes.count % 1024 == 512 { bytes = bytes.dropFirst(512) }
-        let hash = SHA256.hash(data: bytes).map { String(format: "%02x", $0) }.joined()
+        let hash = SHA256Hex.of(bytes)
         guard hash == rom.sha256 else { throw .changed }
 
         let folder = root.appending(path: "rom-\(UUID().uuidString)", directoryHint: .isDirectory)

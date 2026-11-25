@@ -1,4 +1,4 @@
-import CryptoKit
+import DownloadKit
 import Foundation
 import ProcessKit
 import Testing
@@ -19,7 +19,7 @@ import Testing
         return data
     }
 
-    static func sha(_ data: Data) -> String { SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined() }
+    static func sha(_ data: Data) -> String { SHA256Hex.of(data) }
 
     static func expect(_ data: Data, toFailWith problem: ROMCheck.Problem, sourceLocation: SourceLocation = #_sourceLocation) {
         #expect(throws: problem, sourceLocation: sourceLocation) { try ROMCheck.identify(data) }

@@ -1,5 +1,5 @@
 import ArchiveKit
-import CryptoKit
+import DownloadKit
 import Foundation
 
 /// Recognizes the player's own Super Metroid ROM (S-001): a .sfc or .smc file, or a .zip or .7z holding one.
@@ -94,7 +94,7 @@ public enum ROMCheck {
         let headered = data.count % 1024 == 512
         let body = headered ? data.dropFirst(512) : data[...]
         guard body.count >= 256 * 1024, body.count <= 8 * 1024 * 1024, body.count % (32 * 1024) == 0 else { throw .wrongSize }
-        let hash = SHA256.hash(data: body).map { String(format: "%02x", $0) }.joined()
+        let hash = SHA256Hex.of(body)
         if body.count == SupportedROM.size, hash == supported { return (headered, hash) }
 
         let header = Header(body, at: 0x7FC0)

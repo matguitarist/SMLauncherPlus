@@ -1,22 +1,9 @@
+import DownloadKit
 import Foundation
 import Testing
 @testable import SMLauncherPlusKit
 
 struct UpdateCheckTests {
-    @Test func comparesSemanticVersions() {
-        #expect(UpdateCheck.isNewer("0.4.7", than: "0.4.6"))
-        #expect(UpdateCheck.isNewer("0.4.10", than: "0.4.9"))
-        #expect(UpdateCheck.isNewer("v1.0.0", than: "0.9.99"))
-        #expect(UpdateCheck.isNewer("0.5.0", than: "0.5.0-rc.2"))
-        #expect(UpdateCheck.isNewer("0.5.0-rc.10", than: "0.5.0-rc.2"))
-        #expect(UpdateCheck.isNewer("0.5.0-rc", than: "0.5.0-beta"))
-        #expect(UpdateCheck.isNewer("0.4.6.1", than: "0.4.6"))
-        #expect(!UpdateCheck.isNewer("0.4.6", than: "0.4.6"))
-        #expect(!UpdateCheck.isNewer("0.4.6+build.5", than: "0.4.6"))
-        #expect(!UpdateCheck.isNewer("0.4", than: "0.4.0"))
-        #expect(!UpdateCheck.isNewer("0.4.5", than: "0.4.6"))
-    }
-
     @Test func checksAtMostOnceADay() {
         let now = Date(timeIntervalSince1970: 1_800_000_000)
         #expect(UpdateCheck.isDue(lastCheck: nil, now: now))
@@ -46,11 +33,11 @@ struct UpdateCheckTests {
 
     @Test func readsReleaseNotesFromGitHub() throws {
         let json = """
-        [{"tag_name": "v0.4.7", "published_at": "2026-11-20T10:00:00Z", "assets": [], "body": "# 0.4.7\\nFixes.", "html_url": "https://github.com/mstan/SuperMetroidRecomp/releases/tag/v0.4.7"},
-         {"tag_name": "v0.5.0-rc.1", "published_at": null, "assets": [], "body": "rc", "prerelease": true},
-         {"tag_name": "v0.4.6", "published_at": "2026-11-13T23:38:04Z", "assets": [], "body": null}]
+        [{"id": 3, "tag_name": "v0.4.7", "published_at": "2026-11-20T10:00:00Z", "assets": [], "body": "# 0.4.7\\nFixes.", "html_url": "https://github.com/mstan/SuperMetroidRecomp/releases/tag/v0.4.7"},
+         {"id": 2, "tag_name": "v0.5.0-rc.1", "published_at": null, "assets": [], "body": "rc", "prerelease": true},
+         {"id": 1, "tag_name": "v0.4.6", "published_at": "2026-11-13T23:38:04Z", "assets": [], "body": null}]
         """
-        let notes = try GameRelease.parseNotes(Data(json.utf8))
+        let notes = GameRelease.notes(from: try GitHubRelease.decodeList(Data(json.utf8)))
         #expect(notes.map(\.version) == ["0.4.7", "0.4.6"])
         #expect(notes[0].body == "# 0.4.7\nFixes." && notes[0].page?.lastPathComponent == "v0.4.7" && notes[1].body.isEmpty)
     }

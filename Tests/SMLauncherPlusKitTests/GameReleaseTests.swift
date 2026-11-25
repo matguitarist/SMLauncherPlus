@@ -1,4 +1,4 @@
-import CryptoKit
+import DownloadKit
 import Foundation
 import Testing
 @testable import SMLauncherPlusKit
@@ -6,14 +6,14 @@ import Testing
 /// S-002. GitHub is replaced by StubProtocol: no test touches the network.
 @Suite(.serialized) struct GameReleaseTests {
     static let zip = Data((0..<200_000).map { UInt8($0 % 251) })
-    static var zipHash: String { SHA256.hash(data: zip).map { String(format: "%02x", $0) }.joined() }
+    static var zipHash: String { SHA256Hex.of(zip) }
 
     static let releaseJSON = """
-    {"tag_name": "v0.4.6", "published_at": "2026-11-13T23:38:04Z", "assets": [
-      {"name": "SHA256SUMS", "size": 400, "browser_download_url": "https://example.test/SHA256SUMS"},
-      {"name": "supermetroid-0.4.6-linux-x64.zip", "size": 1, "browser_download_url": "https://example.test/linux.zip"},
-      {"name": "supermetroid-0.4.6-macos-arm64.zip", "size": 200000, "browser_download_url": "https://example.test/arm64.zip"},
-      {"name": "supermetroid-0.4.6-macos-x64.zip", "size": 200000, "browser_download_url": "https://example.test/x64.zip"}
+    {"id": 1, "tag_name": "v0.4.6", "published_at": "2026-11-13T23:38:04Z", "assets": [
+      {"id": 11, "name": "SHA256SUMS", "size": 400, "browser_download_url": "https://example.test/SHA256SUMS"},
+      {"id": 12, "name": "supermetroid-0.4.6-linux-x64.zip", "size": 1, "browser_download_url": "https://example.test/linux.zip"},
+      {"id": 13, "name": "supermetroid-0.4.6-macos-arm64.zip", "size": 200000, "browser_download_url": "https://example.test/arm64.zip"},
+      {"id": 14, "name": "supermetroid-0.4.6-macos-x64.zip", "size": 200000, "browser_download_url": "https://example.test/x64.zip"}
     ]}
     """
 
@@ -32,8 +32,10 @@ import Testing
         return URLSession(configuration: configuration)
     }
 
+    static let latestURL = "https://api.github.com/repos/mstan/SuperMetroidRecomp/releases/latest"
+
     static var github: [String: (Int, Data)] {
-        ["https://api.github.com/repos/mstan/SuperMetroidRecomp/releases/latest": (200, Data(releaseJSON.utf8)),
+        [latestURL: (200, Data(releaseJSON.utf8)),
          "https://example.test/SHA256SUMS": (200, Data(sums.utf8)),
          "https://example.test/arm64.zip": (200, zip),
          "https://example.test/x64.zip": (200, zip)]
@@ -54,25 +56,27 @@ import Testing
         #expect(arm.sha256 == Self.zipHash)
         let intel = try await GameRelease.latest(architecture: "x64", session: session)
         #expect(intel.zipName == "supermetroid-0.4.6-macos-x64.zip")
+        // SHA256SUMS lines with "  " and " *" both count.
+        #expect(intel.sha256 == Self.zipHash)
     }
 
-    @Test func aReleaseWithoutAMacBuildOrChecksumIsRefused() {
-        let noMac = Data(#"{"tag_name":"v1","assets":[{"name":"SHA256SUMS","size":1,"browser_download_url":"https://example.test/s"}]}"#.utf8)
-        #expect(throws: GameRelease.Failure.noMacBuild) { try GameRelease.parse(noMac, architecture: "arm64") }
-        let noSums = Data(#"{"tag_name":"v1","assets":[{"name":"supermetroid-1-macos-arm64.zip","size":1,"browser_download_url":"https://example.test/z"}]}"#.utf8)
-        #expect(throws: GameRelease.Failure.noChecksum) { try GameRelease.parse(noSums, architecture: "arm64") }
-        #expect(throws: GameRelease.Failure.badResponse) { try GameRelease.parse(Data("<html>".utf8), architecture: "arm64") }
-    }
-
-    @Test func checksumsAreReadFromEitherSHA256SUMSForm() {
-        #expect(GameRelease.checksum(for: "supermetroid-0.4.6-macos-arm64.zip", in: Self.sums) == Self.zipHash)
-        #expect(GameRelease.checksum(for: "supermetroid-0.4.6-macos-x64.zip", in: Self.sums) == Self.zipHash)
-        #expect(GameRelease.checksum(for: "missing.zip", in: Self.sums) == nil)
+    @Test func aReleaseWithoutAMacBuildOrChecksumIsRefused() async {
+        let noMac = Data(#"{"id":1,"tag_name":"v1","assets":[{"id":2,"name":"SHA256SUMS","size":1,"browser_download_url":"https://example.test/s"}]}"#.utf8)
+        await #expect(throws: GameRelease.Failure.noMacBuild) {
+            try await GameRelease.latest(architecture: "arm64", session: Self.session([Self.latestURL: (200, noMac)]))
+        }
+        let noSums = Data(#"{"id":1,"tag_name":"v1","assets":[{"id":2,"name":"supermetroid-1-macos-arm64.zip","size":1,"browser_download_url":"https://example.test/z"}]}"#.utf8)
+        await #expect(throws: GameRelease.Failure.noChecksum) {
+            try await GameRelease.latest(architecture: "arm64", session: Self.session([Self.latestURL: (200, noSums)]))
+        }
+        await #expect(throws: GameRelease.Failure.badResponse) {
+            try await GameRelease.latest(architecture: "arm64", session: Self.session([Self.latestURL: (200, Data("<html>".utf8))]))
+        }
     }
 
     @Test func gitHubErrorsAndNoConnectionAreTold() async {
         await #expect(throws: GameRelease.Failure.github(403)) {
-            try await GameRelease.latest(session: Self.session(["https://api.github.com/repos/mstan/SuperMetroidRecomp/releases/latest": (403, Data())]))
+            try await GameRelease.latest(session: Self.session([Self.latestURL: (403, Data())]))
         }
         await #expect(throws: GameRelease.Failure.offline) {
             try await GameRelease.latest(session: Self.session([:]))
@@ -89,7 +93,7 @@ import Testing
         #expect(try Data(contentsOf: file) == Self.zip)
         #expect(seen.last?.0 == Self.zip.count && seen.last?.1 == Self.zip.count)
         #expect(seen.count > 1)
-        #expect(!FileManager.default.fileExists(atPath: file.path + ".partial"))
+        #expect(try FileManager.default.contentsOfDirectory(atPath: file.deletingLastPathComponent().path) == [file.lastPathComponent], "no partial file is left")
     }
 
     @Test func aDamagedDownloadIsDeletedAndTold() async throws {

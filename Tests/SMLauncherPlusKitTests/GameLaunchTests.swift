@@ -1,4 +1,4 @@
-import CryptoKit
+import DownloadKit
 import Foundation
 import ProcessKit
 import Testing
@@ -7,7 +7,7 @@ import Testing
 /// S-004. Made-up ROM bytes; the real one is never written by a test.
 @Suite struct GameLaunchTests {
     static let bytes = Data((0..<(64 * 1024)).map { UInt8($0 % 253) })
-    static var hash: String { SHA256.hash(data: bytes).map { String(format: "%02x", $0) }.joined() }
+    static var hash: String { SHA256Hex.of(bytes) }
 
     static func tempFolder() throws -> URL {
         let folder = FileManager.default.temporaryDirectory.appending(path: "GameLaunchTests-\(UUID())", directoryHint: .isDirectory)

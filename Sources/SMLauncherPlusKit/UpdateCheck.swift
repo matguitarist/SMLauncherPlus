@@ -1,3 +1,4 @@
+import DownloadKit
 import Foundation
 
 /// Whether a newer SuperMetroidRecomp release exists (S-030). Ported from AM2R Launcher Plus's
@@ -37,7 +38,7 @@ public enum UpdateCheck {
 
         /// The notes of every release newer than `installed`, newest first.
         public func notes(since installed: String) -> [Notes] {
-            notes.filter { UpdateCheck.isNewer($0.version, than: installed) }
+            notes.filter { ReleaseVersion.isNewer($0.version, than: installed) }
         }
     }
 
@@ -46,44 +47,6 @@ public enum UpdateCheck {
         guard let lastCheck else { return true }
         let age = now.timeIntervalSince(lastCheck)
         return age >= interval || age < 0
-    }
-
-    /// Semantic versions: "0.4.10" is newer than "0.4.9", "0.5.0" newer than "0.5.0-rc.1"; a leading "v"
-    /// and build metadata ("+abc") are ignored.
-    public static func isNewer(_ candidate: String, than installed: String) -> Bool {
-        compare(candidate, installed) == .orderedDescending
-    }
-
-    public static func compare(_ a: String, _ b: String) -> ComparisonResult {
-        func split(_ version: String) -> (core: [Int], pre: [String]) {
-            var text = version.trimmingCharacters(in: .whitespaces)
-            if text.hasPrefix("v") || text.hasPrefix("V") { text.removeFirst() }
-            if let plus = text.firstIndex(of: "+") { text = String(text[..<plus]) }
-            let parts = text.split(separator: "-", maxSplits: 1).map(String.init)
-            let core = (parts.first ?? "").split(separator: ".").map { Int($0) ?? 0 }
-            let pre = parts.count > 1 ? parts[1].split(separator: ".").map(String.init) : []
-            return (core, pre)
-        }
-        let (x, y) = (split(a), split(b))
-        for i in 0..<max(x.core.count, y.core.count) {
-            let (p, q) = (i < x.core.count ? x.core[i] : 0, i < y.core.count ? y.core[i] : 0)
-            if p != q { return p < q ? .orderedAscending : .orderedDescending }
-        }
-        // A release outranks its pre-releases.
-        if x.pre.isEmpty != y.pre.isEmpty { return x.pre.isEmpty ? .orderedDescending : .orderedAscending }
-        for i in 0..<max(x.pre.count, y.pre.count) {
-            guard i < x.pre.count else { return .orderedAscending }
-            guard i < y.pre.count else { return .orderedDescending }
-            let (p, q) = (x.pre[i], y.pre[i])
-            if p == q { continue }
-            switch (Int(p), Int(q)) {
-            case let (m?, n?): return m < n ? .orderedAscending : .orderedDescending
-            case (.some, nil): return .orderedAscending
-            case (nil, .some): return .orderedDescending
-            default: return p < q ? .orderedAscending : .orderedDescending
-            }
-        }
-        return .orderedSame
     }
 
     /// Asks GitHub for the latest release (with its checksum, as an install would) and recent notes.
@@ -112,19 +75,17 @@ public enum UpdateCheck {
 extension GameRelease {
     /// The notes of the last 10 published releases, newest first (one API call).
     static func recentNotes(session: URLSession = .shared) async throws(Failure) -> [UpdateCheck.Notes] {
-        let api = URL(string: "https://api.github.com/repos/\(owner)/\(repo)/releases?per_page=10")!
-        return try parseNotes(try await get(api, accept: "application/vnd.github+json", session: session))
+        do {
+            return notes(from: try await GitHubRelease.all(owner: owner, repo: repo, limit: 10, token: nil, options: options(session)))
+        } catch {
+            throw Failure(error)
+        }
     }
 
-    static func parseNotes(_ json: Data) throws(Failure) -> [UpdateCheck.Notes] {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        guard let releases = try? decoder.decode([ReleaseResponse].self, from: json) else { throw .badResponse }
-        return releases.filter { $0.draft != true && $0.prerelease != true }.map { response in
-            let version = response.tag_name.hasPrefix("v") ? String(response.tag_name.dropFirst()) : response.tag_name
-            return UpdateCheck.Notes(version: version, published: response.published_at, body: response.body ?? "", page: response.html_url)
-        }
-        .sorted { UpdateCheck.isNewer($0.version, than: $1.version) }
+    static func notes(from releases: [GitHubRelease]) -> [UpdateCheck.Notes] {
+        releases.filter { !$0.isDraft && !$0.isPrerelease }
+            .map { UpdateCheck.Notes(version: $0.version, published: $0.published, body: $0.notes, page: $0.page) }
+            .sorted { ReleaseVersion.isNewer($0.version, than: $1.version) }
     }
 }
 

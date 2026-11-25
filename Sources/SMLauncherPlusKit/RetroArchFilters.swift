@@ -1,4 +1,4 @@
-import CryptoKit
+import DownloadKit
 import Foundation
 
 /// A filter from RetroArch's GLSL shader collection that the launcher offers (S-014). Each was tried
@@ -52,11 +52,7 @@ public struct RetroArchFilter: Equatable, Hashable, Sendable, Identifiable {
 
     static func isValid(_ file: File, in cache: URL) -> Bool {
         guard let data = try? Data(contentsOf: cache.appending(path: file.path)), data.count == file.size else { return false }
-        return sha256(data) == file.sha256
-    }
-
-    static func sha256(_ data: Data) -> String {
-        SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+        return SHA256Hex.of(data) == file.sha256
     }
 
     /// Downloads the files missing from `cache`, checks each against its SHA-256, and writes it in place
@@ -64,21 +60,25 @@ public struct RetroArchFilter: Equatable, Hashable, Sendable, Identifiable {
     public static func download(into cache: URL, session: URLSession = .shared,
                                 progress: @Sendable (Double) -> Void = { _ in }) async throws(Failure) {
         let files = allFiles
+        // Not retried, so offline is told at once, as before.
+        let options = DownloadOptions(session: session, userAgent: "SMLauncherPlus", retry: .none)
         for (index, file) in files.enumerated() {
             progress(Double(index) / Double(files.count))
             if isValid(file, in: cache) { continue }
-            var request = URLRequest(url: url(of: file))
-            request.setValue("SMLauncherPlus", forHTTPHeaderField: "User-Agent")
-            let data: Data, response: URLResponse
-            do { (data, response) = try await session.data(for: request) } catch { throw .offline }
-            guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
-                throw .github((response as? HTTPURLResponse)?.statusCode ?? 0)
-            }
-            guard data.count == file.size, sha256(data) == file.sha256 else { throw .damaged(file.path) }
-            let target = cache.appending(path: file.path)
             do {
-                try FileManager.default.createDirectory(at: target.deletingLastPathComponent(), withIntermediateDirectories: true)
-                try data.write(to: target, options: .atomic)
+                try await Download.file(url(of: file), to: cache.appending(path: file.path), sha256: file.sha256, options: options)
+            } catch DownloadError.http(let status, _) {
+                throw .github(status)
+            } catch DownloadError.rateLimited {
+                throw .github(429)
+            } catch DownloadError.badResponse {
+                throw .github(0)
+            } catch DownloadError.checksumMismatch {
+                throw .damaged(file.path)
+            } catch is URLError {
+                throw .offline
+            } catch is CancellationError {
+                throw .offline
             } catch {
                 throw .failed(error.localizedDescription)
             }

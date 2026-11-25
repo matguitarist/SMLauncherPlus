@@ -12,17 +12,20 @@ let package = Package(
         .package(url: "https://github.com/matguitarist/ProcessKit", from: "0.1.1"),
         // Save backups, the release zip, and ROMs and mod files read out of a .zip or .7z, shared by my Mac apps.
         .package(url: "https://github.com/matguitarist/ArchiveKit", from: "0.1.1"),
+        // The game's releases, its zip and the RetroArch filters, checked against their SHA-256, shared by my apps.
+        .package(url: "https://github.com/matguitarist/DownloadKit", from: "0.1.0"),
     ],
     targets: [
         // Rules and data logic with no SwiftUI, so tests run without the app.
         .target(name: "SMLauncherPlusKit", dependencies: [.product(name: "LogKit", package: "LogKit"),
                                                          .product(name: "ProcessKit", package: "ProcessKit"),
-                                                         .product(name: "ArchiveKit", package: "ArchiveKit")]),
+                                                         .product(name: "ArchiveKit", package: "ArchiveKit"),
+                                                         .product(name: "DownloadKit", package: "DownloadKit")]),
         .executableTarget(
             name: "SMLauncherPlus",
             dependencies: ["SMLauncherPlusKit", .product(name: "Sparkle", package: "Sparkle"),
                            .product(name: "LogKitUI", package: "LogKit"), .product(name: "ProcessKit", package: "ProcessKit"),
-                           .product(name: "ArchiveKit", package: "ArchiveKit")],
+                           .product(name: "ArchiveKit", package: "ArchiveKit"), .product(name: "DownloadKit", package: "DownloadKit")],
             // Filter presets the launcher adds to each profile's assets/shaders (S-010).
             resources: [.copy("Shaders")],
             // App code runs on the main thread unless you say otherwise.
@@ -30,6 +33,7 @@ let package = Package(
             // Sparkle.framework sits in Contents/Frameworks (build.sh copies it).
             linkerSettings: [.unsafeFlags(["-Xlinker", "-rpath", "-Xlinker", "@executable_path/../Frameworks"])]
         ),
-        .testTarget(name: "SMLauncherPlusKitTests", dependencies: ["SMLauncherPlusKit", .product(name: "ProcessKit", package: "ProcessKit")]),
+        .testTarget(name: "SMLauncherPlusKitTests", dependencies: ["SMLauncherPlusKit", .product(name: "ProcessKit", package: "ProcessKit"),
+                                                                .product(name: "DownloadKit", package: "DownloadKit")]),
     ]
 )
