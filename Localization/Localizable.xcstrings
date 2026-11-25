@@ -11,6 +11,16 @@
         }
       }
     },
+    "%@ Help": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aide %@"
+          }
+        }
+      }
+    },
     "%@ Is Ready": {
       "localizations": {
         "fr": {
@@ -131,6 +141,16 @@
         }
       }
     },
+    "%@ on GitHub": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ sur GitHub"
+          }
+        }
+      }
+    },
     "%@ wasn't found. It may have been moved or deleted.": {
       "localizations": {
         "fr": {
@@ -221,12 +241,12 @@
         }
       }
     },
-    "About SM Launcher Plus": {
+    "About %@": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "À propos de SM Launcher Plus"
+            "value": "À propos de %@"
           }
         }
       }
@@ -2281,6 +2301,16 @@
         }
       }
     },
+    "Report a Problem…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signaler un problème…"
+          }
+        }
+      }
+    },
     "Required: choose a file to turn this on.": {
       "localizations": {
         "fr": {
@@ -3857,6 +3887,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nouveautés de SuperMetroidRecomp %@"
+          }
+        }
+      }
+    },
+    "What’s New in %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nouveautés de %@"
           }
         }
       }

@@ -202,33 +202,18 @@ struct AboutSection: View {
 
 /// The About panel's credits (S-006), with links to the game, its license and its framework.
 enum AboutCredits {
-    static func make(gameVersion: String?) -> NSAttributedString {
-        let text = NSMutableAttributedString()
-        let font = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
-        let style = NSMutableParagraphStyle()
-        style.alignment = .center
-        func add(_ string: String, link: URL? = nil) {
-            var attributes: [NSAttributedString.Key: Any] = [.font: font, .paragraphStyle: style, .foregroundColor: NSColor.labelColor]
-            if let link { attributes[.link] = link }
-            text.append(NSAttributedString(string: string, attributes: attributes))
-        }
+    @MainActor static func credits(gameVersion: String?) -> [AboutPanel.Credit] {
         let installed = gameVersion.map { String(localized: "\(Credits.gameName) \($0) installed") } ?? String(localized: "\(Credits.gameName) not installed yet")
-        add(installed + "\n")
-        add(String(localized: "The game is by \(Credits.gameAuthor), built on ") )
-        add("snesrecomp", link: Credits.framework)
-        add(".\n")
-        add(Credits.gameName, link: Credits.project)
-        add(" · ")
-        add(Credits.licenseName, link: Credits.license)
-        add("\n\n")
-        add(String(localized: "SM Launcher Plus ships no game files. Your ROM stays where it is."))
-        return text
+        return [
+            .text(installed + "\n" + String(localized: "The game is by \(Credits.gameAuthor), built on ") + "snesrecomp."),
+            .links([(Credits.gameName, Credits.project), (Credits.licenseName, Credits.license), ("snesrecomp", Credits.framework)]),
+            .text(String(localized: "SM Launcher Plus ships no game files. Your ROM stays where it is.")),
+        ]
     }
 
-    @MainActor static func show(gameVersion: String?) {
-        NSApp.orderFrontStandardAboutPanel(options: [.credits: make(gameVersion: gameVersion)])
-        NSApp.activate()
-    }
+    @MainActor static func make(gameVersion: String?) -> NSAttributedString { AboutPanel.text(credits(gameVersion: gameVersion)) }
+
+    @MainActor static func show(gameVersion: String?) { AboutPanel.show(credits(gameVersion: gameVersion)) }
 }
 
 /// Settings > Updates: Sparkle's automatic checks.

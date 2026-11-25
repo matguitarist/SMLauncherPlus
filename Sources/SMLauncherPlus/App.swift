@@ -78,18 +78,12 @@ struct SMLauncherPlusApp: App {
                     .keyboardShortcut(.delete)
                     .disabled(off || profile.map(model.isBusy) == true)
             }
-            CommandGroup(replacing: .appInfo) {
-                Button("About SM Launcher Plus") { AboutCredits.show(gameVersion: model.currentProfile?.gameVersion) }
-            }
-            CommandGroup(after: .appInfo) {
-                Button("Check for Updates…") { Updater.shared.checkForUpdates() }
-                    .disabled(!Updater.shared.isAvailable)
-            }
-            CommandGroup(after: .sidebar) {
-                Button("Show Log") { model.sidebar = .log }
-                    .keyboardShortcut("l", modifiers: [.command, .option])
-            }
-            CommandGroup(replacing: .help) {
+            PageCommands(pages: SidebarItem.allCases, title: \.title) { model.sidebar = $0 }
+            StandardCommands(app: "SM Launcher Plus", repository: "matguitarist/SMLauncherPlus",
+                             updates: AppUpdates(isAvailable: Updater.shared.isAvailable) { Updater.shared.checkForUpdates() },
+                             about: { AboutCredits.show(gameVersion: model.currentProfile?.gameVersion) },
+                             log: .page { model.sidebar = .log },
+                             logShortcut: KeyboardShortcut("l", modifiers: [.command, .option])) {
                 Button("SuperMetroidRecomp on GitHub") {
                     NSWorkspace.shared.open(URL(string: "https://github.com/mstan/SuperMetroidRecomp")!)
                 }

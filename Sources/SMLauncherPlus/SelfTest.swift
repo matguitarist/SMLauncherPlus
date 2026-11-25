@@ -164,6 +164,9 @@ extension SelfTest {
             check("About shows the installed game version", about.string.contains("0.4.6"), about.string)
             check("About links to the game, its license and snesrecomp",
                   links == [Credits.project, Credits.license, Credits.framework], "\(links)")
+            let issue = RepositoryLinks(repository: "matguitarist/SMLauncherPlus").newIssue(app: "SM Launcher Plus").absoluteString
+            check("Help › Report a Problem opens a new GitHub issue with the version and macOS filled in",
+                  issue.hasPrefix("https://github.com/matguitarist/SMLauncherPlus/issues/new?body=") && issue.contains("macOS"), issue)
 
             await checkUpdateBanner(model: model)
             await checkUpdateAndRollBack(model: model)
