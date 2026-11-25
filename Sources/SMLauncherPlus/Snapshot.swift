@@ -147,6 +147,9 @@ enum Snapshot {
                 model.sidebar = .play
                 model.playFailure = .rom(.missing)
             }, hide: { model.playFailure = nil })
+            // The app's own What's New ("whats-new" is the game update's).
+            await run.shoot("app-whats-new", window: { WindowShot.mainWindow()?.attachedSheet },
+                           show: { WhatsNewState.shared.shown = .sample }, hide: { WhatsNewState.shared.shown = nil })
             if run.wants("settings") {
                 let main = WindowShot.mainWindow()
                 await run.shootSettings(tabs: SettingsTab.allCases.map(\.rawValue), open: { openSettings() },

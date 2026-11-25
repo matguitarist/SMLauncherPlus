@@ -25,6 +25,7 @@ struct SMLauncherPlusApp: App {
         Window("SM Launcher Plus", id: "main") {
             ContentView()
                 .environment(model)
+                .whatsNew(app: "SM Launcher Plus", repository: "matguitarist/SMLauncherPlus")
                 .themed()
                 .overlay { if GridOverlay.enabled { GridOverlay() } }
                 .frame(minWidth: 820, minHeight: 520)
