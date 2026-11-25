@@ -1,4 +1,5 @@
 import AppKit
+import AppTestKit
 import FileKit
 import LogKit
 import LogKitUI
@@ -116,7 +117,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     /// The self-test's result becomes the exit code, after a normal quit.
     func applicationWillTerminate(_ notification: Notification) {
-        if SelfTest.requested { exit(SelfTest.exitCode) }
+        SelfTest.exitIfRequested()
     }
 }
 
@@ -305,19 +306,14 @@ final class AppModel {
 
 /// Where the data lives: ~/Library/Application Support/SMLauncherPlus/SMLauncherPlus.store.
 /// With APP_STORE set (tests, snapshots, self-test), the database is that file instead,
-/// which must be in /tmp, and the log sits next to it.
+/// which must be in /tmp (AppTestKit quits with 1 otherwise), and the log sits next to it.
 nonisolated enum Store {
-    /// True when APP_STORE points somewhere else (tests, snapshots, self-test).
-    static var isOverridden: Bool {
-        !(ProcessInfo.processInfo.environment["APP_STORE"] ?? "").isEmpty
-    }
+    /// True when APP_STORE points somewhere else (tests, snapshots, self-test). The shared UI files read it.
+    static var isOverridden: Bool { TestRun.isTestRun() }
 
     static var url: URL {
-        if let path = ProcessInfo.processInfo.environment["APP_STORE"], !path.isEmpty {
-            // Test runs never touch the real database.
-            precondition(path.hasPrefix("/tmp/") || path.hasPrefix("/private/tmp/"), "APP_STORE must be in /tmp")
-            return URL(fileURLWithPath: path)
-        }
+        // Test runs never touch the real database.
+        if let test = TestRun.store() { return test }
         let dir = URL.applicationSupportDirectory.appending(path: "SMLauncherPlus", directoryHint: .isDirectory)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         return dir.appending(path: "SMLauncherPlus.store")

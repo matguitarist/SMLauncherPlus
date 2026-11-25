@@ -16,6 +16,8 @@ let package = Package(
         .package(url: "https://github.com/matguitarist/DownloadKit", from: "0.1.0"),
         // Moving the data folder to another disk without losing a file, shared by my Mac apps.
         .package(url: "https://github.com/matguitarist/FileKit", from: "0.1.0"),
+        // The self-test's lines and exit code, the snapshots and the /tmp guard, shared by my Mac apps.
+        .package(url: "https://github.com/matguitarist/AppTestKit", from: "0.1.0"),
     ],
     targets: [
         // Rules and data logic with no SwiftUI, so tests run without the app.
@@ -28,7 +30,7 @@ let package = Package(
             dependencies: ["SMLauncherPlusKit", .product(name: "Sparkle", package: "Sparkle"),
                            .product(name: "LogKitUI", package: "LogKit"), .product(name: "ProcessKit", package: "ProcessKit"),
                            .product(name: "ArchiveKit", package: "ArchiveKit"), .product(name: "DownloadKit", package: "DownloadKit"),
-                           .product(name: "FileKit", package: "FileKit")],
+                           .product(name: "FileKit", package: "FileKit"), .product(name: "AppTestKit", package: "AppTestKit")],
             // Filter presets the launcher adds to each profile's assets/shaders (S-010).
             resources: [.copy("Shaders")],
             // App code runs on the main thread unless you say otherwise.

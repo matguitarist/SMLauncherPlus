@@ -1,4 +1,5 @@
 import AppKit
+import AppTestKit
 import LogKitUI
 import SMLauncherPlusKit
 import SwiftData
@@ -253,7 +254,7 @@ struct LogPage: View {
 /// Seed mode for snapshots: a chosen ROM (only its path; there is no file), and a few log lines.
 enum SeedData {
     static func addIfRequested(model: AppModel) {
-        guard ProcessInfo.processInfo.environment["APP_SEED"] == "1", Store.isOverridden else { return }
+        guard TestRun.isSeeded() else { return }
         if model.rom == nil {
             let url = URL(fileURLWithPath: "/Users/Shared/ROMs/Super Metroid (Japan, USA) (En,Ja).zip")
             model.context.insert(RomSource(rom: ROMCheck.ROM(url: url, kind: .zip, member: "Super Metroid (Japan, USA) (En,Ja).sfc",

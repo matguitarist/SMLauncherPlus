@@ -1,4 +1,5 @@
 import AppKit
+import AppTestKit
 import ArchiveKit
 import LogKit
 import ProcessKit
@@ -9,24 +10,10 @@ import SMLauncherPlusKit
 /// FAIL per check, and quits with exit code 0 or 1.
 ///   APP_STORE=/tmp/SMLauncherPlus-self.store ~/Applications/SMLauncherPlus.app/Contents/MacOS/SMLauncherPlus --selftest
 /// (tools/selftest.sh does this.) Add a check for every story with logic.
-@MainActor
-enum SelfTest {
-    static var requested: Bool { CommandLine.arguments.contains("--selftest") }
-    /// Read by AppDelegate.applicationWillTerminate.
-    static var exitCode: Int32 = 0
-    private static var failures = 0
-    private static var count = 0
-
+/// The PASS, FAIL and SKIP lines, the summary, the refusal and the exit code come from AppTestKit.
+extension SelfTest {
     static func runIfRequested(model: AppModel) {
-        guard requested else { return }
-        // Print each line at once, so a crash keeps the lines before it.
-        setvbuf(stdout, nil, _IOLBF, 0)
-        guard Store.isOverridden else {
-            print("SELFTEST refused: set APP_STORE to a file in /tmp")
-            finish(code: 1)
-            return
-        }
-        Task {
+        run {
             let before = (try? model.context.fetchCount(FetchDescriptor<Profile>())) ?? -1
             check("the database opens empty", before == 0, "\(before) profiles")
             model.context.insert(Profile(name: "Self-test", gameVersion: "0.4.6"))
@@ -59,7 +46,7 @@ enum SelfTest {
                       AppModel(container: model.container).welcome == .ready && AppModel(container: model.container).rom?.path == real)
                 check("the ROM is never copied", Self.dataFiles() == before)
             } else {
-                print("SKIP the player's ROM: set SM_ROM_PATH to check it")
+                skip("the player's ROM: set SM_ROM_PATH to check it")
             }
 
             // S-002: downloading the game. Offline first, on a pretend ROM, then the real download when asked.
@@ -139,10 +126,10 @@ enum SelfTest {
                 if model.rom != nil, ProcessInfo.processInfo.environment["SM_ROM_PATH"] != nil {
                     await Self.checkPlay(model)
                 } else {
-                    print("SKIP Play: needs SM_ROM_PATH")
+                    skip("Play: needs SM_ROM_PATH")
                 }
             } else {
-                print("SKIP the real download: set APP_SELFTEST_INSTALL=1 to download the game from GitHub")
+                skip("the real download: set APP_SELFTEST_INSTALL=1 to download the game from GitHub")
             }
             if !hadROM {
                 try? model.context.delete(model: RomSource.self)
@@ -185,16 +172,13 @@ enum SelfTest {
             await checkDataFolderMove(model: model)
             await checkModInstall(model: model)
             await checkModResources()
-
-            print(failures == 0 ? "SELFTEST PASS \(count) checks" : "SELFTEST FAIL \(failures) of \(count) checks")
-            finish(code: failures == 0 ? 0 : 1)
         }
     }
 
     /// S-004: Play starts the game straight to the title screen, then Stop records the time and removes the ROM copy.
     /// The game runs headless and dumps each frame's RAM; Super Metroid's game state ($0998) is 1 on the title screen.
     private static func checkPlay(_ model: AppModel) async {
-        guard let profile = model.currentProfile else { return check("Play has a profile", false, "") }
+        guard let profile = model.currentProfile else { check("Play has a profile", false, ""); return }
         let frames = FileManager.default.temporaryDirectory.appending(path: "SMLauncherPlus-frames-\(UUID())", directoryHint: .isDirectory)
         try? FileManager.default.createDirectory(at: frames, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: frames) }
@@ -253,7 +237,7 @@ enum SelfTest {
             check("the Zero Mission ROM inside its .zip is recognized", mods.status(of: art, in: pauseMap) == .verified,
                   "\(String(describing: mods.status(of: art, in: pauseMap)))")
         } else if gbaZip == nil {
-            print("SKIP the Zero Mission map art: set SM_GBA_ZIP to your zipped Metroid: Zero Mission (USA) ROM")
+            skip("the Zero Mission map art: set SM_GBA_ZIP to your zipped Metroid: Zero Mission (USA) ROM")
         }
         let before = profile.playTime
         await model.play(extraArguments: ["--framedump", frames.path], environment: ["SDL_VIDEODRIVER": "dummy", "SDL_AUDIODRIVER": "dummy"])
@@ -522,7 +506,7 @@ enum SelfTest {
             let zipped = try? Shell.runSync("/usr/bin/zip", ["-q", "-r", "-y", zip.path, top.lastPathComponent], in: top.deletingLastPathComponent())
             return zipped?.succeeded == true ? zip : nil
         }
-        guard let old = release("0.4.6"), let new = release("0.4.7") else { return check("made-up releases are zipped", false) }
+        guard let old = release("0.4.6"), let new = release("0.4.7") else { check("made-up releases are zipped", false); return }
         let profile = Profile(name: "Updating", gameVersion: "0.4.6")
         profile.installedMods = ["fan.hud/1.0.0"]
         model.context.insert(profile)
@@ -531,7 +515,7 @@ enum SelfTest {
         do {
             try await ProfileBuilder.build(zip: old, profile: profile.folder, info: .init(version: "0.4.6", romSHA256: SupportedROM.sha256))
         } catch {
-            return check("a made-up 0.4.6 profile is built", false, "\(error)")
+            check("a made-up 0.4.6 profile is built", false, "\(error)"); return
         }
         let game = profile.gameFolder
         for (path, text) in ["saves/save.srm": "samus", "config.ini": "[General]\nScale = 4\n",
@@ -690,7 +674,7 @@ enum SelfTest {
         let mods = ModsModel(game: game)
         guard let pause = mods.packages.first?.features.first(where: { $0.id == "pause" }),
               let world = mods.packages.first?.features.first(where: { $0.id == "world" }) else {
-            return check("a feature's [[resource]] is read", false, "\(mods.packages)")
+            check("a feature's [[resource]] is read", false, "\(mods.packages)"); return
         }
         await mods.checkResource(pause.resources[0], in: pause)
         check("a required file not chosen blocks its feature", mods.isBlocked(pause) && !mods.isBlocked(world))
@@ -719,19 +703,5 @@ enum SelfTest {
         let folder = Store.url.deletingLastPathComponent()
         return ((try? FileManager.default.contentsOfDirectory(atPath: folder.path)) ?? [])
             .filter { $0.hasPrefix("SMLauncherPlus") && !$0.hasSuffix(".log") && !$0.hasPrefix("SMLauncherPlus-shots") }.sorted()
-    }
-
-    private static func check(_ name: String, _ ok: Bool, _ detail: String = "") {
-        count += 1
-        if !ok { failures += 1 }
-        print(ok ? "PASS \(name)" : "FAIL \(name)\(detail.isEmpty ? "" : ": \(detail)")")
-    }
-
-    /// Quits through NSApp.terminate, never exit(), and closes sheets first:
-    /// an open sheet refuses terminate, and the run would wait forever.
-    static func finish(code: Int32) {
-        exitCode = code
-        for window in NSApp.windows { if let sheet = window.attachedSheet { window.endSheet(sheet) } }
-        NSApp.terminate(nil)
     }
 }
