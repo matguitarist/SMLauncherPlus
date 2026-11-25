@@ -1,3 +1,4 @@
+import FileKit
 import Foundation
 import SMLauncherPlusKit
 
@@ -49,11 +50,7 @@ nonisolated enum DataFolder {
 
     /// What stays behind when the data folder moves: the database, when it sits in the folder (the default).
     static func keeping(for folder: URL) -> Set<String> {
-        let store = Store.url
-        guard store.deletingLastPathComponent().standardizedFileURL.resolvingSymlinksInPath().path
-                == folder.standardizedFileURL.resolvingSymlinksInPath().path else { return [] }
-        let name = store.lastPathComponent
-        return [name, name + "-shm", name + "-wal"]
+        FolderMove.databaseFiles(store: Store.url, in: folder)
     }
 
     /// Profiles, downloads and logs, without the database.

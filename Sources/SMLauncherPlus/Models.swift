@@ -1,3 +1,4 @@
+import FileKit
 import Foundation
 import SwiftData
 import SMLauncherPlusKit

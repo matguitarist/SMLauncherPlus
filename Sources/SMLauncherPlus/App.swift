@@ -1,4 +1,5 @@
 import AppKit
+import FileKit
 import LogKit
 import LogKitUI
 import SwiftData
